@@ -113,11 +113,23 @@ def install_app(tv_ip, passphrase=None):
     # final "installed" status, so a generous -n bound is needed. It's also
     # capped with `timeout` because luna-send-pub keeps the SSH session open
     # waiting for more replies even once the service stops sending any.
+    def run_luna(remote_cmd, force_pty=True):
+        tty_flags = ["-tt"] if force_pty else []
+        args = ["ssh", *tty_flags, *ssh_opts, "-p", "9922", "-i", dec_key, f"prisoner@{tv_ip}", remote_cmd]
+        res = subprocess.run(args, capture_output=True, text=True)
+        # Some TVs' sshd rejects forced PTY allocation outright ("PTY
+        # allocation request failed on channel 0"); ssh then continues the
+        # session without one, which starves luna-send-pub of output. Retry
+        # once without forcing a PTY so the command itself still goes through.
+        if force_pty and "PTY allocation request failed" in (res.stderr or ""):
+            print("[*] TV rejected forced PTY allocation; retrying without one...")
+            res = subprocess.run(["ssh", *ssh_opts, "-p", "9922", "-i", dec_key, f"prisoner@{tv_ip}", remote_cmd], capture_output=True, text=True)
+        return res
+
     print("[*] Installing package on TV...")
     install_payload = json.dumps({"id": APP_ID, "ipkUrl": "/media/developer/temp/app.ipk", "subscribe": True})
     install_remote_cmd = f"timeout 45 luna-send-pub -n 30 luna://com.webos.appInstallService/dev/install '{install_payload}'"
-    install_args = ["ssh", "-tt", *ssh_opts, "-p", "9922", "-i", dec_key, f"prisoner@{tv_ip}", install_remote_cmd]
-    install_res = subprocess.run(install_args, capture_output=True, text=True)
+    install_res = run_luna(install_remote_cmd)
     install_out = install_res.stdout
     if '"state":"installed"' not in install_out:
         print("[!] Install did not reach the 'installed' state. Raw output:")
@@ -129,8 +141,7 @@ def install_app(tv_ip, passphrase=None):
     print("[*] Launching Free My TV...")
     launch_payload = json.dumps({"id": APP_ID})
     launch_remote_cmd = f"luna-send-pub -n 1 luna://com.webos.applicationManager/launch '{launch_payload}'"
-    launch_args = ["ssh", "-tt", *ssh_opts, "-p", "9922", "-i", dec_key, f"prisoner@{tv_ip}", launch_remote_cmd]
-    launch_res = subprocess.run(launch_args, capture_output=True, text=True)
+    launch_res = run_luna(launch_remote_cmd)
     if '"returnValue":true' not in launch_res.stdout:
         print("[!] Install succeeded but launch failed. Raw output:")
         print(launch_res.stdout or "(empty)")
