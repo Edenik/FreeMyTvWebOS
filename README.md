@@ -86,7 +86,7 @@ python scripts/install.py
 ### Step 2B: GUI Install via webOS Dev Manager
 1. Install [webOS Dev Manager](https://github.com/webosbrew/dev-manager-desktop/releases) (`winget install webosbrew.webOSDevManager` on Windows).
 2. Connect your TV using the IP and Passphrase.
-3. Download [`dist/org.webos.freemytv_1.2.1_all.ipk`](dist/org.webos.freemytv_1.2.1_all.ipk) and click **Install .ipk**.
+3. Download [`dist/org.webos.freemytv_1.2.2_all.ipk`](dist/org.webos.freemytv_1.2.2_all.ipk) and click **Install .ipk**.
 
 > [!TIP]
 > **Make It Your 1-Second Home Key (Quick Access):**
@@ -138,7 +138,7 @@ free-my-webos/
 │   ├── webOSTV.js         # Official LG webOS JavaScript service library
 │   └── assets/            # App icons & splash screens
 ├── dist/
-│   └── org.webos.freemytv_1.2.1_all.ipk
+│   └── org.webos.freemytv_1.2.2_all.ipk
 ├── docs/                  # Live preview & visual assets
 └── scripts/
     ├── build.py           # Cross-platform .ipk compiler (ares-package + pure Python fallback)
@@ -249,7 +249,7 @@ python scripts/install.py
 ### Passo 2B: Instalação via Interface Gráfica (webOS Dev Manager)
 1. Instale o [webOS Dev Manager](https://github.com/webosbrew/dev-manager-desktop/releases) (`winget install webosbrew.webOSDevManager` no Windows).
 2. Conecte sua TV usando o IP e a Senha.
-3. Baixe o [`dist/org.webos.freemytv_1.2.1_all.ipk`](dist/org.webos.freemytv_1.2.1_all.ipk) e clique em **Install .ipk**.
+3. Baixe o [`dist/org.webos.freemytv_1.2.2_all.ipk`](dist/org.webos.freemytv_1.2.2_all.ipk) e clique em **Install .ipk**.
 
 > [!TIP]
 > **Transforme em Sua Tecla de Acesso Rápido (1 Segundo):**
@@ -293,7 +293,7 @@ free-my-webos/
 │   ├── webOSTV.js         # Biblioteca oficial de serviços JavaScript do LG webOS
 │   └── assets/            # Ícones e telas de splash do app
 ├── dist/
-│   └── org.webos.freemytv_1.2.1_all.ipk
+│   └── org.webos.freemytv_1.2.2_all.ipk
 ├── docs/                  # Preview ao vivo e recursos visuais
 └── scripts/
     ├── build.py           # Compilador .ipk multiplataforma (ares-package + fallback em Python puro)
