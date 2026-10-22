@@ -293,20 +293,20 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 0;
             cursor: pointer;
             outline: none;
             position: relative;
             will-change: transform;
             transition: transform 0.28s cubic-bezier(0.3, 1.4, 0.5, 1), border-color 0.2s ease, background 0.2s ease;
             transform: scale(1) translateZ(0);
-            padding: 8px;
+            padding: 0;
         }
 
         .app-tile:hover,
         .app-tile:focus,
         .app-tile.focused {
-            transform: scale(1.1) translateY(-6px) translateZ(0);
+            transform: scale(1.04) translateY(-4px) translateZ(0);
             border-color: var(--glass-focus-border);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(255, 255, 255, 0.25);
             z-index: 20;
@@ -314,40 +314,49 @@
         }
 
         .app-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 16px;
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            border-radius: 20px 20px 0 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
             overflow: hidden;
-            background-size: cover;
-            background-position: center;
+            position: relative;
         }
 
-        .app-icon svg {
-            width: 34px;
-            height: 34px;
-            fill: #ffffff;
-        }
-
+        .app-icon svg { width: 75%; height: 75%; }
         .app-icon img {
+            position: absolute;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
-
+        .app-icon img.tile-brand-logo { width: 76%; height: 76%; }
+        .app-art-fallback {
+            font-size: 25px;
+            font-weight: 800;
+            color: #fff;
+            text-align: center;
+            padding: 12px;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
         .app-label {
-            font-size: 13px;
+            width: 100%;
+            padding: 12px 8px;
+            font-size: 15px;
             font-weight: 600;
-            letter-spacing: -0.2px;
             color: var(--text-primary);
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 100%;
+        }
+        .hdmi-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
         }
 
         /* Trending Picks Row */
@@ -885,7 +894,13 @@
             </div>
 
             <div>
-                <div class="modal-section-title">2. Weather, Theme & TMDB API</div>
+                <div class="modal-section-title">2. HDMI Devices</div>
+                <p style="color: var(--text-secondary); margin: 0 0 12px;">Press a port to cycle its device. Save &amp; Apply to keep your choices.</p>
+                <div class="hdmi-options" id="hdmiOptions"></div>
+            </div>
+
+            <div>
+                <div class="modal-section-title">3. Weather, Theme & TMDB API</div>
                 <div class="settings-row">
                     <div class="field-group">
                         <label>City Name (or leave Auto)</label>
@@ -977,6 +992,8 @@
             { id: 'globoplaywebos', title: 'Globoplay', tag: 'Brazil Streaming', desc: 'Original series, live channels, sports, and cinema.', color: '#fb003f', badge: 'globo', bg: 'linear-gradient(135deg, #fb003f, #aa002a)' },
             { id: 'com.webos.app.hdmi1', title: 'HDMI 1', tag: 'External Input', desc: 'Switch directly to HDMI 1 (PC / Gaming Console).', color: '#0a84ff', badge: 'HDMI 1', bg: 'linear-gradient(135deg, #0a84ff, #004ec4)' },
             { id: 'com.webos.app.hdmi2', title: 'HDMI 2', tag: 'External Input', desc: 'Switch directly to HDMI 2 input.', color: '#00c7be', badge: 'HDMI 2', bg: 'linear-gradient(135deg, #00c7be, #007a74)' },
+            { id: 'com.webos.app.hdmi3', title: 'HDMI 3', tag: 'External Input', desc: 'Switch directly to HDMI 3 input.', color: '#0a84ff', badge: 'HDMI 3', bg: 'linear-gradient(135deg, #0a84ff, #004ec4)' },
+            { id: 'com.webos.app.hdmi4', title: 'HDMI 4', tag: 'External Input', desc: 'Switch directly to HDMI 4 input.', color: '#0a84ff', badge: 'HDMI 4', bg: 'linear-gradient(135deg, #0a84ff, #004ec4)' },
             { id: 'com.webos.app.browser', title: 'Browser', tag: 'Internet', desc: 'Full-screen web browsing on your LG Smart TV.', color: '#5856d6', badge: 'WEB', bg: 'linear-gradient(135deg, #5856d6, #3634a3)' },
             { id: 'org.webosbrew.hbchannel', title: 'Homebrew', tag: 'System', desc: 'Homebrew Channel app store, YouTube AdFree, and system tweaks.', color: '#cf0652', badge: 'HB', bg: 'linear-gradient(135deg, #cf0652, #8b0034)' },
             { id: 'com.webos.app.mediadiscovery', title: 'Media Player', tag: 'Local Media', desc: 'Play photos, videos, and music from USB or DLNA servers.', color: '#7e56b1', badge: 'USB', bg: 'linear-gradient(135deg, #7e56b1, #4f3278)' },
@@ -984,6 +1001,62 @@
             { id: 'com.disney.disneyplus-prod', title: 'Disney+', tag: 'Streaming', desc: 'Disney, Pixar, Marvel, Star Wars, and National Geographic.', color: '#113ccf', badge: 'D+', bg: 'linear-gradient(135deg, #113ccf, #071961)' },
             { id: 'spotify-beehive', title: 'Spotify', tag: 'Music', desc: 'Listen to millions of songs, albums, and podcasts on your TV.', color: '#1db954', badge: 'SP', bg: 'linear-gradient(135deg, #1db954, #0f7833)' }
         ];
+
+        // Device artwork is bundled inline so HDMI tiles also work offline.
+        const DEVICE_PRESETS = [
+            { key: 'default', title: '', color: '#0a84ff', shape: 'input' },
+            { key: 'ps5', title: 'PS5', color: '#123ca6', logo: 'playstation5' },
+            { key: 'ps4', title: 'PS4', color: '#173070', logo: 'playstation4' },
+            { key: 'xbox', title: 'Xbox', color: '#107c10', logo: 'xbox' },
+            { key: 'switch', title: 'Nintendo Switch', color: '#c82131', logo: 'nintendoswitch' },
+            { key: 'pc', title: 'Gaming PC', color: '#633ca6', shape: 'pc' }
+        ];
+        function readDeviceChoices() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('fmtv_hdmi_devices') || '{}');
+                return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+            } catch (e) { return {}; }
+        }
+        function isHDMI(app) { return /^com\.webos\.app\.hdmi[1-4]$/.test(app.id); }
+        function devicePreset(app, choices) {
+            if (!isHDMI(app)) return DEVICE_PRESETS[0];
+            return DEVICE_PRESETS.find(function(p) { return p.key === choices[app.id]; }) || DEVICE_PRESETS[0];
+        }
+        function deviceArtwork(shape) {
+            const drawings = {
+                pc: '<rect x="15" y="26" width="90" height="61" rx="6" fill="none" stroke="white" stroke-width="6"/><path d="M60 88v13m-22 0h44M24 75h72" stroke="white" stroke-width="6"/>',
+                input: '<path d="M25 34h70v37L80 86H40L25 71Z" fill="none" stroke="white" stroke-width="6"/><path d="M39 48v18m14-18v18m14-18v18m14-18v18" stroke="white" stroke-width="5"/>'
+            };
+            return '<svg viewBox="0 0 120 120" aria-hidden="true">' + drawings[shape] + '</svg>';
+        }
+        const APP_LOGOS = {
+            'youtube.leanback.v4': 'youtube',
+            'netflix': 'netflix',
+            'cdp-30': 'plex',
+            'com.crunchyroll.webapp': 'crunchyroll',
+            'globoplaywebos': 'globoplay',
+            'amazon': 'amazonprime',
+            'com.disney.disneyplus-prod': 'disneyplus',
+            'spotify-beehive': 'spotify'
+        };
+        function addTileImage(container, url, branded) {
+            const img = document.createElement('img');
+            img.alt = '';
+            if (branded) img.className = 'tile-brand-logo';
+            const fallback = container.firstElementChild;
+            img.onload = function() { if (fallback) fallback.style.visibility = 'hidden'; };
+            img.onerror = function() { img.remove(); if (fallback) fallback.style.visibility = ''; };
+            img.src = url;
+            container.appendChild(img);
+        }
+
+        function launchPointIcon(lp) {
+            const icon = lp.largeIcon || lp.icon || '';
+            if (/^(https?:|file:|data:image\/)/i.test(icon)) return icon;
+            if (icon.charAt(0) === '/') return 'file://' + icon;
+            if (icon && lp.folderPath) return 'file://' + lp.folderPath.replace(/\/$/, '') + '/' + icon;
+            return ''; // Unresolvable paths use the readable tile fallback.
+        }
 
         // Defaults favor the streaming apps with the broadest global install base
         // (YouTube/Netflix/Prime/Disney+) over niche regional or personal-media apps
@@ -1016,6 +1089,7 @@
         // --- Persistent State ---
         let state = {
             favorites: JSON.parse(localStorage.getItem('fmtv_favorites') || 'null') || DEFAULT_FAVORITES.slice(),
+            hdmiDevices: readDeviceChoices(),
             city: localStorage.getItem('fmtv_city') || '',
             lat: parseFloat(localStorage.getItem('fmtv_lat') || '0'),
             lon: parseFloat(localStorage.getItem('fmtv_lon') || '0'),
@@ -1274,17 +1348,21 @@
                     onSuccess: function(res) {
                         if (res && Array.isArray(res.launchPoints)) {
                             res.launchPoints.forEach(function(lp) {
-                                if (!lp.id || lp.systemApp) return;
-                                const exists = state.catalog.some(function(c) { return c.id === lp.id; });
+                                const appId = lp.appId || lp.id;
+                                if (!appId) return;
+                                const exists = state.catalog.find(function(c) { return c.id === appId; });
+                                const iconUrl = launchPointIcon(lp);
+                                if (exists && iconUrl) exists.iconUrl = iconUrl;
+                                if (lp.systemApp && !exists) return;
                                 if (!exists) {
                                     state.catalog.push({
-                                        id: lp.id,
+                                        id: appId,
                                         title: lp.title || lp.id,
                                         tag: 'Installed App',
                                         desc: lp.appDescription || ('Launch ' + (lp.title || lp.id) + ' natively on your LG TV.'),
                                         color: lp.iconColor || '#0a84ff',
                                         badge: (lp.title || 'APP').substring(0, 3).toUpperCase(),
-                                        iconUrl: lp.largeIcon || lp.icon || '',
+                                        iconUrl: iconUrl,
                                         bg: 'linear-gradient(135deg, ' + (lp.iconColor || '#2a344a') + ', #101420)'
                                     });
                                 }
@@ -1329,22 +1407,45 @@
                 .slice(0, 8);
 
             favItems.forEach(function(app) {
+                const device = devicePreset(app, state.hdmiDevices);
+                const title = device.title || app.title;
                 const btn = document.createElement('button');
                 btn.className = 'app-tile nav-item';
                 btn.dataset.id = app.id;
                 btn.dataset.tag = app.tag;
-                btn.dataset.title = app.title;
-                btn.dataset.desc = app.desc;
+                btn.dataset.title = title;
+                btn.dataset.desc = device.title ? 'Play ' + device.title + ' on ' + app.title + '.' : app.desc;
+                btn.setAttribute('aria-label', title + (device.title ? ' — ' + app.title : ''));
                 btn.dataset.color = app.color;
 
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'app-icon';
                 iconDiv.style.background = app.bg || 'linear-gradient(135deg, #0a84ff, #0040a0)';
-                iconDiv.innerHTML = '<span style="color:#fff;font-weight:800;font-size:21px;">' + app.badge + '</span>';
+                if (isHDMI(app)) {
+                    iconDiv.style.background = device.color;
+                    if (device.logo) {
+                        const fallback = document.createElement('span');
+                        fallback.className = 'app-art-fallback';
+                        fallback.textContent = device.title;
+                        iconDiv.appendChild(fallback);
+                        addTileImage(iconDiv, 'assets/brands/' + device.logo + '.svg', true);
+                    } else {
+                        iconDiv.innerHTML = deviceArtwork(device.shape);
+                    }
+                } else {
+                    const fallback = document.createElement('span');
+                    fallback.className = 'app-art-fallback';
+                    fallback.textContent = app.title;
+                    iconDiv.appendChild(fallback);
+                    const logo = APP_LOGOS[app.id];
+                    if (logo || app.iconUrl) {
+                        addTileImage(iconDiv, logo ? 'assets/brands/' + logo + '.svg' : app.iconUrl, !!logo);
+                    }
+                }
 
                 const labelDiv = document.createElement('div');
                 labelDiv.className = 'app-label';
-                labelDiv.textContent = app.title;
+                labelDiv.textContent = title + (device.title ? ' · ' + app.title : '');
 
                 btn.appendChild(iconDiv);
                 btn.appendChild(labelDiv);
@@ -1476,10 +1577,13 @@
         // --- Customize Shelf & Settings Modal ---
         const settingsModal = document.getElementById('settingsModal');
         let tempFavorites = [];
+        let tempDevices = {};
 
         function openSettingsModal() {
             modalOpen = true;
             tempFavorites = state.favorites.slice();
+            tempDevices = Object.assign({}, state.hdmiDevices);
+            renderHDMIOptions();
             document.getElementById('cfgCity').value = state.city;
             document.getElementById('cfgTheme').value = state.theme;
             document.getElementById('cfgTmdbKey').value = state.tmdbKey;
@@ -1487,6 +1591,26 @@
             renderAppSelectorGrid();
             settingsModal.classList.add('active');
             refreshModalNavList();
+        }
+
+        function renderHDMIOptions() {
+            const container = document.getElementById('hdmiOptions');
+            container.innerHTML = '';
+            state.catalog.filter(isHDMI).forEach(function(app) {
+                const button = document.createElement('button');
+                button.className = 'app-toggle-item modal-nav';
+                function updateLabel() {
+                    button.textContent = app.title + ': ' + (devicePreset(app, tempDevices).title || 'HDMI');
+                    button.setAttribute('aria-label', button.textContent + '. Press to change device');
+                }
+                updateLabel();
+                button.addEventListener('click', function() {
+                    const current = DEVICE_PRESETS.indexOf(devicePreset(app, tempDevices));
+                    tempDevices[app.id] = DEVICE_PRESETS[(current + 1) % DEVICE_PRESETS.length].key;
+                    updateLabel();
+                });
+                container.appendChild(button);
+            });
         }
 
         function closeSettingsModal() {
@@ -1652,6 +1776,8 @@
         document.getElementById('closeModalBtn').addEventListener('click', closeSettingsModal);
         document.getElementById('resetDefaultBtn').addEventListener('click', function() {
             tempFavorites = DEFAULT_FAVORITES.slice();
+            tempDevices = {};
+            renderHDMIOptions();
             document.getElementById('cfgCity').value = '';
             document.getElementById('cfgTheme').value = 'auto';
             document.getElementById('cfgTmdbKey').value = '';
@@ -1662,6 +1788,8 @@
 
         document.getElementById('saveModalBtn').addEventListener('click', function() {
             state.favorites = tempFavorites.slice();
+            state.hdmiDevices = Object.assign({}, tempDevices);
+            localStorage.setItem('fmtv_hdmi_devices', JSON.stringify(state.hdmiDevices));
             state.city = document.getElementById('cfgCity').value.trim();
             state.theme = document.getElementById('cfgTheme').value;
             state.tmdbKey = document.getElementById('cfgTmdbKey').value.trim();
