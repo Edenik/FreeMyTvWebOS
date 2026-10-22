@@ -98,6 +98,10 @@ python scripts/install.py
 
 Click the **⚙️ Customize** button in the top-right corner of the dashboard using your remote:
 
+Choose **Reorder** on the main shelf. Select a tile and press OK to pick it up, use Left/Right to move it, then OK to place it. Choose **Done** to save. Back or Cancel discards changes.
+
+Launch messages use the app or console name and report unavailable apps, failures, or no response after eight seconds. Repeated presses are ignored while a launch is pending; browser previews explain that launching requires an LG TV.
+
 Under **HDMI Devices**, press a port to cycle through HDMI, PS5, PS4, Xbox, Nintendo Switch, and Gaming PC, then choose **Save & Apply**. These are manual, per-port choices; connected consoles are not automatically detected. The tile keeps launching the same HDMI input. Cancel discards pending changes, and Reset Defaults clears device choices when saved.
 
 The shelf displays larger artwork with bundled brand logos for PS5, PS4, Xbox, Nintendo Switch, and the streaming apps in the default catalog (including Netflix). These logos work offline. Other installed apps use icons supplied by webOS when accessible; missing or unreadable icons fall back to a readable app name.

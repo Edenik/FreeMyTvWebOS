@@ -581,6 +581,13 @@
             background: rgba(255, 255, 255, 0.16);
         }
 
+        .shelf-edit-actions { display: flex; align-items: center; gap: 10px; }
+        .shelf-edit-actions[hidden], #reorderShelfBtn[hidden] { display: none; }
+        .shelf-edit-actions button, #reorderShelfBtn { padding: 7px 14px; font-size: 14px; }
+        .app-tile.moving { outline: 3px solid #fff; transform: translateY(-8px); }
+
+        .app-tile[aria-busy="true"] { border-color: var(--accent); }
+
         .settings-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -820,7 +827,7 @@
 </head>
 <body>
     <div class="ambient-glow" id="ambientGlow"></div>
-    <div class="toast-msg" id="toastMsg">Launching...</div>
+    <div class="toast-msg" id="toastMsg" role="status" aria-live="polite">Launching...</div>
 
     <div class="container">
         <!-- Header -->
@@ -861,7 +868,12 @@
         <div class="shelf-wrapper">
             <div class="shelf-top-bar">
                 <div class="shelf-header">Favorite Apps</div>
-                <div class="shelf-hint" id="shelfCountHint">Instant Native Launch</div>
+                <div class="shelf-hint" id="shelfCountHint" aria-live="polite">Instant Native Launch</div>
+                <button class="header-btn nav-item" id="reorderShelfBtn" data-title="Reorder tiles" data-desc="Rearrange your apps right here on the shelf.">Reorder</button>
+                <div class="shelf-edit-actions" id="shelfEditActions" hidden>
+                    <button class="header-btn nav-item" id="saveShelfOrder" data-title="Save tile order">Done</button>
+                    <button class="header-btn nav-item" id="cancelShelfOrder" data-title="Cancel reordering">Cancel</button>
+                </div>
             </div>
             <div class="shelf-grid" id="appsGrid"></div>
         </div>
@@ -891,6 +903,7 @@
             <div>
                 <div class="modal-section-title">1. Select Apps for Glass Shelf (Click to Toggle)</div>
                 <div class="app-selector-grid" id="appSelectorGrid"></div>
+
             </div>
 
             <div>
@@ -1044,6 +1057,7 @@
             img.alt = '';
             if (branded) img.className = 'tile-brand-logo';
             const fallback = container.firstElementChild;
+            if (fallback) fallback.style.visibility = 'hidden';
             img.onload = function() { if (fallback) fallback.style.visibility = 'hidden'; };
             img.onerror = function() { img.remove(); if (fallback) fallback.style.visibility = ''; };
             img.src = url;
@@ -1124,11 +1138,11 @@
 
         // --- Toast Helper ---
         const toastEl = document.getElementById('toastMsg');
-        function showToast(msg) {
+        function showToast(msg, duration) {
             toastEl.textContent = msg;
             toastEl.style.display = 'block';
             clearTimeout(window._toastTimer);
-            window._toastTimer = setTimeout(function() { toastEl.style.display = 'none'; }, 2400);
+            window._toastTimer = setTimeout(function() { toastEl.style.display = 'none'; }, duration || 2400);
         }
 
         // --- Theme Engine ---
@@ -1375,25 +1389,73 @@
         }
 
         // --- Native webOS App Launch ---
+        let shelfEdit = null;
+        let movingTileId = null;
+        let pendingLaunch = null;
         function launchApp(appId) {
-            showToast('Launching ' + appId + '...');
-            try {
-                if (window.webOS && window.webOS.service) {
-                    webOS.service.request("luna://com.webos.applicationManager", {
-                        method: "launch",
-                        parameters: { id: appId },
-                        onSuccess: function() {},
-                        onFailure: function() {
-                            webOS.service.request("luna://org.webosbrew.hbchannel.service", {
-                                method: "exec",
-                                parameters: {
-                                    command: "luna-send-pub -n 1 luna://com.webos.applicationManager/launch '{\"id\":\"" + appId + "\"}'"
-                                }
-                            });
-                        }
-                    });
+            if (shelfEdit || pendingLaunch) return; // Ignore repeated remote presses while a request is pending.
+            const app = state.catalog.find(function(item) { return item.id === appId; });
+            const title = app ? (devicePreset(app, state.hdmiDevices).title || app.title) : appId;
+            if (!window.webOS || !window.webOS.service || typeof window.webOS.service.request !== 'function') {
+                showToast('Open ' + title + ' on your LG TV. Launching is unavailable in this preview.', 5000);
+                return;
+            }
+            const request = { timer: null };
+            pendingLaunch = request;
+            const tiles = Array.from(document.querySelectorAll('.app-tile')).filter(function(tile) { return tile.dataset.id === appId; });
+            tiles.forEach(function(tile) { tile.setAttribute('aria-busy', 'true'); });
+            function finish(message) {
+                if (pendingLaunch !== request) return;
+                clearTimeout(request.timer);
+                pendingLaunch = null;
+                tiles.forEach(function(tile) { tile.removeAttribute('aria-busy'); });
+                showToast(message, 5000);
+            }
+            function failure(error) {
+                const detail = error && error.errorText || '';
+                if (/not installed|not found|does not exist|unknown app/i.test(detail)) {
+                    finish(title + ' is not installed or is unavailable on this TV.');
+                } else {
+                    finish('Could not open ' + title + '. Check that it is installed, then try again.');
                 }
-            } catch (e) {}
+            }
+            function fallback(originalError) {
+                if (pendingLaunch !== request) return;
+                // Only known app-ID characters may enter the legacy shell-based fallback.
+                if (!/^[a-zA-Z0-9._-]+$/.test(appId)) { failure(originalError); return; }
+                try {
+                    webOS.service.request('luna://org.webosbrew.hbchannel.service', {
+                        method: 'exec',
+                        parameters: { command: "luna-send-pub -n 1 luna://com.webos.applicationManager/launch '{\"id\":\"" + appId + "\"}'" },
+                        onSuccess: function(result) {
+                            // Successful exec alone does not confirm that the destination opened.
+                            if (pendingLaunch !== request) return;
+                            let reply = null;
+                            try { reply = JSON.parse(result && result.stdout || ''); } catch (e) {}
+                            if (reply && reply.returnValue === true) finish('Opening ' + title + '…');
+                            else if (reply && reply.returnValue === false) failure(reply);
+                            else finish('Could not confirm ' + title + ' opened. Please try again.');
+                        },
+                        onFailure: function() { failure(originalError); }
+                    });
+                } catch (e) { failure(originalError); }
+            }
+            showToast('Opening ' + title + '…', 8000);
+            request.timer = setTimeout(function() {
+                finish('No response opening ' + title + '. Please try again.');
+            }, 8000);
+            try {
+                webOS.service.request('luna://com.webos.applicationManager', {
+                    method: 'launch',
+                    parameters: { id: appId },
+                    onSuccess: function(result) {
+                        if (pendingLaunch !== request) return;
+                        if (result && result.returnValue === false) fallback(result);
+                        else finish('Opening ' + title + '…');
+                    },
+                    onFailure: fallback
+                });
+            } catch (e) { failure(e); }
         }
 
         // --- Render App Shelf & Trending Row ---
@@ -1401,7 +1463,7 @@
             const grid = document.getElementById('appsGrid');
             grid.innerHTML = '';
 
-            const favItems = state.favorites
+            const favItems = (shelfEdit || state.favorites)
                 .map(function(id) { return state.catalog.find(function(c) { return c.id === id; }); })
                 .filter(Boolean)
                 .slice(0, 8);
@@ -1410,7 +1472,8 @@
                 const device = devicePreset(app, state.hdmiDevices);
                 const title = device.title || app.title;
                 const btn = document.createElement('button');
-                btn.className = 'app-tile nav-item';
+                btn.className = 'app-tile nav-item' + (movingTileId === app.id ? ' moving' : '');
+                if (shelfEdit) btn.setAttribute('aria-pressed', String(movingTileId === app.id));
                 btn.dataset.id = app.id;
                 btn.dataset.tag = app.tag;
                 btn.dataset.title = title;
@@ -1451,11 +1514,14 @@
                 btn.appendChild(labelDiv);
 
                 btn.addEventListener('mouseenter', function() { setMainFocus(btn); });
-                btn.addEventListener('click', function() { launchApp(app.id); });
+                btn.addEventListener('click', function() {
+                    if (shelfEdit) { movingTileId = movingTileId === app.id ? null : app.id; renderAppsShelf(); focusShelfTile(app.id); }
+                    else launchApp(app.id);
+                });
                 grid.appendChild(btn);
             });
 
-            document.getElementById('shelfCountHint').textContent = favItems.length + ' Apps • Instant Launch';
+            document.getElementById('shelfCountHint').textContent = shelfEdit ? (movingTileId ? '← / → Move • OK Place • Back Cancel' : 'Select a tile • OK Pick up • Done to save') : favItems.length + ' Apps • Instant Launch';
             refreshMainNavList();
         }
 
@@ -1496,6 +1562,49 @@
             refreshMainNavList();
         }
 
+        function focusShelfTile(id) {
+            const tile = Array.from(document.querySelectorAll('.app-tile')).find(function(el) { return el.dataset.id === id; });
+            if (tile) setMainFocus(tile);
+        }
+        function moveShelfTile(direction) {
+            if (!shelfEdit || !movingTileId) { showToast('Select a tile first'); return; }
+            const index = shelfEdit.indexOf(movingTileId);
+            const destination = index + direction;
+            if (index < 0 || destination < 0 || destination >= shelfEdit.length) return;
+            shelfEdit.splice(index, 1);
+            shelfEdit.splice(destination, 0, movingTileId);
+            renderAppsShelf();
+            focusShelfTile(movingTileId);
+        }
+        function finishShelfEdit(save) {
+            if (!shelfEdit) return;
+            if (save) {
+                try { localStorage.setItem('fmtv_favorites', JSON.stringify(shelfEdit)); }
+                catch (e) { showToast('Could not save the order. Please try again.', 5000); return; }
+                state.favorites = shelfEdit.slice();
+            }
+            shelfEdit = null;
+            movingTileId = null;
+            document.getElementById('reorderShelfBtn').hidden = false;
+            document.getElementById('shelfEditActions').hidden = true;
+            renderAppsShelf();
+            setMainFocus(document.getElementById('reorderShelfBtn'));
+            showToast(save ? 'Tile order saved' : 'Reordering cancelled');
+        }
+        document.getElementById('reorderShelfBtn').addEventListener('click', function() {
+            shelfEdit = state.favorites.slice();
+            movingTileId = null;
+            this.hidden = true;
+            document.getElementById('shelfEditActions').hidden = false;
+            renderAppsShelf();
+            focusShelfTile(shelfEdit[0]);
+        });
+        document.getElementById('saveShelfOrder').addEventListener('click', function() { finishShelfEdit(true); });
+        document.getElementById('cancelShelfOrder').addEventListener('click', function() { finishShelfEdit(false); });
+        document.querySelectorAll('#shelfEditActions button, #reorderShelfBtn').forEach(function(button) {
+            button.addEventListener('mouseenter', function() { setMainFocus(button); });
+        });
+
         // --- Focus & Spatial Navigation ---
         let mainNavItems = [];
         let curIndex = 0;
@@ -1509,7 +1618,7 @@
         const ambientGlow = document.getElementById('ambientGlow');
 
         function refreshMainNavList() {
-            mainNavItems = Array.from(document.querySelectorAll('.nav-item'));
+            mainNavItems = Array.from(document.querySelectorAll(shelfEdit ? '.shelf-wrapper .nav-item' : '.nav-item')).filter(function(el) { return el.offsetParent !== null; });
             if (mainNavItems.length > 0) {
                 curIndex = Math.min(curIndex, mainNavItems.length - 1);
                 // Default focus on first app tile if starting
@@ -1522,9 +1631,10 @@
         }
 
         function setMainFocus(item) {
-            if (!item) return;
-            mainNavItems.forEach(function(i) { i.classList.remove('focused'); });
+            if (!item || (shelfEdit && !item.closest('.shelf-wrapper'))) return;
+            document.querySelectorAll('.nav-item.focused').forEach(function(i) { i.classList.remove('focused'); });
             item.classList.add('focused');
+            item.focus({ preventScroll: true });
             curIndex = mainNavItems.indexOf(item);
 
             heroTag.textContent = item.dataset.tag || 'Selection';
@@ -1580,6 +1690,7 @@
         let tempDevices = {};
 
         function openSettingsModal() {
+            if (shelfEdit) return;
             modalOpen = true;
             tempFavorites = state.favorites.slice();
             tempDevices = Object.assign({}, state.hdmiDevices);
@@ -1608,6 +1719,8 @@
                     const current = DEVICE_PRESETS.indexOf(devicePreset(app, tempDevices));
                     tempDevices[app.id] = DEVICE_PRESETS[(current + 1) % DEVICE_PRESETS.length].key;
                     updateLabel();
+                    refreshModalNavList();
+                    setModalFocus(button);
                 });
                 container.appendChild(button);
             });
@@ -1646,7 +1759,7 @@
         }
 
         function refreshModalNavList() {
-            modalNavItems = Array.from(settingsModal.querySelectorAll('.modal-nav'));
+            modalNavItems = Array.from(settingsModal.querySelectorAll('.modal-nav:not(:disabled)'));
             modalIndex = Math.min(modalIndex, modalNavItems.length - 1);
             setModalFocus(modalNavItems[modalIndex]);
         }
@@ -1715,6 +1828,7 @@
         }
 
         function openDrawer() {
+            if (shelfEdit) return;
             drawerOpen = true;
             weatherDrawer.classList.add('active');
             closeDrawerBtn.classList.add('focused');
@@ -1814,6 +1928,24 @@
                 exitScreensaver();
                 e.preventDefault();
                 return;
+            }
+
+            if (shelfEdit) {
+                if (e.keyCode === 461 || e.key === 'Escape' || e.key === 'GoBack') {
+                    finishShelfEdit(false); e.preventDefault(); return;
+                }
+                if (movingTileId) {
+                    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                        moveShelfTile(e.key === 'ArrowLeft' ? -1 : 1);
+                    } else if (e.key === 'Enter' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                        const id = movingTileId;
+                        movingTileId = null;
+                        renderAppsShelf();
+                        if (e.key === 'Enter') focusShelfTile(id);
+                        else setMainFocus(document.getElementById('saveShelfOrder'));
+                    } else return;
+                    e.preventDefault(); return;
+                }
             }
 
             // Back button on LG Magic Remote (461) or Escape
