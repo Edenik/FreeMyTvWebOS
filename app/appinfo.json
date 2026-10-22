@@ -10,7 +10,7 @@
   "splashBackground": "assets/splash.png",
   "iconColor": "#0a84ff",
   "resolution": "1920x1080",
-  "handlesRelaunch": true,
+  "handlesRelaunch": false,
   "supportQuickStart": true,
   "requiredPermissions": [
     "applications",
