@@ -1,6 +1,6 @@
 {
   "id": "org.webos.freemytv",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "vendor": "FreeMyTV",
   "type": "web",
   "main": "index.html",
