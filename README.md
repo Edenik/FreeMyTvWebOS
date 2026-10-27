@@ -67,7 +67,7 @@ Modern LG webOS (especially webOS 6, 22, 23, and 24) replaced the classic, snapp
 
 ## 🚀 Quick Install (2 Minutes)
 
-All you need is an LG Smart TV (webOS 3.0+) and a computer on the same Wi-Fi for the initial 2-minute install.
+All you need is an LG Smart TV (webOS 3.0+) and a computer or Android phone on the same Wi-Fi for the initial 2-minute install.
 
 ### Step 1: Enable Developer Mode on the TV
 1. Open the **Apps / LG Content Store** on your TV, search for **`Developer Mode`**, and install it.
@@ -87,6 +87,26 @@ python scripts/install.py
 1. Install [webOS Dev Manager](https://github.com/webosbrew/dev-manager-desktop/releases) (`winget install webosbrew.webOSDevManager` on Windows).
 2. Connect your TV using the IP and Passphrase.
 3. Download [`dist/org.webos.freemytv_1.2.5_all.ipk`](dist/org.webos.freemytv_1.2.5_all.ipk) and click **Install .ipk**.
+
+### Step 2C: Install from Android Phone via Termux (No PC Needed)
+Don't have a computer? You can install Free My TV directly from an Android phone on the same Wi-Fi:
+
+1. Install **Termux from [F-Droid](https://f-droid.org/packages/com.termux/)** *(do not use the Google Play Store version as it is outdated and unsupported)*.
+2. Ensure your phone and LG TV are connected to the **same Wi-Fi network** (not a guest Wi-Fi).
+3. Open Termux, install dependencies, and run the installer:
+
+```bash
+pkg update -y
+pkg install -y git python openssh python-cryptography
+git clone https://github.com/danielthejoker18/FreeMyTvWebOS.git
+cd FreeMyTvWebOS
+python scripts/install.py
+```
+
+4. The script discovers your TV on the network. When prompted, enter the 6-character **Passphrase** currently shown in the Developer Mode app on the TV.
+
+> [!NOTE]
+> Install `python-cryptography` via `pkg install` as shown above. Running `pip install cryptography` on Termux may fail because it attempts to compile native Rust/C extensions on device.
 
 > [!TIP]
 > **Make It Your 1-Second Home Key (Quick Access):**
@@ -234,7 +254,7 @@ O webOS moderno da LG (especialmente webOS 6, 22, 23 e 24) substituiu a clássic
 
 ## 🚀 Instalação Rápida (2 Minutos)
 
-Tudo que você precisa é de uma Smart TV LG (webOS 3.0+) e um computador na mesma rede Wi-Fi para a instalação inicial de 2 minutos.
+Tudo que você precisa é de uma Smart TV LG (webOS 3.0+) e um computador ou celular Android na mesma rede Wi-Fi para a instalação inicial de 2 minutos.
 
 ### Passo 1: Ativar o Developer Mode na TV
 1. Abra a **LG Content Store** na sua TV, procure por **`Developer Mode`** e instale.
@@ -254,6 +274,26 @@ python scripts/install.py
 1. Instale o [webOS Dev Manager](https://github.com/webosbrew/dev-manager-desktop/releases) (`winget install webosbrew.webOSDevManager` no Windows).
 2. Conecte sua TV usando o IP e a Senha.
 3. Baixe o [`dist/org.webos.freemytv_1.2.5_all.ipk`](dist/org.webos.freemytv_1.2.5_all.ipk) e clique em **Install .ipk**.
+
+### Passo 2C: Instalação pelo Celular Android via Termux (Sem PC)
+Não tem um computador por perto? Você pode instalar o Free My TV direto pelo seu celular Android na mesma rede Wi-Fi:
+
+1. Instale o **Termux pelo [F-Droid](https://f-droid.org/packages/com.termux/)** *(não use a versão da Google Play Store, pois está descontinuada e sem suporte)*.
+2. Garanta que o celular e a TV LG estejam na **mesma rede Wi-Fi** (não use rede de convidados).
+3. Abra o Termux, instale as dependências e rode o instalador:
+
+```bash
+pkg update -y
+pkg install -y git python openssh python-cryptography
+git clone https://github.com/danielthejoker18/FreeMyTvWebOS.git
+cd FreeMyTvWebOS
+python scripts/install.py
+```
+
+4. O script encontrará sua TV na rede. Quando solicitado, digite a **Senha (Passphrase)** de 6 caracteres exibida no app Developer Mode da TV.
+
+> [!NOTE]
+> Instale o `python-cryptography` via `pkg install` como indicado acima. Executar `pip install cryptography` no Termux pode falhar ao tentar compilar extensões nativas em Rust/C no dispositivo.
 
 > [!TIP]
 > **Transforme em Sua Tecla de Acesso Rápido (1 Segundo):**

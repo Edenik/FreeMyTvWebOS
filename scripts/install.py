@@ -59,7 +59,20 @@ def install_app(tv_ip, passphrase=None):
     if not os.path.exists(DIST_IPK):
         print("[!] Package not found. Building first...")
         build_script = os.path.join(REPO_DIR, "scripts", "build.py")
-        subprocess.run(f"python {build_script}", shell=True)
+        res = subprocess.run([sys.executable, build_script])
+        if res.returncode != 0:
+            print("[!] Package build failed.")
+            return False
+
+    # Check for OpenSSH client tools
+    if not shutil.which("ssh") or not shutil.which("scp"):
+        print("[!] Missing required dependency: OpenSSH (ssh / scp)")
+        print("    Please install OpenSSH:")
+        print("    - On Windows: Settings -> System -> Optional Features -> OpenSSH Client")
+        print("    - On macOS: Built-in or 'brew install openssh'")
+        print("    - On Linux: sudo apt install openssh-client (or distro equivalent)")
+        print("    - On Android (Termux): pkg install openssh")
+        return False
 
     ssh_dir = os.path.expanduser("~/.ssh")
     os.makedirs(ssh_dir, exist_ok=True)
@@ -85,7 +98,15 @@ def install_app(tv_ip, passphrase=None):
             return False
 
         # Decrypt key
-        from cryptography.hazmat.primitives import serialization
+        try:
+            from cryptography.hazmat.primitives import serialization
+        except ImportError:
+            print("[!] Missing required dependency: cryptography")
+            print("    Please install it using:")
+            print("    - On PC/Mac/Linux: pip install cryptography")
+            print("    - On Android (Termux): pkg install python-cryptography")
+            return False
+
         key = serialization.load_pem_private_key(key_data, password=passphrase.encode())
         unenc = key.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -174,6 +195,13 @@ if __name__ == "__main__":
     if not ip:
         ip = discover_lg_tv()
         if not ip:
+            print("[!] TV not found automatically via SSDP network scan.")
+            print("    Make sure your device and TV are on the same Wi-Fi network (not a guest network),")
+            print("    and that Developer Mode & Key Server are turned ON.")
             ip = input("Enter TV IP Address (shown in Developer Mode app): ").strip()
+
+    if not ip:
+        print("[!] No IP address provided. Aborting.")
+        sys.exit(1)
 
     install_app(ip, passphrase)
