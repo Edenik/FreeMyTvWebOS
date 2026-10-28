@@ -111,10 +111,14 @@ def build():
     import tarfile
     import io
 
+    # Installed-Size (bytes of app files) is required by the webosbrew apps-repo tooling.
+    installed_size = sum(os.path.getsize(os.path.join(root, f))
+                         for root, _, files in os.walk(APP_DIR) for f in files)
     control_content = f"""Package: {app_id}
 Version: {version}
 Section: misc
 Priority: optional
+Installed-Size: {installed_size}
 Architecture: all
 Maintainer: FreeMyTV
 Description: A fast, ad-free 60fps home screen for LG webOS TVs.
