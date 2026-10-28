@@ -20,10 +20,12 @@ jobs:
           v=$(python -c "import json;print(json.load(open('app/appinfo.json'))['version'])")
           [ "v$v" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME != appinfo v$v"; exit 1; }
       - name: Build ipk
-        run: python scripts/build.py
+        run: |
+          python scripts/build.py
+          python scripts/make_manifest.py
       - name: Attach ipk to the release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes
-          gh release upload "$GITHUB_REF_NAME" dist/*.ipk --clobber
+          gh release upload "$GITHUB_REF_NAME" dist/*.ipk dist/*.manifest.json --clobber

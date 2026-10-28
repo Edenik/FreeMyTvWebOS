@@ -149,7 +149,7 @@ See the full [ROADMAP.md](ROADMAP.md) for detailed technical specifications.
 
 - [x] **v1.0 — Core 60fps Glass Engine:** Native Luna app launching, Magic Remote + D-Pad spatial nav, 1-command installer.
 - [x] **v1.1 — Live Weather, Sunset Themes & On-TV Customizer:** Open-Meteo integration, TMDB + zero-key live trending feed, and interactive app shelf editor.
-- [ ] **v1.2 — Deep-Linking & Quick Drawer (Next Up 🚧):** Direct movie/episode deep-linking into Netflix/YouTube/Plex, D-Pad tile reordering, native TV icon extraction, and multi-language support (`EN`, `PT-BR`, `ES`, `DE`, `FR`).
+- [x] **v1.2 — Reordering, Quick Drawer & Languages:** D-Pad tile reordering, weather drawer, bundled brand icons, and `EN`/`PT-BR`/`ES`/`DE`/`FR` support. Trailer deep-links from TMDB picks; per-service title deep-links are still open.
 - [ ] **v1.3 — OLED Care Screensaver & Wake-on-LAN 📅:** Built-in pixel-shifting 4K ambient screensaver and automatic Wake-on-LAN packet sender to wake your gaming PC when selecting HDMI.
 - [ ] **v1.4 — Official Homebrew Repo & Home Button Hook 🚀:** One-click installation from the `webosbrew.org` on-TV store and optional physical Home button binding for rooted TVs.
 - [ ] **v2.0 — Smartphone QR Companion & Smart Home Hub 🌟:** Scan a QR code to configure settings from your phone and trigger Home Assistant lighting webhooks.
@@ -343,7 +343,7 @@ Veja o [ROADMAP.md](ROADMAP.md) completo para as especificações técnicas deta
 
 - [x] **v1.0 — Motor de Vidro 60fps:** Abertura nativa de apps via Luna, navegação espacial com Magic Remote + D-Pad, instalador em 1 comando.
 - [x] **v1.1 — Clima ao Vivo, Temas de Pôr do Sol e Personalizador na TV:** Integração com Open-Meteo, TMDB + feed de tendências sem chave, e editor interativo da prateleira de apps.
-- [ ] **v1.2 — Deep-Linking e Gaveta Rápida (Em Breve 🚧):** Deep-linking direto para filmes/episódios no Netflix/YouTube/Plex, reordenação de cards via D-Pad, extração nativa de ícones de TV, e suporte a múltiplos idiomas (`EN`, `PT-BR`, `ES`, `DE`, `FR`).
+- [x] **v1.2 — Reordenação, Gaveta Rápida e Idiomas:** reordenação por D-Pad, gaveta do clima, ícones de marca embutidos e suporte a `EN`/`PT-BR`/`ES`/`DE`/`FR`. Deep-link de trailers do TMDB; deep-links por serviço ainda em aberto.
 - [ ] **v1.3 — Proteção de Tela OLED e Wake-on-LAN 📅:** Protetor de tela ambiente 4K com deslocamento de pixels embutido e envio automático de pacotes Wake-on-LAN para acordar seu PC gamer ao selecionar o HDMI.
 - [ ] **v1.4 — Repositório Oficial no Homebrew e Atalho do Botão Home 🚀:** Instalação em um clique pela loja na TV do `webosbrew.org` e vínculo opcional do botão físico Home para TVs com root.
 - [ ] **v2.0 — Companheiro QR no Celular e Hub Smart Home 🌟:** Escaneie um QR code para configurar pelo celular e disparar webhooks de iluminação do Home Assistant.
