@@ -341,6 +341,11 @@
         }
 
         .shelf-grid {
+            /* Flexbox fallback for engines without CSS Grid (e.g. webOS 3.x /
+               Chromium 38); the display: grid line below overrides it on any
+               engine that understands grid, since it comes later in the cascade. */
+            display: flex;
+            flex-wrap: wrap;
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             gap: 18px;
@@ -351,6 +356,7 @@
             border: 1.5px solid rgba(255, 255, 255, 0.1);
             border-radius: 22px;
             aspect-ratio: 1 / 1;
+            flex: 0 0 calc((100% - 18px * 7) / 8);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -416,9 +422,17 @@
             text-overflow: ellipsis;
         }
         .hdmi-options {
+            /* Flexbox fallback for engines without CSS Grid; display: grid
+               below overrides it on any engine that understands grid. */
+            display: flex;
+            flex-wrap: wrap;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
+        }
+
+        .hdmi-options .app-toggle-item {
+            flex: 0 0 calc((100% - 12px) / 2);
         }
 
         /* Trending Picks Row */
@@ -481,6 +495,10 @@
         }
 
         .picks-grid {
+            /* Flexbox fallback for engines without CSS Grid; display: grid
+               below overrides it on any engine that understands grid. */
+            display: flex;
+            flex-wrap: wrap;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
@@ -491,6 +509,7 @@
             border: 1.5px solid var(--glass-border);
             border-radius: 18px;
             height: 128px;
+            flex: 0 0 calc((100% - 20px * 3) / 4);
             display: flex;
             overflow: hidden;
             cursor: pointer;
@@ -608,12 +627,20 @@
         }
 
         .app-selector-grid {
+            /* Flexbox fallback for engines without CSS Grid; display: grid
+               below overrides it on any engine that understands grid. */
+            display: flex;
+            flex-wrap: wrap;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             max-height: 240px;
             overflow-y: auto;
             padding: 4px;
+        }
+
+        .app-selector-grid .app-toggle-item {
+            flex: 0 0 calc((100% - 12px * 3) / 4);
         }
 
         .app-toggle-item {
@@ -651,12 +678,17 @@
         .app-tile[aria-busy="true"] { border-color: var(--accent); }
 
         .settings-row {
+            /* Flexbox fallback for engines without CSS Grid; display: grid
+               below overrides it on any engine that understands grid. */
+            display: flex;
+            flex-wrap: wrap;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
         }
 
         .field-group {
+            flex: 0 0 calc((100% - 16px * 2) / 3);
             display: flex;
             flex-direction: column;
             gap: 6px;
@@ -1017,6 +1049,13 @@
                             <option value="high">High Performance (60 FPS Boost)</option>
                         </select>
                     </div>
+                    <div class="field-group">
+                        <label>Auto-locate by IP (sends your IP to ipapi.co)</label>
+                        <select class="field-input modal-nav" id="cfgIpLocate">
+                            <option value="off">Off (use the city above)</option>
+                            <option value="on">On</option>
+                        </select>
+                    </div>
                     <div class="field-group" style="grid-column: span 2;">
                         <label>TMDB API Key (Optional)</label>
                         <input type="text" class="field-input modal-nav" id="cfgTmdbKey" placeholder="Optional for TMDB Trending">
@@ -1086,7 +1125,7 @@
 
     <script>
         // --- Default Catalog of Apps ---
-        const DEFAULT_CATALOG = [
+        var DEFAULT_CATALOG = [
             { id: 'youtube.leanback.v4', title: 'YouTube', tag: 'Streaming', desc: 'Watch 4K videos, live streams, music, and coding radio.', color: '#ff0000', badge: 'YT', bg: 'linear-gradient(135deg, #ff0000, #b00000)' },
             { id: 'netflix', title: 'Netflix', tag: 'Movies & Series', desc: 'Unlimited movies, TV shows, and originals in 4K Dolby Vision.', color: '#e50914', badge: 'N', bg: 'linear-gradient(135deg, #1f1f1f, #080808)' },
             { id: 'cdp-30', title: 'Plex', tag: 'Personal Media', desc: 'Stream your personal home cinema, movies, and music library.', color: '#e5a00d', badge: '>', bg: 'linear-gradient(135deg, #e5a00d, #9e6d00)' },
@@ -1105,7 +1144,7 @@
         ];
 
         // Device artwork is bundled inline so HDMI tiles also work offline.
-        const DEVICE_PRESETS = [
+        var DEVICE_PRESETS = [
             { key: 'default', title: '', color: '#0a84ff', shape: 'input' },
             { key: 'ps5', title: 'PS5', color: '#123ca6', logo: 'playstation5' },
             { key: 'ps4', title: 'PS4', color: '#173070', logo: 'playstation4' },
@@ -1115,23 +1154,23 @@
         ];
         function readDeviceChoices() {
             try {
-                const saved = JSON.parse(localStorage.getItem('fmtv_hdmi_devices') || '{}');
+                var saved = JSON.parse(localStorage.getItem('fmtv_hdmi_devices') || '{}');
                 return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
             } catch (e) { return {}; }
         }
         function isHDMI(app) { return /^com\.webos\.app\.hdmi[1-4]$/.test(app.id); }
         function devicePreset(app, choices) {
             if (!isHDMI(app)) return DEVICE_PRESETS[0];
-            return DEVICE_PRESETS.find(function(p) { return p.key === choices[app.id]; }) || DEVICE_PRESETS[0];
+            return arrFind(DEVICE_PRESETS, function(p) { return p.key === choices[app.id]; }) || DEVICE_PRESETS[0];
         }
         function deviceArtwork(shape) {
-            const drawings = {
+            var drawings = {
                 pc: '<rect x="15" y="26" width="90" height="61" rx="6" fill="none" stroke="white" stroke-width="6"/><path d="M60 88v13m-22 0h44M24 75h72" stroke="white" stroke-width="6"/>',
                 input: '<path d="M25 34h70v37L80 86H40L25 71Z" fill="none" stroke="white" stroke-width="6"/><path d="M39 48v18m14-18v18m14-18v18m14-18v18" stroke="white" stroke-width="5"/>'
             };
             return '<svg viewBox="0 0 120 120" aria-hidden="true">' + drawings[shape] + '</svg>';
         }
-        const APP_LOGOS = {
+        var APP_LOGOS = {
             'youtube.leanback.v4': 'youtube',
             'netflix': 'netflix',
             'cdp-30': 'plex',
@@ -1142,10 +1181,10 @@
             'spotify-beehive': 'spotify'
         };
         function addTileImage(container, url, branded) {
-            const img = document.createElement('img');
+            var img = document.createElement('img');
             img.alt = '';
             if (branded) img.className = 'tile-brand-logo';
-            const fallback = container.firstElementChild;
+            var fallback = container.firstElementChild;
             if (fallback) fallback.style.visibility = 'hidden';
             img.onload = function() { if (fallback) fallback.style.visibility = 'hidden'; };
             img.onerror = function() { img.remove(); if (fallback) fallback.style.visibility = ''; };
@@ -1154,7 +1193,7 @@
         }
 
         function launchPointIcon(lp) {
-            const icon = lp.largeIcon || lp.icon || '';
+            var icon = lp.largeIcon || lp.icon || '';
             if (/^(https?:|file:|data:image\/)/i.test(icon)) return icon;
             if (icon.charAt(0) === '/') return 'file://' + icon;
             if (icon && lp.folderPath) return 'file://' + lp.folderPath.replace(/\/$/, '') + '/' + icon;
@@ -1164,7 +1203,7 @@
         // Defaults favor the streaming apps with the broadest global install base
         // (YouTube/Netflix/Prime/Disney+) over niche regional or personal-media apps
         // like Plex or Globoplay, which stay one tap away in Customize for anyone who uses them.
-        const DEFAULT_FAVORITES = [
+        var DEFAULT_FAVORITES = [
             'youtube.leanback.v4',
             'netflix',
             'amazon',
@@ -1175,14 +1214,14 @@
             'org.webosbrew.hbchannel'
         ];
 
-        const FALLBACK_MOVIES = [
+        var FALLBACK_MOVIES = [
             { title: 'Dune: Part Two', badge: 'Sci-Fi • 8.8★', service: 'Watch on Max / Netflix', app: 'netflix', desc: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators.', poster: 'https://image.tmdb.org/t/p/w300/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg', color: '#e5a00d' },
             { title: 'Oppenheimer', badge: 'Drama • 8.3★', service: 'Watch on Prime Video', app: 'amazon', desc: 'The story of American scientist J. Robert Oppenheimer and his role in developing the atomic bomb.', poster: '', color: '#00a8e1' },
             { title: 'Spider-Man: Across the Spider-Verse', badge: 'Animation • 8.6★', service: 'Watch on Netflix', app: 'netflix', desc: 'Miles Morales catapults across the Multiverse to team up with Gwen Stacy and a new crew of Spider-People.', poster: '', color: '#5856d6' },
             { title: 'Barbie', badge: 'Comedy • 7.0★', service: 'Watch on Max', app: 'netflix', desc: 'Barbie and Ken venture from Barbie Land to the real world in search of true happiness.', poster: '', color: '#ff375f' }
         ];
 
-        const FALLBACK_SHOWS = [
+        var FALLBACK_SHOWS = [
             { title: 'Severance', badge: 'Thriller • 8.7★', service: 'Trending Series', app: 'netflix', desc: 'Mark leads a team of office workers whose memories have been surgically divided between work and personal lives.', poster: 'https://image.tmdb.org/t/p/w300/e9Lra4Wv77L84a0d8lEwB47zYqS.jpg', color: '#0a84ff' },
             { title: 'Demon Slayer: Infinity', badge: 'Anime • 8.9★', service: 'Watch on Crunchyroll', app: 'com.crunchyroll.webapp', desc: 'Tanjiro and the Hashira face the Upper Rank demons in the final stronghold.', poster: 'https://image.tmdb.org/t/p/w300/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg', color: '#f47521' },
             { title: 'The Last of Us', badge: 'Drama • 8.8★', service: 'Watch on Max', app: 'netflix', desc: 'Joel and Ellie navigate a brutal, infected America in search of a cure.', poster: '', color: '#e5a00d' },
@@ -1190,7 +1229,7 @@
         ];
 
         // --- Persistent State ---
-        let state = {
+        var state = {
             favorites: JSON.parse(localStorage.getItem('fmtv_favorites') || 'null') || DEFAULT_FAVORITES.slice(),
             hdmiDevices: readDeviceChoices(),
             city: localStorage.getItem('fmtv_city') || '',
@@ -1200,6 +1239,7 @@
             clockFormat: localStorage.getItem('fmtv_clock_format') || '24h',
             perfMode: localStorage.getItem('fmtv_perf_mode') || 'standard',
             tmdbKey: localStorage.getItem('fmtv_tmdb_key') || '',
+            ipLocate: localStorage.getItem('fmtv_ip_locate') || 'off',
             catalog: DEFAULT_CATALOG.slice(),
             picksTab: 'movies',
             hourlyForecast: [],
@@ -1210,23 +1250,55 @@
         };
 
         // --- Clock & Date ---
+        function pad2(n) {
+            return ('0' + n).slice(-2);
+        }
+
+        // Array.prototype.find/findIndex, Array.from, and Object.assign are
+        // all ES6 and unavailable on the Chromium 38 engine LG ships on webOS 3.x
+        function arrFind(arr, predicate) {
+            for (var i = 0; i < arr.length; i++) {
+                if (predicate(arr[i], i)) return arr[i];
+            }
+            return undefined;
+        }
+
+        function arrFindIndex(arr, predicate) {
+            for (var i = 0; i < arr.length; i++) {
+                if (predicate(arr[i], i)) return i;
+            }
+            return -1;
+        }
+
+        function toArray(arrayLike) {
+            return Array.prototype.slice.call(arrayLike);
+        }
+
+        function shallowClone(obj) {
+            var copy = {};
+            for (var key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) copy[key] = obj[key];
+            }
+            return copy;
+        }
+
         function updateClock() {
-            const now = new Date();
-            const rawHours = now.getHours();
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            let timeStr;
+            var now = new Date();
+            var rawHours = now.getHours();
+            var minutes = pad2(now.getMinutes());
+            var timeStr;
             if (state.clockFormat === '12h') {
-                const ampm = rawHours >= 12 ? 'PM' : 'AM';
-                let h12 = rawHours % 12;
+                var ampm = rawHours >= 12 ? 'PM' : 'AM';
+                var h12 = rawHours % 12;
                 if (!h12) h12 = 12;
                 timeStr = h12 + ':' + minutes + ' ' + ampm;
             } else {
-                timeStr = String(rawHours).padStart(2, '0') + ':' + minutes;
+                timeStr = pad2(rawHours) + ':' + minutes;
             }
             document.getElementById('clockText').textContent = timeStr;
 
-            const opts = { weekday: 'short', month: 'short', day: 'numeric' };
-            const dateStr = now.toLocaleDateString('en-US', opts);
+            var opts = { weekday: 'short', month: 'short', day: 'numeric' };
+            var dateStr = now.toLocaleDateString('en-US', opts);
             document.getElementById('dateText').textContent = dateStr;
 
             document.getElementById('screensaverClock').textContent = timeStr;
@@ -1236,7 +1308,7 @@
         updateClock();
 
         // --- Toast Helper ---
-        const toastEl = document.getElementById('toastMsg');
+        var toastEl = document.getElementById('toastMsg');
         function showToast(msg, duration) {
             toastEl.textContent = msg;
             toastEl.style.display = 'block';
@@ -1258,8 +1330,8 @@
         function applyTheme() {
             document.body.classList.remove('theme-day', 'theme-sunset', 'theme-oled');
             document.documentElement.classList.remove('theme-day', 'theme-sunset', 'theme-oled');
-            const badge = document.getElementById('themeBadge');
-            const perfSuffix = state.perfMode === 'high' ? ' ⚡' : '';
+            var badge = document.getElementById('themeBadge');
+            var perfSuffix = state.perfMode === 'high' ? ' ⚡' : '';
             if (state.theme === 'oled') {
                 document.body.classList.add('theme-oled');
                 document.documentElement.classList.add('theme-oled');
@@ -1286,188 +1358,255 @@
         }
 
         // --- Live Weather & Sunset (Open-Meteo) ---
-        const WMO_CODES = {
+        var WMO_CODES = {
             0: ['☀️', 'Clear Sky'], 1: ['🌤️', 'Mostly Clear'], 2: ['⛅', 'Partly Cloudy'],
             3: ['☁️', 'Overcast'], 45: ['🌫️', 'Foggy'], 51: ['🌦️', 'Light Drizzle'],
             61: ['🌧️', 'Rain'], 63: ['🌧️', 'Moderate Rain'], 71: ['❄️', 'Snow'],
             80: ['🌦️', 'Rain Showers'], 95: ['⛈️', 'Thunderstorm']
         };
 
-        async function fetchWeather() {
-            try {
-                let lat = state.lat;
-                let lon = state.lon;
-                let cityLabel = state.city;
-
-                // Geocode city if user typed one
-                if (cityLabel) {
-                    const geoRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(cityLabel) + '&count=1');
-                    const geoData = await geoRes.json();
-                    if (geoData.results && geoData.results.length > 0) {
-                        lat = geoData.results[0].latitude;
-                        lon = geoData.results[0].longitude;
-                        cityLabel = geoData.results[0].name;
-                    }
-                }
-
-                // Auto-locate by IP if not set
-                if (!lat && !lon) {
-                    try {
-                        const ipRes = await fetch('https://ipapi.co/json/');
-                        const ipData = await ipRes.json();
-                        if (ipData.latitude && ipData.longitude) {
-                            lat = ipData.latitude;
-                            lon = ipData.longitude;
-                            cityLabel = ipData.city || 'Local';
-                        }
-                    } catch (e) {}
-                }
-
-                // Default to Sao Paulo coordinates if offline/blocked
-                if (!lat && !lon) {
-                    lat = -23.55;
-                    lon = -46.63;
-                    cityLabel = cityLabel || 'São Paulo';
-                }
-
-                const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
-                    '&current=temperature_2m,weather_code,is_day' +
-                    '&hourly=temperature_2m,weather_code' +
-                    '&daily=sunrise,sunset&timezone=auto&forecast_days=2';
-                const res = await fetch(url);
-                const data = await res.json();
-
-                // Open-Meteo returns naive local wall-clock strings for the target city,
-                // so "now" must be shifted by the same UTC offset to compare correctly -
-                // comparing against the device's own local time would be wrong whenever
-                // the device and the configured city are in different timezones.
-                const localNow = typeof data.utc_offset_seconds === 'number'
-                    ? new Date(Date.now() + data.utc_offset_seconds * 1000)
-                    : new Date();
-
-                if (data.current) {
-                    const temp = Math.round(data.current.temperature_2m);
-                    const code = data.current.weather_code;
-                    const isDay = data.current.is_day === 1;
-                    const wmo = WMO_CODES[code] || ['⛅', 'Fair'];
-
-                    document.getElementById('weatherIcon').textContent = isDay ? wmo[0] : '🌙';
-                    document.getElementById('weatherText').textContent = temp + '°C • ' + wmo[1];
-
-                    let sunsetStr = '';
-                    if (data.daily) {
-                        if (data.daily.sunrise && data.daily.sunrise[0]) {
-                            state.sunrise = data.daily.sunrise[0].split('T')[1];
-                        }
-                        if (data.daily.sunset && data.daily.sunset[0]) {
-                            state.sunset = data.daily.sunset[0].split('T')[1];
-                            sunsetStr = ' • Sunset ' + state.sunset;
-                            const sunsetHour = parseInt(state.sunset.split(':')[0], 10);
-                            state.isSunset = Math.abs(localNow.getUTCHours() - sunsetHour) <= 1;
-                        }
-                    }
-                    state.isNight = !isDay;
-                    document.getElementById('weatherSub').textContent = cityLabel + sunsetStr;
-                    applyTheme();
-                }
-
-                if (data.hourly && Array.isArray(data.hourly.time)) {
-                    const nowKey = localNow.toISOString().slice(0, 13);
-                    let startIdx = data.hourly.time.findIndex(function(t) { return t.slice(0, 13) >= nowKey; });
-                    if (startIdx === -1) startIdx = 0;
-                    // 6 chips so the D-Pad-only drawer never needs scrolling to see them all
-                    state.hourlyForecast = data.hourly.time.slice(startIdx, startIdx + 6).map(function(t, i) {
-                        const idx = startIdx + i;
-                        return {
-                            hour: t.split('T')[1].slice(0, 5),
-                            temp: Math.round(data.hourly.temperature_2m[idx]),
-                            code: data.hourly.weather_code[idx]
-                        };
-                    });
-                }
-
-                renderDrawerForecast();
-            } catch (err) {
+        // Written as .then() chains (no async/await) and guarded against a
+        // missing fetch() global, since both are absent on the Chromium 38
+        // engine LG ships on webOS 3.x - either would otherwise throw
+        // synchronously and abort the rest of the boot sequence below it.
+        function fetchWeather() {
+            if (typeof fetch !== 'function') {
                 document.getElementById('weatherText').textContent = '22°C • Clear';
                 document.getElementById('weatherSub').textContent = state.city || 'Offline Mode';
+                return;
             }
+
+            var lat = state.lat;
+            var lon = state.lon;
+            var cityLabel = state.city;
+
+            // Geocode city if user typed one
+            var geoPromise = cityLabel
+                ? fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(cityLabel) + '&count=1')
+                    .then(function(geoRes) { return geoRes.json(); })
+                    .then(function(geoData) {
+                        if (geoData.results && geoData.results.length > 0) {
+                            lat = geoData.results[0].latitude;
+                            lon = geoData.results[0].longitude;
+                            cityLabel = geoData.results[0].name;
+                        }
+                    })
+                : Promise.resolve();
+
+            geoPromise
+                .then(function() {
+                    // IP lookup sends the user's public IP to a third party, so it is opt-in
+                    if (!lat && !lon && state.ipLocate === 'on') {
+                        return fetch('https://ipapi.co/json/')
+                            .then(function(ipRes) { return ipRes.json(); })
+                            .then(function(ipData) {
+                                if (ipData.latitude && ipData.longitude) {
+                                    lat = ipData.latitude;
+                                    lon = ipData.longitude;
+                                    cityLabel = ipData.city || 'Local';
+                                }
+                            })
+                            .catch(function() {});
+                    }
+                })
+                .then(function() {
+                    // Default to Sao Paulo coordinates if offline/blocked
+                    if (!lat && !lon) {
+                        lat = -23.55;
+                        lon = -46.63;
+                        cityLabel = cityLabel || 'São Paulo';
+                    }
+
+                    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
+                        '&current=temperature_2m,weather_code,is_day' +
+                        '&hourly=temperature_2m,weather_code' +
+                        '&daily=sunrise,sunset&timezone=auto&forecast_days=2';
+                    return fetch(url).then(function(res) { return res.json(); });
+                })
+                .then(function(data) {
+                    // Open-Meteo returns naive local wall-clock strings for the target city,
+                    // so "now" must be shifted by the same UTC offset to compare correctly -
+                    // comparing against the device's own local time would be wrong whenever
+                    // the device and the configured city are in different timezones.
+                    var localNow = typeof data.utc_offset_seconds === 'number'
+                        ? new Date(Date.now() + data.utc_offset_seconds * 1000)
+                        : new Date();
+
+                    if (data.current) {
+                        var temp = Math.round(data.current.temperature_2m);
+                        var code = data.current.weather_code;
+                        var isDay = data.current.is_day === 1;
+                        var wmo = WMO_CODES[code] || ['⛅', 'Fair'];
+
+                        document.getElementById('weatherIcon').textContent = isDay ? wmo[0] : '🌙';
+                        document.getElementById('weatherText').textContent = temp + '°C • ' + wmo[1];
+
+                        var sunsetStr = '';
+                        if (data.daily) {
+                            if (data.daily.sunrise && data.daily.sunrise[0]) {
+                                state.sunrise = data.daily.sunrise[0].split('T')[1];
+                            }
+                            if (data.daily.sunset && data.daily.sunset[0]) {
+                                state.sunset = data.daily.sunset[0].split('T')[1];
+                                sunsetStr = ' • Sunset ' + state.sunset;
+                                var sunsetHour = parseInt(state.sunset.split(':')[0], 10);
+                                state.isSunset = Math.abs(localNow.getUTCHours() - sunsetHour) <= 1;
+                            }
+                        }
+                        state.isNight = !isDay;
+                        document.getElementById('weatherSub').textContent = cityLabel + sunsetStr;
+                        applyTheme();
+                    }
+
+                    if (data.hourly && Array.isArray(data.hourly.time)) {
+                        var nowKey = localNow.toISOString().slice(0, 13);
+                        var startIdx = arrFindIndex(data.hourly.time, function(t) { return t.slice(0, 13) >= nowKey; });
+                        if (startIdx === -1) startIdx = 0;
+                        // 6 chips so the D-Pad-only drawer never needs scrolling to see them all
+                        state.hourlyForecast = data.hourly.time.slice(startIdx, startIdx + 6).map(function(t, i) {
+                            var idx = startIdx + i;
+                            return {
+                                hour: t.split('T')[1].slice(0, 5),
+                                temp: Math.round(data.hourly.temperature_2m[idx]),
+                                code: data.hourly.weather_code[idx]
+                            };
+                        });
+                    }
+
+                    renderDrawerForecast();
+                })
+                .catch(function(err) {
+                    document.getElementById('weatherText').textContent = '22°C • Clear';
+                    document.getElementById('weatherSub').textContent = state.city || 'Offline Mode';
+                });
         }
 
         // --- Live Trending Picks (TMDB + Live TVMaze Zero-Key Feed), split by Movies/Shows tab ---
-        async function fetchTrendingPicks() {
-            const badge = document.getElementById('picksSourceBadge');
-            const tab = state.picksTab;
-            const tmdbMediaPath = tab === 'shows' ? 'tv' : 'movie';
-            try {
-                // 1. If user provided a TMDB API Key, fetch live from TMDB for the active tab
-                if (state.tmdbKey && state.tmdbKey.trim().length > 8) {
-                    const key = state.tmdbKey.trim();
-                    const headers = key.length > 40 ? { 'Authorization': 'Bearer ' + key } : {};
-                    const url = key.length > 40
-                        ? 'https://api.themoviedb.org/3/trending/' + tmdbMediaPath + '/week?language=en-US'
-                        : 'https://api.themoviedb.org/3/trending/' + tmdbMediaPath + '/week?api_key=' + encodeURIComponent(key);
+        function fetchTrendingPicks() {
+            var badge = document.getElementById('picksSourceBadge');
+            var tab = state.picksTab;
+            var tmdbMediaPath = tab === 'shows' ? 'tv' : 'movie';
 
-                    const res = await fetch(url, { headers: headers });
-                    const data = await res.json();
-                    if (data.results && data.results.length >= 4 && tab === state.picksTab) {
-                        const items = data.results.slice(0, 4).map(function(item) {
-                            const title = item.title || item.name || 'Trending';
-                            const score = item.vote_average ? item.vote_average.toFixed(1) + '★' : 'Hot';
-                            return {
-                                title: title,
-                                badge: (tab === 'shows' ? 'Series' : 'Movie') + ' • ' + score,
-                                service: 'TMDB Trending',
-                                app: 'netflix',
-                                desc: item.overview || 'Trending worldwide this week.',
-                                poster: item.poster_path ? 'https://image.tmdb.org/t/p/w300' + item.poster_path : '',
-                                color: '#0a84ff'
-                            };
-                        });
-                        badge.textContent = 'TMDB Live';
-                        renderPicks(items);
-                        return;
-                    }
-                }
+            function showCurated() {
+                if (tab !== state.picksTab) return;
+                badge.textContent = 'Curated Picks';
+                renderPicks(tab === 'shows' ? FALLBACK_SHOWS : FALLBACK_MOVIES);
+            }
 
-                // 2. Zero-Key Live Fallback: TVMaze only has TV data, so it covers the Shows tab;
-                //    the Movies tab falls through to the curated list below without a TMDB key.
-                if (tab === 'shows') {
-                    const res = await fetch('https://api.tvmaze.com/shows?page=0');
-                    const shows = await res.json();
-                    if (Array.isArray(shows) && shows.length > 0 && tab === state.picksTab) {
-                        const topShows = shows
-                            .filter(function(s) { return s.rating && s.rating.average >= 8.4 && s.image && s.image.medium; })
-                            .sort(function() { return 0.5 - Math.random(); })
-                            .slice(0, 4)
-                            .map(function(s) {
-                                const cleanSummary = (s.summary || '').replace(/<[^>]*>/g, '');
-                                const genre = (s.genres && s.genres[0]) || 'Series';
-                                const network = (s.network && s.network.name) || (s.webChannel && s.webChannel.name) || 'Streaming';
+            if (typeof fetch !== 'function') {
+                showCurated();
+                return;
+            }
+
+            // 1. If user provided a TMDB API Key, fetch live from TMDB for the active tab
+            var tmdbPromise;
+            if (state.tmdbKey && state.tmdbKey.trim().length > 8) {
+                var key = state.tmdbKey.trim();
+                var headers = key.length > 40 ? { 'Authorization': 'Bearer ' + key } : {};
+                var url = key.length > 40
+                    ? 'https://api.themoviedb.org/3/trending/' + tmdbMediaPath + '/week?language=en-US'
+                    : 'https://api.themoviedb.org/3/trending/' + tmdbMediaPath + '/week?api_key=' + encodeURIComponent(key);
+
+                tmdbPromise = fetch(url, { headers: headers })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.results && data.results.length >= 4 && tab === state.picksTab) {
+                            var items = data.results.slice(0, 4).map(function(item) {
+                                var title = item.title || item.name || 'Trending';
+                                var score = item.vote_average ? item.vote_average.toFixed(1) + '★' : 'Hot';
                                 return {
-                                    title: s.name,
-                                    badge: genre + ' • ' + s.rating.average + '★',
-                                    service: 'Watch on ' + network,
+                                    title: title,
+                                    badge: (tab === 'shows' ? 'Series' : 'Movie') + ' • ' + score,
+                                    service: 'TMDB Trending',
                                     app: 'netflix',
-                                    desc: cleanSummary || 'Critically acclaimed trending series.',
-                                    poster: s.image.medium,
+                                    desc: item.overview || 'Trending worldwide this week.',
+                                    poster: item.poster_path ? 'https://image.tmdb.org/t/p/w300' + item.poster_path : '',
                                     color: '#0a84ff'
                                 };
                             });
-                        if (topShows.length === 4) {
-                            badge.textContent = 'Live Popular Feed';
-                            renderPicks(topShows);
-                            return;
+                            badge.textContent = 'TMDB Live';
+                            renderPicks(items);
+                            return true;
                         }
-                    }
-                }
-            } catch (e) {}
+                        return false;
+                    })
+                    .catch(function() { return false; });
+            } else {
+                tmdbPromise = Promise.resolve(false);
+            }
 
-            if (tab !== state.picksTab) return;
-            badge.textContent = 'Curated Picks';
-            renderPicks(tab === 'shows' ? FALLBACK_SHOWS : FALLBACK_MOVIES);
+            tmdbPromise
+                .then(function(handled) {
+                    if (handled) return true;
+
+                    // 2. Zero-Key Live Fallback: TVMaze only has TV data, so it covers the Shows tab;
+                    //    the Movies tab falls through to the curated list below without a TMDB key.
+                    if (tab === 'shows') {
+                        return fetch('https://api.tvmaze.com/shows?page=0')
+                            .then(function(res) { return res.json(); })
+                            .then(function(shows) {
+                                if (Array.isArray(shows) && shows.length > 0 && tab === state.picksTab) {
+                                    var topShows = shows
+                                        .filter(function(s) { return s.rating && s.rating.average >= 8.4 && s.image && s.image.medium; })
+                                        .sort(function() { return 0.5 - Math.random(); })
+                                        .slice(0, 4)
+                                        .map(function(s) {
+                                            var cleanSummary = (s.summary || '').replace(/<[^>]*>/g, '');
+                                            var genre = (s.genres && s.genres[0]) || 'Series';
+                                            var network = (s.network && s.network.name) || (s.webChannel && s.webChannel.name) || 'Streaming';
+                                            return {
+                                                title: s.name,
+                                                badge: genre + ' • ' + s.rating.average + '★',
+                                                service: 'Watch on ' + network,
+                                                app: 'netflix',
+                                                desc: cleanSummary || 'Critically acclaimed trending series.',
+                                                poster: s.image.medium,
+                                                color: '#0a84ff'
+                                            };
+                                        });
+                                    if (topShows.length === 4) {
+                                        badge.textContent = 'Live Popular Feed';
+                                        renderPicks(topShows);
+                                        return true;
+                                    }
+                                }
+                                return false;
+                            })
+                            .catch(function() { return false; });
+                    }
+                    return false;
+                })
+                .then(function(handled) {
+                    if (!handled) showCurated();
+                })
+                .catch(showCurated);
         }
 
         // --- Discover Installed Apps from LG webOS ---
+        function addLaunchPoints(launchPoints) {
+            launchPoints.forEach(function(lp) {
+                var appId = lp.appId || lp.id;
+                if (!appId) return;
+                var exists = arrFind(state.catalog, function(c) { return c.id === appId; });
+                var iconUrl = launchPointIcon(lp);
+                if (exists && iconUrl) exists.iconUrl = iconUrl;
+                if (lp.systemApp && !exists) return;
+                if (!exists) {
+                    state.catalog.push({
+                        id: appId,
+                        title: lp.title || lp.id,
+                        tag: 'Installed App',
+                        desc: lp.appDescription || ('Launch ' + (lp.title || lp.id) + ' natively on your LG TV.'),
+                        color: lp.iconColor || '#0a84ff',
+                        badge: (lp.title || 'APP').substring(0, 3).toUpperCase(),
+                        iconUrl: iconUrl,
+                        bg: 'linear-gradient(135deg, ' + (lp.iconColor || '#2a344a') + ', #101420)'
+                    });
+                }
+            });
+            renderAppsShelf();
+        }
+
         function discoverTVApps() {
             if (!window.webOS || !window.webOS.service) return;
             try {
@@ -1475,49 +1614,90 @@
                     method: "listLaunchPoints",
                     parameters: {},
                     onSuccess: function(res) {
-                        if (res && Array.isArray(res.launchPoints)) {
-                            res.launchPoints.forEach(function(lp) {
-                                const appId = lp.appId || lp.id;
-                                if (!appId) return;
-                                const exists = state.catalog.find(function(c) { return c.id === appId; });
-                                const iconUrl = launchPointIcon(lp);
-                                if (exists && iconUrl) exists.iconUrl = iconUrl;
-                                if (lp.systemApp && !exists) return;
-                                if (!exists) {
-                                    state.catalog.push({
-                                        id: appId,
-                                        title: lp.title || lp.id,
-                                        tag: 'Installed App',
-                                        desc: lp.appDescription || ('Launch ' + (lp.title || lp.id) + ' natively on your LG TV.'),
-                                        color: lp.iconColor || '#0a84ff',
-                                        badge: (lp.title || 'APP').substring(0, 3).toUpperCase(),
-                                        iconUrl: iconUrl,
-                                        bg: 'linear-gradient(135deg, ' + (lp.iconColor || '#2a344a') + ', #101420)'
-                                    });
-                                }
-                            });
-                            renderAppsShelf();
-                        }
-                    }
+                        if (res && Array.isArray(res.launchPoints)) addLaunchPoints(res.launchPoints);
+                    },
+                    // Newer webOS (seen on SDK 10.x) denies listLaunchPoints to Dev Mode apps.
+                    onFailure: function() { discoverViaSSAP(0); }
                 });
             } catch (e) {}
         }
 
+        // The TV's own remote-control socket still lists installed apps once the
+        // viewer accepts a one-time on-screen pairing prompt. The client key it
+        // returns is kept so later launches skip the prompt. Right after an app
+        // (re)launch the socket sometimes drops or ignores the connection, so a failed
+        // attempt is retried; a shown prompt or a refusal is never retried.
+        var SSAP_RETRY_MS = [2000, 5000, 15000];
+        function discoverViaSSAP(attempt) {
+            attempt = attempt || 0;
+            var ws, timer;
+            var settled = false;
+            var prompted = false;
+            function finish(retry) {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timer);
+                try { ws.close(); } catch (e) {}
+                if (retry && attempt < SSAP_RETRY_MS.length) {
+                    setTimeout(function() { discoverViaSSAP(attempt + 1); }, SSAP_RETRY_MS[attempt]);
+                }
+            }
+            function waitForReply() {
+                clearTimeout(timer);
+                timer = setTimeout(function() { finish(true); }, 8000);
+            }
+            try { ws = new WebSocket('ws://127.0.0.1:3000'); } catch (e) { finish(true); return; }
+            var clientKey = null;
+            try { clientKey = localStorage.getItem('fmtv_ssap_key'); } catch (e) {}
+            waitForReply();
+            ws.onopen = function() {
+                var payload = {
+                    pairingType: 'PROMPT',
+                    manifest: { manifestVersion: 1, appVersion: '1.0', permissions: ['READ_INSTALLED_APPS'] }
+                };
+                if (clientKey) payload['client-key'] = clientKey;
+                ws.send(JSON.stringify({ id: 'register', type: 'register', payload: payload }));
+            };
+            // Also fires after a connection error.
+            ws.onclose = function() { finish(!prompted); };
+            ws.onmessage = function(ev) {
+                var msg;
+                try { msg = JSON.parse(ev.data); } catch (e) { return; }
+                if (msg.id === 'register') {
+                    if (msg.type === 'response' && msg.payload && msg.payload.pairingType === 'PROMPT') {
+                        // Waiting for the viewer: no timeout, and no retry that would prompt again.
+                        prompted = true;
+                        clearTimeout(timer);
+                        showToast('Accept the request on screen so Free My TV can list your installed apps.', 15000);
+                    } else if (msg.type === 'registered') {
+                        try { localStorage.setItem('fmtv_ssap_key', msg.payload['client-key']); } catch (e) {}
+                        ws.send(JSON.stringify({ id: 'apps', type: 'request', uri: 'ssap://com.webos.applicationManager/listLaunchPoints' }));
+                        waitForReply();
+                    } else if (msg.type === 'error') {
+                        finish(false);
+                    }
+                } else if (msg.id === 'apps') {
+                    if (msg.payload && Array.isArray(msg.payload.launchPoints)) addLaunchPoints(msg.payload.launchPoints);
+                    finish(false);
+                }
+            };
+        }
+
         // --- Native webOS App Launch ---
-        let shelfEdit = null;
-        let movingTileId = null;
-        let pendingLaunch = null;
+        var shelfEdit = null;
+        var movingTileId = null;
+        var pendingLaunch = null;
         function launchApp(appId) {
             if (shelfEdit || pendingLaunch) return; // Ignore repeated remote presses while a request is pending.
-            const app = state.catalog.find(function(item) { return item.id === appId; });
-            const title = app ? (devicePreset(app, state.hdmiDevices).title || app.title) : appId;
+            var app = arrFind(state.catalog, function(item) { return item.id === appId; });
+            var title = app ? (devicePreset(app, state.hdmiDevices).title || app.title) : appId;
             if (!window.webOS || !window.webOS.service || typeof window.webOS.service.request !== 'function') {
                 showToast('Open ' + title + ' on your LG TV. Launching is unavailable in this preview.', 5000);
                 return;
             }
-            const request = { timer: null };
+            var request = { timer: null };
             pendingLaunch = request;
-            const tiles = Array.from(document.querySelectorAll('.app-tile')).filter(function(tile) { return tile.dataset.id === appId; });
+            var tiles = toArray(document.querySelectorAll('.app-tile')).filter(function(tile) { return tile.dataset.id === appId; });
             tiles.forEach(function(tile) { tile.setAttribute('aria-busy', 'true'); });
             function finish(message) {
                 if (pendingLaunch !== request) return;
@@ -1527,7 +1707,7 @@
                 showToast(message, 5000);
             }
             function failure(error) {
-                const detail = error && error.errorText || '';
+                var detail = error && error.errorText || '';
                 if (/not installed|not found|does not exist|unknown app/i.test(detail)) {
                     finish(title + ' is not installed or is unavailable on this TV.');
                 } else {
@@ -1545,7 +1725,7 @@
                         onSuccess: function(result) {
                             // Successful exec alone does not confirm that the destination opened.
                             if (pendingLaunch !== request) return;
-                            let reply = null;
+                            var reply = null;
                             try { reply = JSON.parse(result && result.stdout || ''); } catch (e) {}
                             if (reply && reply.returnValue === true) finish('Opening ' + title + '…');
                             else if (reply && reply.returnValue === false) failure(reply);
@@ -1575,18 +1755,18 @@
 
         // --- Render App Shelf & Trending Row ---
         function renderAppsShelf() {
-            const grid = document.getElementById('appsGrid');
+            var grid = document.getElementById('appsGrid');
             grid.innerHTML = '';
 
-            const favItems = (shelfEdit || state.favorites)
-                .map(function(id) { return state.catalog.find(function(c) { return c.id === id; }); })
+            var favItems = (shelfEdit || state.favorites)
+                .map(function(id) { return arrFind(state.catalog, function(c) { return c.id === id; }); })
                 .filter(Boolean)
                 .slice(0, 8);
 
             favItems.forEach(function(app) {
-                const device = devicePreset(app, state.hdmiDevices);
-                const title = device.title || app.title;
-                const btn = document.createElement('button');
+                var device = devicePreset(app, state.hdmiDevices);
+                var title = device.title || app.title;
+                var btn = document.createElement('button');
                 btn.className = 'app-tile nav-item' + (movingTileId === app.id ? ' moving' : '');
                 if (shelfEdit) btn.setAttribute('aria-pressed', String(movingTileId === app.id));
                 btn.dataset.id = app.id;
@@ -1596,13 +1776,13 @@
                 btn.setAttribute('aria-label', title + (device.title ? ' — ' + app.title : ''));
                 btn.dataset.color = app.color;
 
-                const iconDiv = document.createElement('div');
+                var iconDiv = document.createElement('div');
                 iconDiv.className = 'app-icon';
                 iconDiv.style.background = app.bg || 'linear-gradient(135deg, #0a84ff, #0040a0)';
                 if (isHDMI(app)) {
                     iconDiv.style.background = device.color;
                     if (device.logo) {
-                        const fallback = document.createElement('span');
+                        var fallback = document.createElement('span');
                         fallback.className = 'app-art-fallback';
                         fallback.textContent = device.title;
                         iconDiv.appendChild(fallback);
@@ -1611,17 +1791,17 @@
                         iconDiv.innerHTML = deviceArtwork(device.shape);
                     }
                 } else {
-                    const fallback = document.createElement('span');
+                    var fallback = document.createElement('span');
                     fallback.className = 'app-art-fallback';
                     fallback.textContent = app.title;
                     iconDiv.appendChild(fallback);
-                    const logo = APP_LOGOS[app.id];
+                    var logo = APP_LOGOS[app.id];
                     if (logo || app.iconUrl) {
                         addTileImage(iconDiv, logo ? 'assets/brands/' + logo + '.svg' : app.iconUrl, !!logo);
                     }
                 }
 
-                const labelDiv = document.createElement('div');
+                var labelDiv = document.createElement('div');
                 labelDiv.className = 'app-label';
                 labelDiv.textContent = title + (device.title ? ' · ' + app.title : '');
 
@@ -1641,11 +1821,11 @@
         }
 
         function renderPicks(picks) {
-            const grid = document.getElementById('picksGrid');
+            var grid = document.getElementById('picksGrid');
             grid.innerHTML = '';
 
             picks.forEach(function(pick) {
-                const card = document.createElement('div');
+                var card = document.createElement('div');
                 card.className = 'pick-card nav-item';
                 card.dataset.app = pick.app;
                 card.dataset.tag = pick.badge;
@@ -1653,7 +1833,7 @@
                 card.dataset.desc = pick.desc;
                 card.dataset.color = pick.color || '#0a84ff';
 
-                const poster = document.createElement('div');
+                var poster = document.createElement('div');
                 poster.className = 'pick-poster';
                 // Poster URLs come from third-party APIs, so only plain https URLs may enter the CSS url().
                 if (pick.poster && /^https:\/\/[^\s"'()\\]+$/.test(pick.poster)) {
@@ -1661,10 +1841,10 @@
                 }
 
                 // Pick text comes from TMDB/TVMaze (TVMaze is community-edited), so it is set as text, never HTML.
-                const meta = document.createElement('div');
+                var meta = document.createElement('div');
                 meta.className = 'pick-meta';
                 [['pick-badge', pick.badge], ['pick-title', pick.title], ['pick-service', pick.service]].forEach(function(part) {
-                    const el = document.createElement('div');
+                    var el = document.createElement('div');
                     el.className = part[0];
                     el.textContent = part[1];
                     meta.appendChild(el);
@@ -1682,13 +1862,13 @@
         }
 
         function focusShelfTile(id) {
-            const tile = Array.from(document.querySelectorAll('.app-tile')).find(function(el) { return el.dataset.id === id; });
+            var tile = arrFind(toArray(document.querySelectorAll('.app-tile')), function(el) { return el.dataset.id === id; });
             if (tile) setMainFocus(tile);
         }
         function moveShelfTile(direction) {
             if (!shelfEdit || !movingTileId) { showToast('Select a tile first'); return; }
-            const index = shelfEdit.indexOf(movingTileId);
-            const destination = index + direction;
+            var index = shelfEdit.indexOf(movingTileId);
+            var destination = index + direction;
             if (index < 0 || destination < 0 || destination >= shelfEdit.length) return;
             shelfEdit.splice(index, 1);
             shelfEdit.splice(destination, 0, movingTileId);
@@ -1725,23 +1905,23 @@
         });
 
         // --- Focus & Spatial Navigation ---
-        let mainNavItems = [];
-        let curIndex = 0;
-        let modalOpen = false;
-        let modalNavItems = [];
-        let modalIndex = 0;
+        var mainNavItems = [];
+        var curIndex = 0;
+        var modalOpen = false;
+        var modalNavItems = [];
+        var modalIndex = 0;
 
-        const heroTag = document.getElementById('heroTag');
-        const heroTitle = document.getElementById('heroTitle');
-        const heroDesc = document.getElementById('heroDesc');
-        const ambientGlow = document.getElementById('ambientGlow');
+        var heroTag = document.getElementById('heroTag');
+        var heroTitle = document.getElementById('heroTitle');
+        var heroDesc = document.getElementById('heroDesc');
+        var ambientGlow = document.getElementById('ambientGlow');
 
         function refreshMainNavList() {
-            mainNavItems = Array.from(document.querySelectorAll(shelfEdit ? '.shelf-wrapper .nav-item' : '.nav-item')).filter(function(el) { return el.offsetParent !== null; });
+            mainNavItems = toArray(document.querySelectorAll(shelfEdit ? '.shelf-wrapper .nav-item' : '.nav-item')).filter(function(el) { return el.offsetParent !== null; });
             if (mainNavItems.length > 0) {
                 curIndex = Math.min(curIndex, mainNavItems.length - 1);
                 // Default focus on first app tile if starting
-                const firstAppIdx = mainNavItems.findIndex(function(el) { return el.classList.contains('app-tile'); });
+                var firstAppIdx = arrFindIndex(mainNavItems, function(el) { return el.classList.contains('app-tile'); });
                 if (!document.querySelector('.nav-item.focused') && firstAppIdx !== -1) {
                     curIndex = firstAppIdx;
                 }
@@ -1760,7 +1940,7 @@
             heroTitle.textContent = item.dataset.title || '';
             heroDesc.textContent = item.dataset.desc || '';
 
-            const color = item.dataset.color || '#0a84ff';
+            var color = item.dataset.color || '#0a84ff';
             if (state.perfMode !== 'high') {
                 ambientGlow.style.background = 'radial-gradient(circle, ' + color + '35 0%, rgba(0,0,0,0) 70%)';
             }
@@ -1771,19 +1951,19 @@
         // horizontal column. This replaces hand-tuned index arithmetic that broke
         // every time a row was added/removed (header -> apps -> tabs -> picks).
         function moveFocusVertical(dir) {
-            const current = mainNavItems[curIndex];
+            var current = mainNavItems[curIndex];
             if (!current) return;
-            const cur = current.getBoundingClientRect();
-            const curX = cur.left + cur.width / 2;
-            const curY = cur.top + cur.height / 2;
+            var cur = current.getBoundingClientRect();
+            var curX = cur.left + cur.width / 2;
+            var curY = cur.top + cur.height / 2;
 
-            const candidates = [];
+            var candidates = [];
             mainNavItems.forEach(function(el, idx) {
                 if (idx === curIndex) return;
-                const r = el.getBoundingClientRect();
-                const x = r.left + r.width / 2;
-                const y = r.top + r.height / 2;
-                const dy = (y - curY) * dir;
+                var r = el.getBoundingClientRect();
+                var x = r.left + r.width / 2;
+                var y = r.top + r.height / 2;
+                var dy = (y - curY) * dir;
                 // Threshold well above the focus hover-lift (tiles/cards shift up to ~6px on
                 // focus via translateY), otherwise that lift alone makes a same-row neighbor
                 // look like it's "below" and Down/Up never leaves the row.
@@ -1793,12 +1973,12 @@
             if (!candidates.length) return;
 
             // Snap to the nearest row first (smallest dy), then pick whichever item in
-            // that row is best horizontally aligned. Scoring dy+dx together let a
+            // that row is best horizontally aligned. Scoring dy+dx together var a
             // far-but-aligned row (e.g. a full-width picks grid) outscore a narrow row
             // sitting right in between (e.g. the Movies/Shows tabs), which skipped it
             // entirely - rows must win on distance first, alignment only breaks ties.
-            const minDy = Math.min.apply(null, candidates.map(function(c) { return c.dy; }));
-            const nearestRow = candidates.filter(function(c) { return c.dy <= minDy + 40; });
+            var minDy = Math.min.apply(null, candidates.map(function(c) { return c.dy; }));
+            var nearestRow = candidates.filter(function(c) { return c.dy <= minDy + 40; });
             nearestRow.sort(function(a, b) { return a.dx - b.dx; });
 
             curIndex = nearestRow[0].idx;
@@ -1806,20 +1986,21 @@
         }
 
         // --- Customize Shelf & Settings Modal ---
-        const settingsModal = document.getElementById('settingsModal');
-        let tempFavorites = [];
-        let tempDevices = {};
+        var settingsModal = document.getElementById('settingsModal');
+        var tempFavorites = [];
+        var tempDevices = {};
 
         function openSettingsModal() {
             if (shelfEdit) return;
             modalOpen = true;
             tempFavorites = state.favorites.slice();
-            tempDevices = Object.assign({}, state.hdmiDevices);
+            tempDevices = shallowClone(state.hdmiDevices);
             renderHDMIOptions();
             document.getElementById('cfgCity').value = state.city;
             document.getElementById('cfgTheme').value = state.theme;
             document.getElementById('cfgClockFormat').value = state.clockFormat;
             document.getElementById('cfgPerfMode').value = state.perfMode;
+            document.getElementById('cfgIpLocate').value = state.ipLocate;
             document.getElementById('cfgTmdbKey').value = state.tmdbKey;
 
             renderAppSelectorGrid();
@@ -1828,10 +2009,10 @@
         }
 
         function renderHDMIOptions() {
-            const container = document.getElementById('hdmiOptions');
+            var container = document.getElementById('hdmiOptions');
             container.innerHTML = '';
             state.catalog.filter(isHDMI).forEach(function(app) {
-                const button = document.createElement('button');
+                var button = document.createElement('button');
                 button.className = 'app-toggle-item modal-nav';
                 function updateLabel() {
                     button.textContent = app.title + ': ' + (devicePreset(app, tempDevices).title || 'HDMI');
@@ -1839,7 +2020,7 @@
                 }
                 updateLabel();
                 button.addEventListener('click', function() {
-                    const current = DEVICE_PRESETS.indexOf(devicePreset(app, tempDevices));
+                    var current = DEVICE_PRESETS.indexOf(devicePreset(app, tempDevices));
                     tempDevices[app.id] = DEVICE_PRESETS[(current + 1) % DEVICE_PRESETS.length].key;
                     updateLabel();
                     refreshModalNavList();
@@ -1856,23 +2037,23 @@
         }
 
         function renderAppSelectorGrid() {
-            const container = document.getElementById('appSelectorGrid');
+            var container = document.getElementById('appSelectorGrid');
             container.innerHTML = '';
 
             state.catalog.forEach(function(app) {
-                const isSelected = tempFavorites.indexOf(app.id) !== -1;
-                const item = document.createElement('div');
+                var isSelected = tempFavorites.indexOf(app.id) !== -1;
+                var item = document.createElement('div');
                 item.className = 'app-toggle-item modal-nav' + (isSelected ? ' selected' : '');
                 // Installed app titles come from listLaunchPoints, so they are set as text.
-                const titleSpan = document.createElement('span');
+                var titleSpan = document.createElement('span');
                 titleSpan.textContent = app.title;
-                const markSpan = document.createElement('span');
+                var markSpan = document.createElement('span');
                 markSpan.textContent = isSelected ? '✓' : '+';
                 item.appendChild(titleSpan);
                 item.appendChild(markSpan);
 
                 item.addEventListener('click', function() {
-                    const idx = tempFavorites.indexOf(app.id);
+                    var idx = tempFavorites.indexOf(app.id);
                     if (idx !== -1) {
                         if (tempFavorites.length > 1) tempFavorites.splice(idx, 1);
                     } else if (tempFavorites.length < 8) {
@@ -1888,7 +2069,7 @@
         }
 
         function refreshModalNavList() {
-            modalNavItems = Array.from(settingsModal.querySelectorAll('.modal-nav:not(:disabled)'));
+            modalNavItems = toArray(settingsModal.querySelectorAll('.modal-nav:not(:disabled)'));
             modalIndex = Math.min(modalIndex, modalNavItems.length - 1);
             setModalFocus(modalNavItems[modalIndex]);
         }
@@ -1931,9 +2112,9 @@
         });
 
         // --- Weather & Sun Drawer ---
-        const weatherDrawer = document.getElementById('weatherDrawer');
-        const closeDrawerBtn = document.getElementById('closeDrawerBtn');
-        let drawerOpen = false;
+        var weatherDrawer = document.getElementById('weatherDrawer');
+        var closeDrawerBtn = document.getElementById('closeDrawerBtn');
+        var drawerOpen = false;
 
         function renderDrawerForecast() {
             document.getElementById('drawerIcon').textContent = document.getElementById('weatherIcon').textContent;
@@ -1942,11 +2123,11 @@
             document.getElementById('drawerSunrise').textContent = state.sunrise || '--:--';
             document.getElementById('drawerSunset').textContent = state.sunset || '--:--';
 
-            const hourlyEl = document.getElementById('drawerHourly');
+            var hourlyEl = document.getElementById('drawerHourly');
             hourlyEl.innerHTML = '';
             state.hourlyForecast.forEach(function(h) {
-                const wmo = WMO_CODES[h.code] || ['⛅', 'Fair'];
-                const chip = document.createElement('div');
+                var wmo = WMO_CODES[h.code] || ['⛅', 'Fair'];
+                var chip = document.createElement('div');
                 chip.className = 'drawer-hour-chip';
                 chip.innerHTML =
                     '<div class="drawer-hour-time">' + h.hour + '</div>' +
@@ -1974,19 +2155,19 @@
         closeDrawerBtn.addEventListener('click', closeDrawer);
 
         // --- OLED-Safe Idle Screensaver ---
-        const IDLE_TIMEOUT_MS = 3 * 60 * 1000;
-        const PIXEL_SHIFT_MS = 25 * 1000;
-        const screensaverOverlay = document.getElementById('screensaverOverlay');
-        const screensaverClockWrap = document.getElementById('screensaverClockWrap');
-        let screensaverOn = false;
-        let lastActivity = Date.now();
-        let pixelShiftTimer = null;
+        var IDLE_TIMEOUT_MS = 3 * 60 * 1000;
+        var PIXEL_SHIFT_MS = 25 * 1000;
+        var screensaverOverlay = document.getElementById('screensaverOverlay');
+        var screensaverClockWrap = document.getElementById('screensaverClockWrap');
+        var screensaverOn = false;
+        var lastActivity = Date.now();
+        var pixelShiftTimer = null;
 
         function shiftScreensaverClock() {
-            const maxX = Math.min(window.innerWidth * 0.28, 260);
-            const maxY = Math.min(window.innerHeight * 0.28, 160);
-            const x = Math.round((Math.random() - 0.5) * 2 * maxX);
-            const y = Math.round((Math.random() - 0.5) * 2 * maxY);
+            var maxX = Math.min(window.innerWidth * 0.28, 260);
+            var maxY = Math.min(window.innerHeight * 0.28, 160);
+            var x = Math.round((Math.random() - 0.5) * 2 * maxX);
+            var y = Math.round((Math.random() - 0.5) * 2 * maxY);
             screensaverClockWrap.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
         }
 
@@ -2025,6 +2206,7 @@
             document.getElementById('cfgTheme').value = 'auto';
             document.getElementById('cfgClockFormat').value = '24h';
             document.getElementById('cfgPerfMode').value = 'standard';
+            document.getElementById('cfgIpLocate').value = 'off';
             document.getElementById('cfgTmdbKey').value = '';
             renderAppSelectorGrid();
             refreshModalNavList();
@@ -2033,12 +2215,13 @@
 
         document.getElementById('saveModalBtn').addEventListener('click', function() {
             state.favorites = tempFavorites.slice();
-            state.hdmiDevices = Object.assign({}, tempDevices);
+            state.hdmiDevices = shallowClone(tempDevices);
             localStorage.setItem('fmtv_hdmi_devices', JSON.stringify(state.hdmiDevices));
             state.city = document.getElementById('cfgCity').value.trim();
             state.theme = document.getElementById('cfgTheme').value;
             state.clockFormat = document.getElementById('cfgClockFormat').value;
             state.perfMode = document.getElementById('cfgPerfMode').value;
+            state.ipLocate = document.getElementById('cfgIpLocate').value;
             state.tmdbKey = document.getElementById('cfgTmdbKey').value.trim();
 
             localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
@@ -2046,6 +2229,7 @@
             localStorage.setItem('fmtv_theme', state.theme);
             localStorage.setItem('fmtv_clock_format', state.clockFormat);
             localStorage.setItem('fmtv_perf_mode', state.perfMode);
+            localStorage.setItem('fmtv_ip_locate', state.ipLocate);
             localStorage.setItem('fmtv_tmdb_key', state.tmdbKey);
 
             applyPerfMode();
@@ -2075,7 +2259,7 @@
                     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                         moveShelfTile(e.key === 'ArrowLeft' ? -1 : 1);
                     } else if (e.key === 'Enter' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                        const id = movingTileId;
+                        var id = movingTileId;
                         movingTileId = null;
                         renderAppsShelf();
                         if (e.key === 'Enter') focusShelfTile(id);
@@ -2115,7 +2299,7 @@
                     setModalFocus(modalNavItems[modalIndex]);
                     e.preventDefault();
                 } else if (e.key === 'Enter') {
-                    const active = modalNavItems[modalIndex];
+                    var active = modalNavItems[modalIndex];
                     if (active && active.tagName !== 'INPUT' && active.tagName !== 'SELECT') {
                         active.click();
                         e.preventDefault();

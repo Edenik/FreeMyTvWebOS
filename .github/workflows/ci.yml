@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Repo checks (scripts compile, docs in sync, ipk matches version, no epoch-zero tar mtimes)
+        run: python scripts/check.py
+      - name: Builds from source with the fallback packager
+        run: |
+          python scripts/build.py
+          python scripts/check.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: App JS stays ES5 (webOS 3.x runs Chromium 38)
+        run: |
+          python scripts/check.py --extract-js "$RUNNER_TEMP/app.js"
+          npx --yes es-check@7.2.1 es5 "$RUNNER_TEMP/app.js"
