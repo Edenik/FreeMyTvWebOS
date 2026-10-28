@@ -1050,6 +1050,17 @@
                         </select>
                     </div>
                     <div class="field-group">
+                        <label>Language</label>
+                        <select class="field-input modal-nav" id="cfgLang">
+                            <option value="auto">Auto (TV language)</option>
+                            <option value="en">English</option>
+                            <option value="pt">Português (Brasil)</option>
+                            <option value="es">Español</option>
+                            <option value="de">Deutsch</option>
+                            <option value="fr">Français</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
                         <label>Auto-locate by IP (sends your IP to ipapi.co)</label>
                         <select class="field-input modal-nav" id="cfgIpLocate">
                             <option value="off">Off (use the city above)</option>
@@ -1240,6 +1251,7 @@
             perfMode: localStorage.getItem('fmtv_perf_mode') || 'standard',
             tmdbKey: localStorage.getItem('fmtv_tmdb_key') || '',
             ipLocate: localStorage.getItem('fmtv_ip_locate') || 'off',
+            lang: localStorage.getItem('fmtv_lang') || 'auto',
             catalog: DEFAULT_CATALOG.slice(),
             picksTab: 'movies',
             hourlyForecast: [],
@@ -1248,6 +1260,289 @@
             isSunset: false,
             isNight: true
         };
+
+        // --- Localization ---
+        // English is the source language: every UI string below is looked up by its
+        // English text, and anything without a translation simply stays English.
+        // Written in plain ES5 for the Chromium 38 engine on webOS 3.x.
+        var I18N = {
+            pt: {
+                '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritos', 'Reorder': 'Reordenar', 'Done': 'Concluir', 'Cancel': 'Cancelar',
+                'Trending This Week': 'Em Alta na Semana', 'Movies': 'Filmes', 'Shows': 'Séries',
+                'Customize Free My TV': 'Personalizar o Free My TV', 'Press BACK or ESC to close': 'Pressione VOLTAR ou ESC para fechar',
+                '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Escolha os Apps da Prateleira (Clique para Alternar)',
+                '2. HDMI Devices': '2. Dispositivos HDMI',
+                'Press a port to cycle its device. Save & Apply to keep your choices.': 'Pressione uma porta para trocar o dispositivo. Use Salvar e Aplicar para manter.',
+                '3. Preferences & Display': '3. Preferências e Tela',
+                'City Name (or leave Auto)': 'Nome da Cidade (ou deixe Auto)', 'Theme Mode': 'Tema',
+                'Auto (Follows Sunset)': 'Auto (Segue o Pôr do Sol)', 'Deep Midnight (Default)': 'Meia-Noite (Padrão)', 'Pure OLED Black': 'Preto OLED Puro', 'Daylight Blue': 'Azul Diurno',
+                'Clock Format': 'Formato do Relógio', '24-Hour (20:30)': '24 Horas (20:30)', '12-Hour (8:30 PM)': '12 Horas (8:30 PM)',
+                'Performance Mode': 'Modo de Desempenho', 'Standard (Glass & Glow)': 'Padrão (Vidro e Brilho)', 'High Performance (60 FPS Boost)': 'Alto Desempenho (60 FPS)',
+                'Auto-locate by IP (sends your IP to ipapi.co)': 'Localizar por IP (envia seu IP ao ipapi.co)', 'Off (use the city above)': 'Desligado (usar a cidade acima)', 'On': 'Ligado',
+                'TMDB API Key (Optional)': 'Chave da API TMDB (Opcional)', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma da TV)',
+                'Reset Defaults': 'Restaurar Padrões', 'Save & Apply': 'Salvar e Aplicar',
+                'Weather & Sun': 'Clima e Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Nascer do Sol', 'Sunset': 'Pôr do Sol', 'Close': 'Fechar',
+                'e.g. Sao Paulo, Lisbon, NYC': 'ex.: São Paulo, Lisboa, Nova York', 'Optional for TMDB Trending': 'Opcional para o TMDB em Alta',
+                'Personalize': 'Personalizar', 'Customize Shelf & Settings': 'Personalizar Prateleira e Ajustes',
+                'Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.': 'Escolha quais apps da TV aparecem na prateleira, a cidade do clima e a chave do TMDB.',
+                'Live Forecast': 'Previsão ao Vivo', 'Local Weather & Sunset': 'Clima Local e Pôr do Sol', 'Live temperature and sky conditions powered by Open-Meteo.': 'Temperatura e condições do céu ao vivo via Open-Meteo.',
+                'Reorder tiles': 'Reordenar blocos', 'Rearrange your apps right here on the shelf.': 'Reorganize seus apps aqui mesmo na prateleira.',
+                'Save tile order': 'Salvar ordem', 'Cancel reordering': 'Cancelar reordenação', 'Trending': 'Em Alta',
+                "Switch the row below to this week's trending movies.": 'Mostra os filmes em alta da semana na linha abaixo.',
+                "Switch the row below to this week's trending TV shows.": 'Mostra as séries em alta da semana na linha abaixo.',
+                'App Launcher': 'Lançador de Apps', 'Clean & Ad-Free Home': 'Início Limpo e Sem Anúncios',
+                'Navigate smoothly with Magic Remote D-Pad or pointer. Launch apps in 100ms with zero ads.': 'Navegue com o direcional ou o ponteiro do Magic Remote. Abra apps em 100 ms, sem anúncios.',
+                'Selection': 'Seleção',
+                'Streaming': 'Streaming', 'Movies & Series': 'Filmes e Séries', 'Personal Media': 'Mídia Pessoal', 'Anime': 'Anime', 'Brazil Streaming': 'Streaming Brasileiro',
+                'External Input': 'Entrada Externa', 'Internet': 'Internet', 'System': 'Sistema', 'Local Media': 'Mídia Local', 'Movies & Shows': 'Filmes e Séries', 'Music': 'Música',
+                'Watch 4K videos, live streams, music, and coding radio.': 'Assista a vídeos em 4K, transmissões ao vivo e música.',
+                'Unlimited movies, TV shows, and originals in 4K Dolby Vision.': 'Filmes, séries e originais ilimitados em 4K Dolby Vision.',
+                'Stream your personal home cinema, movies, and music library.': 'Sua biblioteca pessoal de filmes e músicas.',
+                "Stream the world's largest anime library and simulcasts.": 'A maior biblioteca de animes e simulcasts do mundo.',
+                'Original series, live channels, sports, and cinema.': 'Séries originais, canais ao vivo, esportes e cinema.',
+                'Switch directly to HDMI 1 (PC / Gaming Console).': 'Troque direto para o HDMI 1 (PC / Console).',
+                'Switch directly to HDMI 2 input.': 'Troque direto para a entrada HDMI 2.', 'Switch directly to HDMI 3 input.': 'Troque direto para a entrada HDMI 3.', 'Switch directly to HDMI 4 input.': 'Troque direto para a entrada HDMI 4.',
+                'Full-screen web browsing on your LG Smart TV.': 'Navegação web em tela cheia na sua LG Smart TV.',
+                'Homebrew Channel app store, YouTube AdFree, and system tweaks.': 'Loja de apps do Homebrew Channel, YouTube sem anúncios e ajustes do sistema.',
+                'Play photos, videos, and music from USB or DLNA servers.': 'Reproduza fotos, vídeos e músicas de USB ou servidores DLNA.',
+                'Watch Amazon Originals, popular movies, and live sports.': 'Assista a Amazon Originals, filmes populares e esportes ao vivo.',
+                'Disney, Pixar, Marvel, Star Wars, and National Geographic.': 'Disney, Pixar, Marvel, Star Wars e National Geographic.',
+                'Listen to millions of songs, albums, and podcasts on your TV.': 'Ouça milhões de músicas, álbuns e podcasts na TV.',
+                'OLED Zero • 60 FPS': 'OLED Zero • 60 FPS', 'Daylight • 60 FPS': 'Dia • 60 FPS', 'Sunset • 60 FPS': 'Pôr do Sol • 60 FPS', 'Night • 60 FPS': 'Noite • 60 FPS', '60 FPS • Onboard': '60 FPS • Na TV',
+                'Clear': 'Limpo', 'Offline Mode': 'Modo Offline',
+                'Clear Sky': 'Céu Limpo', 'Mostly Clear': 'Predomínio de Sol', 'Partly Cloudy': 'Parcialmente Nublado', 'Overcast': 'Nublado', 'Foggy': 'Neblina', 'Light Drizzle': 'Garoa',
+                'Rain': 'Chuva', 'Moderate Rain': 'Chuva Moderada', 'Snow': 'Neve', 'Rain Showers': 'Pancadas de Chuva', 'Thunderstorm': 'Tempestade', 'Fair': 'Tempo Firme',
+                'Curated Picks': 'Seleção Curada', 'TMDB Live': 'TMDB ao Vivo', 'Live Popular Feed': 'Populares ao Vivo', 'Watch on %s': 'Assista no %s', 'Trending Series': 'Série em Alta', 'Series': 'Série', 'Movie': 'Filme', 
+                'Accept the request on screen so Free My TV can list your installed apps.': 'Aceite o pedido na tela para o Free My TV listar seus apps instalados.',
+                'Open %s on your LG TV. Launching is unavailable in this preview.': 'Abra %s na sua TV LG. A abertura não está disponível nesta prévia.',
+                'Opening %s…': 'Abrindo %s…', '%s is not installed or is unavailable on this TV.': '%s não está instalado ou não está disponível nesta TV.',
+                'Could not open %s. Check that it is installed, then try again.': 'Não foi possível abrir %s. Verifique se está instalado e tente de novo.',
+                'Could not confirm %s opened. Please try again.': 'Não foi possível confirmar a abertura de %s. Tente novamente.',
+                'No response opening %s. Please try again.': 'Sem resposta ao abrir %s. Tente novamente.',
+                '← / → Move • OK Place • Back Cancel': '← / → Mover • OK Soltar • Voltar Cancelar', 'Select a tile • OK Pick up • Done to save': 'Escolha um bloco • OK Pegar • Concluir para salvar',
+                '%s Apps • Instant Launch': '%s Apps • Abertura Instantânea',
+                'Select a tile first': 'Escolha um bloco primeiro', 'Could not save the order. Please try again.': 'Não foi possível salvar a ordem. Tente novamente.',
+                'Tile order saved': 'Ordem salva', 'Reordering cancelled': 'Reordenação cancelada', 'Max 8 apps on shelf': 'Máximo de 8 apps na prateleira',
+                'Defaults restored': 'Padrões restaurados', 'Saved & Applied!': 'Salvo e aplicado!'
+            },
+            es: {
+                '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritas', 'Reorder': 'Reordenar', 'Done': 'Listo', 'Cancel': 'Cancelar',
+                'Trending This Week': 'Tendencias de la Semana', 'Movies': 'Películas', 'Shows': 'Series',
+                'Customize Free My TV': 'Personalizar Free My TV', 'Press BACK or ESC to close': 'Pulsa ATRÁS o ESC para cerrar',
+                '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Elige las Apps del Estante (Clic para Alternar)',
+                '2. HDMI Devices': '2. Dispositivos HDMI',
+                'Press a port to cycle its device. Save & Apply to keep your choices.': 'Pulsa un puerto para cambiar su dispositivo. Usa Guardar y Aplicar para conservarlo.',
+                '3. Preferences & Display': '3. Preferencias y Pantalla',
+                'City Name (or leave Auto)': 'Nombre de la Ciudad (o deja Auto)', 'Theme Mode': 'Tema',
+                'Auto (Follows Sunset)': 'Auto (Sigue el Atardecer)', 'Deep Midnight (Default)': 'Medianoche (Predeterminado)', 'Pure OLED Black': 'Negro OLED Puro', 'Daylight Blue': 'Azul Diurno',
+                'Clock Format': 'Formato del Reloj', '24-Hour (20:30)': '24 Horas (20:30)', '12-Hour (8:30 PM)': '12 Horas (8:30 PM)',
+                'Performance Mode': 'Modo de Rendimiento', 'Standard (Glass & Glow)': 'Estándar (Cristal y Brillo)', 'High Performance (60 FPS Boost)': 'Alto Rendimiento (60 FPS)',
+                'Auto-locate by IP (sends your IP to ipapi.co)': 'Ubicar por IP (envía tu IP a ipapi.co)', 'Off (use the city above)': 'Desactivado (usar la ciudad de arriba)', 'On': 'Activado',
+                'TMDB API Key (Optional)': 'Clave API de TMDB (Opcional)', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma del TV)',
+                'Reset Defaults': 'Restablecer', 'Save & Apply': 'Guardar y Aplicar',
+                'Weather & Sun': 'Clima y Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Amanecer', 'Sunset': 'Atardecer', 'Close': 'Cerrar',
+                'e.g. Sao Paulo, Lisbon, NYC': 'p. ej. Madrid, Lisboa, Nueva York', 'Optional for TMDB Trending': 'Opcional para tendencias de TMDB',
+                'Personalize': 'Personalizar', 'Customize Shelf & Settings': 'Personalizar Estante y Ajustes',
+                'Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.': 'Elige qué apps del TV aparecen en el estante, la ciudad del clima y la clave de TMDB.',
+                'Live Forecast': 'Pronóstico en Vivo', 'Local Weather & Sunset': 'Clima Local y Atardecer', 'Live temperature and sky conditions powered by Open-Meteo.': 'Temperatura y cielo en vivo con Open-Meteo.',
+                'Reorder tiles': 'Reordenar mosaicos', 'Rearrange your apps right here on the shelf.': 'Reorganiza tus apps aquí mismo en el estante.',
+                'Save tile order': 'Guardar orden', 'Cancel reordering': 'Cancelar reordenación', 'Trending': 'Tendencias',
+                "Switch the row below to this week's trending movies.": 'Muestra las películas en tendencia de la semana en la fila de abajo.',
+                "Switch the row below to this week's trending TV shows.": 'Muestra las series en tendencia de la semana en la fila de abajo.',
+                'App Launcher': 'Lanzador de Apps', 'Clean & Ad-Free Home': 'Inicio Limpio y Sin Anuncios',
+                'Navigate smoothly with Magic Remote D-Pad or pointer. Launch apps in 100ms with zero ads.': 'Navega con la cruceta o el puntero del Magic Remote. Abre apps en 100 ms, sin anuncios.',
+                'Selection': 'Selección',
+                'Streaming': 'Streaming', 'Movies & Series': 'Películas y Series', 'Personal Media': 'Medios Personales', 'Anime': 'Anime', 'Brazil Streaming': 'Streaming de Brasil',
+                'External Input': 'Entrada Externa', 'Internet': 'Internet', 'System': 'Sistema', 'Local Media': 'Medios Locales', 'Movies & Shows': 'Películas y Series', 'Music': 'Música',
+                'Watch 4K videos, live streams, music, and coding radio.': 'Mira vídeos en 4K, directos y música.',
+                'Unlimited movies, TV shows, and originals in 4K Dolby Vision.': 'Películas, series y originales sin límite en 4K Dolby Vision.',
+                'Stream your personal home cinema, movies, and music library.': 'Tu biblioteca personal de películas y música.',
+                "Stream the world's largest anime library and simulcasts.": 'La mayor biblioteca de anime y simulcasts del mundo.',
+                'Original series, live channels, sports, and cinema.': 'Series originales, canales en vivo, deportes y cine.',
+                'Switch directly to HDMI 1 (PC / Gaming Console).': 'Cambia directo a HDMI 1 (PC / Consola).',
+                'Switch directly to HDMI 2 input.': 'Cambia directo a la entrada HDMI 2.', 'Switch directly to HDMI 3 input.': 'Cambia directo a la entrada HDMI 3.', 'Switch directly to HDMI 4 input.': 'Cambia directo a la entrada HDMI 4.',
+                'Full-screen web browsing on your LG Smart TV.': 'Navegación web a pantalla completa en tu LG Smart TV.',
+                'Homebrew Channel app store, YouTube AdFree, and system tweaks.': 'Tienda de apps de Homebrew Channel, YouTube sin anuncios y ajustes del sistema.',
+                'Play photos, videos, and music from USB or DLNA servers.': 'Reproduce fotos, vídeos y música desde USB o servidores DLNA.',
+                'Watch Amazon Originals, popular movies, and live sports.': 'Mira Amazon Originals, películas populares y deportes en vivo.',
+                'Disney, Pixar, Marvel, Star Wars, and National Geographic.': 'Disney, Pixar, Marvel, Star Wars y National Geographic.',
+                'Listen to millions of songs, albums, and podcasts on your TV.': 'Escucha millones de canciones, álbumes y podcasts en tu TV.',
+                'OLED Zero • 60 FPS': 'OLED Zero • 60 FPS', 'Daylight • 60 FPS': 'Día • 60 FPS', 'Sunset • 60 FPS': 'Atardecer • 60 FPS', 'Night • 60 FPS': 'Noche • 60 FPS', '60 FPS • Onboard': '60 FPS • En el TV',
+                'Clear': 'Despejado', 'Offline Mode': 'Modo Sin Conexión',
+                'Clear Sky': 'Cielo Despejado', 'Mostly Clear': 'Mayormente Despejado', 'Partly Cloudy': 'Parcialmente Nublado', 'Overcast': 'Nublado', 'Foggy': 'Niebla', 'Light Drizzle': 'Llovizna',
+                'Rain': 'Lluvia', 'Moderate Rain': 'Lluvia Moderada', 'Snow': 'Nieve', 'Rain Showers': 'Chubascos', 'Thunderstorm': 'Tormenta', 'Fair': 'Buen Tiempo',
+                'Curated Picks': 'Selección Curada', 'TMDB Live': 'TMDB en Vivo', 'Live Popular Feed': 'Populares en Vivo', 'Watch on %s': 'Ver en %s', 'Trending Series': 'Serie en Tendencia', 'Series': 'Serie', 'Movie': 'Película',
+                'Accept the request on screen so Free My TV can list your installed apps.': 'Acepta la solicitud en pantalla para que Free My TV pueda listar tus apps instaladas.',
+                'Open %s on your LG TV. Launching is unavailable in this preview.': 'Abre %s en tu TV LG. No se puede abrir en esta vista previa.',
+                'Opening %s…': 'Abriendo %s…', '%s is not installed or is unavailable on this TV.': '%s no está instalada o no está disponible en este TV.',
+                'Could not open %s. Check that it is installed, then try again.': 'No se pudo abrir %s. Comprueba que esté instalada e inténtalo de nuevo.',
+                'Could not confirm %s opened. Please try again.': 'No se pudo confirmar que %s se abrió. Inténtalo de nuevo.',
+                'No response opening %s. Please try again.': 'Sin respuesta al abrir %s. Inténtalo de nuevo.',
+                '← / → Move • OK Place • Back Cancel': '← / → Mover • OK Soltar • Atrás Cancelar', 'Select a tile • OK Pick up • Done to save': 'Elige un mosaico • OK Coger • Listo para guardar',
+                '%s Apps • Instant Launch': '%s Apps • Apertura Instantánea',
+                'Select a tile first': 'Elige un mosaico primero', 'Could not save the order. Please try again.': 'No se pudo guardar el orden. Inténtalo de nuevo.',
+                'Tile order saved': 'Orden guardado', 'Reordering cancelled': 'Reordenación cancelada', 'Max 8 apps on shelf': 'Máximo 8 apps en el estante',
+                'Defaults restored': 'Valores restablecidos', 'Saved & Applied!': '¡Guardado y aplicado!'
+            },
+            de: {
+                '⚙️ Customize': '⚙️ Anpassen', 'Favorite Apps': 'Lieblings-Apps', 'Reorder': 'Sortieren', 'Done': 'Fertig', 'Cancel': 'Abbrechen',
+                'Trending This Week': 'Trends der Woche', 'Movies': 'Filme', 'Shows': 'Serien',
+                'Customize Free My TV': 'Free My TV anpassen', 'Press BACK or ESC to close': 'Zum Schließen ZURÜCK oder ESC drücken',
+                '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Apps für die Leiste wählen (Klicken zum Umschalten)',
+                '2. HDMI Devices': '2. HDMI-Geräte',
+                'Press a port to cycle its device. Save & Apply to keep your choices.': 'Anschluss drücken, um das Gerät zu wechseln. Mit Speichern & Anwenden übernehmen.',
+                '3. Preferences & Display': '3. Einstellungen & Anzeige',
+                'City Name (or leave Auto)': 'Stadtname (oder Auto lassen)', 'Theme Mode': 'Design',
+                'Auto (Follows Sunset)': 'Auto (folgt dem Sonnenuntergang)', 'Deep Midnight (Default)': 'Mitternacht (Standard)', 'Pure OLED Black': 'Reines OLED-Schwarz', 'Daylight Blue': 'Tagesblau',
+                'Clock Format': 'Uhrzeitformat', '24-Hour (20:30)': '24 Stunden (20:30)', '12-Hour (8:30 PM)': '12 Stunden (8:30 PM)',
+                'Performance Mode': 'Leistungsmodus', 'Standard (Glass & Glow)': 'Standard (Glas & Glanz)', 'High Performance (60 FPS Boost)': 'Hohe Leistung (60 FPS)',
+                'Auto-locate by IP (sends your IP to ipapi.co)': 'Standort per IP (sendet Ihre IP an ipapi.co)', 'Off (use the city above)': 'Aus (Stadt oben verwenden)', 'On': 'An',
+                'TMDB API Key (Optional)': 'TMDB-API-Schlüssel (optional)', 'Language': 'Sprache', 'Auto (TV language)': 'Auto (TV-Sprache)',
+                'Reset Defaults': 'Zurücksetzen', 'Save & Apply': 'Speichern & Anwenden',
+                'Weather & Sun': 'Wetter & Sonne', 'Next Hours': 'Nächste Stunden', 'Sunrise': 'Sonnenaufgang', 'Sunset': 'Sonnenuntergang', 'Close': 'Schließen',
+                'e.g. Sao Paulo, Lisbon, NYC': 'z. B. Berlin, Wien, Zürich', 'Optional for TMDB Trending': 'Optional für TMDB-Trends',
+                'Personalize': 'Anpassen', 'Customize Shelf & Settings': 'Leiste & Einstellungen anpassen',
+                'Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.': 'Wählen Sie, welche TV-Apps in der Leiste erscheinen, die Wetterstadt und den TMDB-Schlüssel.',
+                'Live Forecast': 'Live-Vorhersage', 'Local Weather & Sunset': 'Lokales Wetter & Sonnenuntergang', 'Live temperature and sky conditions powered by Open-Meteo.': 'Live-Temperatur und Himmelslage über Open-Meteo.',
+                'Reorder tiles': 'Kacheln sortieren', 'Rearrange your apps right here on the shelf.': 'Ordnen Sie Ihre Apps direkt in der Leiste neu an.',
+                'Save tile order': 'Reihenfolge speichern', 'Cancel reordering': 'Sortieren abbrechen', 'Trending': 'Trends',
+                "Switch the row below to this week's trending movies.": 'Zeigt unten die Film-Trends der Woche.',
+                "Switch the row below to this week's trending TV shows.": 'Zeigt unten die Serien-Trends der Woche.',
+                'App Launcher': 'App-Starter', 'Clean & Ad-Free Home': 'Aufgeräumter Startbildschirm ohne Werbung',
+                'Navigate smoothly with Magic Remote D-Pad or pointer. Launch apps in 100ms with zero ads.': 'Navigieren Sie mit Steuerkreuz oder Magic-Remote-Zeiger. Apps starten in 100 ms, ganz ohne Werbung.',
+                'Selection': 'Auswahl',
+                'Streaming': 'Streaming', 'Movies & Series': 'Filme & Serien', 'Personal Media': 'Eigene Medien', 'Anime': 'Anime', 'Brazil Streaming': 'Brasilien-Streaming',
+                'External Input': 'Externer Eingang', 'Internet': 'Internet', 'System': 'System', 'Local Media': 'Lokale Medien', 'Movies & Shows': 'Filme & Serien', 'Music': 'Musik',
+                'Watch 4K videos, live streams, music, and coding radio.': 'Videos in 4K, Livestreams und Musik.',
+                'Unlimited movies, TV shows, and originals in 4K Dolby Vision.': 'Unbegrenzt Filme, Serien und Originals in 4K Dolby Vision.',
+                'Stream your personal home cinema, movies, and music library.': 'Ihre persönliche Film- und Musikbibliothek.',
+                "Stream the world's largest anime library and simulcasts.": 'Die größte Anime-Bibliothek der Welt samt Simulcasts.',
+                'Original series, live channels, sports, and cinema.': 'Originalserien, Live-Sender, Sport und Kino.',
+                'Switch directly to HDMI 1 (PC / Gaming Console).': 'Direkt zu HDMI 1 wechseln (PC / Konsole).',
+                'Switch directly to HDMI 2 input.': 'Direkt zu HDMI 2 wechseln.', 'Switch directly to HDMI 3 input.': 'Direkt zu HDMI 3 wechseln.', 'Switch directly to HDMI 4 input.': 'Direkt zu HDMI 4 wechseln.',
+                'Full-screen web browsing on your LG Smart TV.': 'Vollbild-Surfen auf Ihrem LG Smart TV.',
+                'Homebrew Channel app store, YouTube AdFree, and system tweaks.': 'App-Store des Homebrew Channel, YouTube ohne Werbung und Systemanpassungen.',
+                'Play photos, videos, and music from USB or DLNA servers.': 'Fotos, Videos und Musik von USB oder DLNA-Servern abspielen.',
+                'Watch Amazon Originals, popular movies, and live sports.': 'Amazon Originals, beliebte Filme und Live-Sport.',
+                'Disney, Pixar, Marvel, Star Wars, and National Geographic.': 'Disney, Pixar, Marvel, Star Wars und National Geographic.',
+                'Listen to millions of songs, albums, and podcasts on your TV.': 'Millionen Songs, Alben und Podcasts auf Ihrem TV.',
+                'OLED Zero • 60 FPS': 'OLED Zero • 60 FPS', 'Daylight • 60 FPS': 'Tag • 60 FPS', 'Sunset • 60 FPS': 'Abendrot • 60 FPS', 'Night • 60 FPS': 'Nacht • 60 FPS', '60 FPS • Onboard': '60 FPS • Auf dem TV',
+                'Clear': 'Klar', 'Offline Mode': 'Offline-Modus',
+                'Clear Sky': 'Klarer Himmel', 'Mostly Clear': 'Überwiegend klar', 'Partly Cloudy': 'Teils bewölkt', 'Overcast': 'Bedeckt', 'Foggy': 'Nebel', 'Light Drizzle': 'Leichter Nieselregen',
+                'Rain': 'Regen', 'Moderate Rain': 'Mäßiger Regen', 'Snow': 'Schnee', 'Rain Showers': 'Regenschauer', 'Thunderstorm': 'Gewitter', 'Fair': 'Heiter',
+                'Curated Picks': 'Kuratierte Auswahl', 'TMDB Live': 'TMDB Live', 'Live Popular Feed': 'Live-Beliebtes', 'Watch on %s': 'Ansehen auf %s', 'Trending Series': 'Trend-Serie', 'Series': 'Serie', 'Movie': 'Film',
+                'Accept the request on screen so Free My TV can list your installed apps.': 'Bestätigen Sie die Anfrage am Bildschirm, damit Free My TV Ihre installierten Apps auflisten kann.',
+                'Open %s on your LG TV. Launching is unavailable in this preview.': 'Öffnen Sie %s auf Ihrem LG-TV. Starten ist in dieser Vorschau nicht möglich.',
+                'Opening %s…': '%s wird geöffnet…', '%s is not installed or is unavailable on this TV.': '%s ist nicht installiert oder auf diesem TV nicht verfügbar.',
+                'Could not open %s. Check that it is installed, then try again.': '%s konnte nicht geöffnet werden. Prüfen Sie, ob es installiert ist, und versuchen Sie es erneut.',
+                'Could not confirm %s opened. Please try again.': 'Das Öffnen von %s konnte nicht bestätigt werden. Bitte erneut versuchen.',
+                'No response opening %s. Please try again.': 'Keine Antwort beim Öffnen von %s. Bitte erneut versuchen.',
+                '← / → Move • OK Place • Back Cancel': '← / → Bewegen • OK Ablegen • Zurück Abbrechen', 'Select a tile • OK Pick up • Done to save': 'Kachel wählen • OK Aufnehmen • Fertig zum Speichern',
+                '%s Apps • Instant Launch': '%s Apps • Sofortstart',
+                'Select a tile first': 'Zuerst eine Kachel wählen', 'Could not save the order. Please try again.': 'Reihenfolge konnte nicht gespeichert werden. Bitte erneut versuchen.',
+                'Tile order saved': 'Reihenfolge gespeichert', 'Reordering cancelled': 'Sortieren abgebrochen', 'Max 8 apps on shelf': 'Maximal 8 Apps in der Leiste',
+                'Defaults restored': 'Standardwerte wiederhergestellt', 'Saved & Applied!': 'Gespeichert & angewendet!'
+            },
+            fr: {
+                '⚙️ Customize': '⚙️ Personnaliser', 'Favorite Apps': 'Applis Favorites', 'Reorder': 'Réorganiser', 'Done': 'Terminé', 'Cancel': 'Annuler',
+                'Trending This Week': 'Tendances de la Semaine', 'Movies': 'Films', 'Shows': 'Séries',
+                'Customize Free My TV': 'Personnaliser Free My TV', 'Press BACK or ESC to close': 'Appuyez sur RETOUR ou ÉCHAP pour fermer',
+                '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Choisissez les Applis de l’Étagère (Cliquez pour Basculer)',
+                '2. HDMI Devices': '2. Appareils HDMI',
+                'Press a port to cycle its device. Save & Apply to keep your choices.': 'Appuyez sur un port pour changer d’appareil. Utilisez Enregistrer et Appliquer pour conserver.',
+                '3. Preferences & Display': '3. Préférences et Affichage',
+                'City Name (or leave Auto)': 'Nom de la Ville (ou laissez Auto)', 'Theme Mode': 'Thème',
+                'Auto (Follows Sunset)': 'Auto (Suit le Coucher du Soleil)', 'Deep Midnight (Default)': 'Minuit (Par défaut)', 'Pure OLED Black': 'Noir OLED Pur', 'Daylight Blue': 'Bleu Jour',
+                'Clock Format': 'Format de l’Horloge', '24-Hour (20:30)': '24 Heures (20:30)', '12-Hour (8:30 PM)': '12 Heures (8:30 PM)',
+                'Performance Mode': 'Mode Performance', 'Standard (Glass & Glow)': 'Standard (Verre et Lueur)', 'High Performance (60 FPS Boost)': 'Haute Performance (60 FPS)',
+                'Auto-locate by IP (sends your IP to ipapi.co)': 'Localiser par IP (envoie votre IP à ipapi.co)', 'Off (use the city above)': 'Désactivé (utiliser la ville ci-dessus)', 'On': 'Activé',
+                'TMDB API Key (Optional)': 'Clé API TMDB (Facultatif)', 'Language': 'Langue', 'Auto (TV language)': 'Auto (langue de la TV)',
+                'Reset Defaults': 'Réinitialiser', 'Save & Apply': 'Enregistrer et Appliquer',
+                'Weather & Sun': 'Météo et Soleil', 'Next Hours': 'Prochaines Heures', 'Sunrise': 'Lever du Soleil', 'Sunset': 'Coucher du Soleil', 'Close': 'Fermer',
+                'e.g. Sao Paulo, Lisbon, NYC': 'p. ex. Paris, Lisbonne, New York', 'Optional for TMDB Trending': 'Facultatif pour les tendances TMDB',
+                'Personalize': 'Personnaliser', 'Customize Shelf & Settings': 'Personnaliser l’Étagère et les Réglages',
+                'Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.': 'Choisissez les applis de la TV affichées sur l’étagère, la ville météo et la clé TMDB.',
+                'Live Forecast': 'Prévisions en Direct', 'Local Weather & Sunset': 'Météo Locale et Coucher du Soleil', 'Live temperature and sky conditions powered by Open-Meteo.': 'Température et ciel en direct via Open-Meteo.',
+                'Reorder tiles': 'Réorganiser les tuiles', 'Rearrange your apps right here on the shelf.': 'Réorganisez vos applis directement sur l’étagère.',
+                'Save tile order': 'Enregistrer l’ordre', 'Cancel reordering': 'Annuler la réorganisation', 'Trending': 'Tendances',
+                "Switch the row below to this week's trending movies.": 'Affiche les films tendance de la semaine dans la rangée ci-dessous.',
+                "Switch the row below to this week's trending TV shows.": 'Affiche les séries tendance de la semaine dans la rangée ci-dessous.',
+                'App Launcher': 'Lanceur d’Applis', 'Clean & Ad-Free Home': 'Accueil Épuré et Sans Publicité',
+                'Navigate smoothly with Magic Remote D-Pad or pointer. Launch apps in 100ms with zero ads.': 'Naviguez avec la croix directionnelle ou le pointeur Magic Remote. Lancez des applis en 100 ms, sans publicité.',
+                'Selection': 'Sélection',
+                'Streaming': 'Streaming', 'Movies & Series': 'Films et Séries', 'Personal Media': 'Médias Personnels', 'Anime': 'Anime', 'Brazil Streaming': 'Streaming Brésilien',
+                'External Input': 'Entrée Externe', 'Internet': 'Internet', 'System': 'Système', 'Local Media': 'Médias Locaux', 'Movies & Shows': 'Films et Séries', 'Music': 'Musique',
+                'Watch 4K videos, live streams, music, and coding radio.': 'Vidéos 4K, directs et musique.',
+                'Unlimited movies, TV shows, and originals in 4K Dolby Vision.': 'Films, séries et originaux illimités en 4K Dolby Vision.',
+                'Stream your personal home cinema, movies, and music library.': 'Votre bibliothèque personnelle de films et de musique.',
+                "Stream the world's largest anime library and simulcasts.": 'La plus grande bibliothèque d’animés et de simulcasts au monde.',
+                'Original series, live channels, sports, and cinema.': 'Séries originales, chaînes en direct, sport et cinéma.',
+                'Switch directly to HDMI 1 (PC / Gaming Console).': 'Basculez directement sur HDMI 1 (PC / Console).',
+                'Switch directly to HDMI 2 input.': 'Basculez directement sur l’entrée HDMI 2.', 'Switch directly to HDMI 3 input.': 'Basculez directement sur l’entrée HDMI 3.', 'Switch directly to HDMI 4 input.': 'Basculez directement sur l’entrée HDMI 4.',
+                'Full-screen web browsing on your LG Smart TV.': 'Navigation web en plein écran sur votre LG Smart TV.',
+                'Homebrew Channel app store, YouTube AdFree, and system tweaks.': 'Boutique d’applis Homebrew Channel, YouTube sans pub et réglages système.',
+                'Play photos, videos, and music from USB or DLNA servers.': 'Lisez photos, vidéos et musique depuis USB ou des serveurs DLNA.',
+                'Watch Amazon Originals, popular movies, and live sports.': 'Amazon Originals, films populaires et sport en direct.',
+                'Disney, Pixar, Marvel, Star Wars, and National Geographic.': 'Disney, Pixar, Marvel, Star Wars et National Geographic.',
+                'Listen to millions of songs, albums, and podcasts on your TV.': 'Des millions de titres, d’albums et de podcasts sur votre TV.',
+                'OLED Zero • 60 FPS': 'OLED Zero • 60 FPS', 'Daylight • 60 FPS': 'Jour • 60 FPS', 'Sunset • 60 FPS': 'Crépuscule • 60 FPS', 'Night • 60 FPS': 'Nuit • 60 FPS', '60 FPS • Onboard': '60 FPS • Sur la TV',
+                'Clear': 'Dégagé', 'Offline Mode': 'Mode Hors Ligne',
+                'Clear Sky': 'Ciel Dégagé', 'Mostly Clear': 'Plutôt Dégagé', 'Partly Cloudy': 'Partiellement Nuageux', 'Overcast': 'Couvert', 'Foggy': 'Brouillard', 'Light Drizzle': 'Légère Bruine',
+                'Rain': 'Pluie', 'Moderate Rain': 'Pluie Modérée', 'Snow': 'Neige', 'Rain Showers': 'Averses', 'Thunderstorm': 'Orage', 'Fair': 'Beau Temps',
+                'Curated Picks': 'Sélection', 'TMDB Live': 'TMDB en Direct', 'Live Popular Feed': 'Populaires en Direct', 'Watch on %s': 'À voir sur %s', 'Trending Series': 'Série Tendance', 'Series': 'Série', 'Movie': 'Film',
+                'Accept the request on screen so Free My TV can list your installed apps.': 'Acceptez la demande à l’écran pour que Free My TV puisse lister vos applis installées.',
+                'Open %s on your LG TV. Launching is unavailable in this preview.': 'Ouvrez %s sur votre TV LG. Le lancement n’est pas disponible dans cet aperçu.',
+                'Opening %s…': 'Ouverture de %s…', '%s is not installed or is unavailable on this TV.': '%s n’est pas installée ou n’est pas disponible sur cette TV.',
+                'Could not open %s. Check that it is installed, then try again.': 'Impossible d’ouvrir %s. Vérifiez qu’elle est installée, puis réessayez.',
+                'Could not confirm %s opened. Please try again.': 'Impossible de confirmer l’ouverture de %s. Veuillez réessayer.',
+                'No response opening %s. Please try again.': 'Aucune réponse à l’ouverture de %s. Veuillez réessayer.',
+                '← / → Move • OK Place • Back Cancel': '← / → Déplacer • OK Poser • Retour Annuler', 'Select a tile • OK Pick up • Done to save': 'Choisissez une tuile • OK Saisir • Terminé pour enregistrer',
+                '%s Apps • Instant Launch': '%s Applis • Lancement Instantané',
+                'Select a tile first': 'Choisissez d’abord une tuile', 'Could not save the order. Please try again.': 'Impossible d’enregistrer l’ordre. Veuillez réessayer.',
+                'Tile order saved': 'Ordre enregistré', 'Reordering cancelled': 'Réorganisation annulée', 'Max 8 apps on shelf': '8 applis maximum sur l’étagère',
+                'Defaults restored': 'Valeurs par défaut rétablies', 'Saved & Applied!': 'Enregistré et appliqué !'
+            }
+        };
+        // Names shown in the Language setting (never translated, so they stay findable).
+        var LANG_LOCALES = { en: 'en-US', pt: 'pt-BR', es: 'es-ES', de: 'de-DE', fr: 'fr-FR' };
+
+        function currentLang() {
+            if (state.lang && state.lang !== 'auto') return state.lang;
+            var nav = ((window.navigator && (navigator.language || navigator.userLanguage)) || 'en').slice(0, 2).toLowerCase();
+            return LANG_LOCALES[nav] ? nav : 'en';
+        }
+
+        // t('Opening %s…', title): looks up the English text, then fills each %s in order.
+        function t(text) {
+            var dict = I18N[currentLang()];
+            var out = (dict && Object.prototype.hasOwnProperty.call(dict, text)) ? dict[text] : text;
+            for (var i = 1; i < arguments.length; i++) out = out.replace('%s', arguments[i]);
+            return out;
+        }
+
+        var I18N_SKIP_IDS = { themeBadge: 1, shelfCountHint: 1, picksSourceBadge: 1, toastMsg: 1 };
+
+        // Static markup is written in English; remember each translatable leaf's
+        // original text the first time through so switching languages is lossless.
+        function applyStaticTranslations() {
+            var nodes = document.body.querySelectorAll('*');
+            for (var i = 0; i < nodes.length; i++) {
+                var el = nodes[i];
+                if (el.tagName === 'SCRIPT' || I18N_SKIP_IDS[el.id] || el.children.length > 0) continue;
+                if (el.dataset.en === undefined) {
+                    var text = el.textContent.replace(/^\s+|\s+$/g, '');
+                    if (!text || !Object.prototype.hasOwnProperty.call(I18N.pt, text)) continue;
+                    el.dataset.en = text;
+                }
+                el.textContent = t(el.dataset.en);
+            }
+            var inputs = document.body.querySelectorAll('input[placeholder]');
+            for (var j = 0; j < inputs.length; j++) {
+                if (inputs[j].dataset.enPlaceholder === undefined) inputs[j].dataset.enPlaceholder = inputs[j].getAttribute('placeholder');
+                inputs[j].setAttribute('placeholder', t(inputs[j].dataset.enPlaceholder));
+            }
+            document.documentElement.setAttribute('lang', currentLang());
+        }
 
         // --- Clock & Date ---
         function pad2(n) {
@@ -1298,7 +1593,7 @@
             document.getElementById('clockText').textContent = timeStr;
 
             var opts = { weekday: 'short', month: 'short', day: 'numeric' };
-            var dateStr = now.toLocaleDateString('en-US', opts);
+            var dateStr = now.toLocaleDateString(LANG_LOCALES[currentLang()], opts);
             document.getElementById('dateText').textContent = dateStr;
 
             document.getElementById('screensaverClock').textContent = timeStr;
@@ -1335,25 +1630,25 @@
             if (state.theme === 'oled') {
                 document.body.classList.add('theme-oled');
                 document.documentElement.classList.add('theme-oled');
-                badge.textContent = 'OLED Zero • 60 FPS' + perfSuffix;
+                badge.textContent = t('OLED Zero • 60 FPS') + perfSuffix;
             } else if (state.theme === 'day') {
                 document.body.classList.add('theme-day');
                 document.documentElement.classList.add('theme-day');
-                badge.textContent = 'Daylight • 60 FPS' + perfSuffix;
+                badge.textContent = t('Daylight • 60 FPS') + perfSuffix;
             } else if (state.theme === 'auto') {
                 if (state.isSunset) {
                     document.body.classList.add('theme-sunset');
                     document.documentElement.classList.add('theme-sunset');
-                    badge.textContent = 'Sunset • 60 FPS' + perfSuffix;
+                    badge.textContent = t('Sunset • 60 FPS') + perfSuffix;
                 } else if (!state.isNight) {
                     document.body.classList.add('theme-day');
                     document.documentElement.classList.add('theme-day');
-                    badge.textContent = 'Daylight • 60 FPS' + perfSuffix;
+                    badge.textContent = t('Daylight • 60 FPS') + perfSuffix;
                 } else {
-                    badge.textContent = 'Night • 60 FPS' + perfSuffix;
+                    badge.textContent = t('Night • 60 FPS') + perfSuffix;
                 }
             } else {
-                badge.textContent = '60 FPS • Onboard' + perfSuffix;
+                badge.textContent = t('60 FPS • Onboard') + perfSuffix;
             }
         }
 
@@ -1371,8 +1666,8 @@
         // synchronously and abort the rest of the boot sequence below it.
         function fetchWeather() {
             if (typeof fetch !== 'function') {
-                document.getElementById('weatherText').textContent = '22°C • Clear';
-                document.getElementById('weatherSub').textContent = state.city || 'Offline Mode';
+                document.getElementById('weatherText').textContent = '22°C • ' + t('Clear');
+                document.getElementById('weatherSub').textContent = state.city || t('Offline Mode');
                 return;
             }
 
@@ -1439,7 +1734,7 @@
                         var wmo = WMO_CODES[code] || ['⛅', 'Fair'];
 
                         document.getElementById('weatherIcon').textContent = isDay ? wmo[0] : '🌙';
-                        document.getElementById('weatherText').textContent = temp + '°C • ' + wmo[1];
+                        document.getElementById('weatherText').textContent = temp + '°C • ' + t(wmo[1]);
 
                         var sunsetStr = '';
                         if (data.daily) {
@@ -1448,7 +1743,7 @@
                             }
                             if (data.daily.sunset && data.daily.sunset[0]) {
                                 state.sunset = data.daily.sunset[0].split('T')[1];
-                                sunsetStr = ' • Sunset ' + state.sunset;
+                                sunsetStr = ' • ' + t('Sunset') + ' ' + state.sunset;
                                 var sunsetHour = parseInt(state.sunset.split(':')[0], 10);
                                 state.isSunset = Math.abs(localNow.getUTCHours() - sunsetHour) <= 1;
                             }
@@ -1476,8 +1771,8 @@
                     renderDrawerForecast();
                 })
                 .catch(function(err) {
-                    document.getElementById('weatherText').textContent = '22°C • Clear';
-                    document.getElementById('weatherSub').textContent = state.city || 'Offline Mode';
+                    document.getElementById('weatherText').textContent = '22°C • ' + t('Clear');
+                    document.getElementById('weatherSub').textContent = state.city || t('Offline Mode');
                 });
         }
 
@@ -1489,7 +1784,7 @@
 
             function showCurated() {
                 if (tab !== state.picksTab) return;
-                badge.textContent = 'Curated Picks';
+                badge.textContent = t('Curated Picks');
                 renderPicks(tab === 'shows' ? FALLBACK_SHOWS : FALLBACK_MOVIES);
             }
 
@@ -1516,7 +1811,7 @@
                                 var score = item.vote_average ? item.vote_average.toFixed(1) + '★' : 'Hot';
                                 return {
                                     title: title,
-                                    badge: (tab === 'shows' ? 'Series' : 'Movie') + ' • ' + score,
+                                    badge: t(tab === 'shows' ? 'Series' : 'Movie') + ' • ' + score,
                                     service: 'TMDB Trending',
                                     app: 'netflix',
                                     desc: item.overview || 'Trending worldwide this week.',
@@ -1524,7 +1819,7 @@
                                     color: '#0a84ff'
                                 };
                             });
-                            badge.textContent = 'TMDB Live';
+                            badge.textContent = t('TMDB Live');
                             renderPicks(items);
                             return true;
                         }
@@ -1552,12 +1847,12 @@
                                         .slice(0, 4)
                                         .map(function(s) {
                                             var cleanSummary = (s.summary || '').replace(/<[^>]*>/g, '');
-                                            var genre = (s.genres && s.genres[0]) || 'Series';
+                                            var genre = (s.genres && s.genres[0]) || t('Series');
                                             var network = (s.network && s.network.name) || (s.webChannel && s.webChannel.name) || 'Streaming';
                                             return {
                                                 title: s.name,
                                                 badge: genre + ' • ' + s.rating.average + '★',
-                                                service: 'Watch on ' + network,
+                                                service: t('Watch on %s', network),
                                                 app: 'netflix',
                                                 desc: cleanSummary || 'Critically acclaimed trending series.',
                                                 poster: s.image.medium,
@@ -1565,7 +1860,7 @@
                                             };
                                         });
                                     if (topShows.length === 4) {
-                                        badge.textContent = 'Live Popular Feed';
+                                        badge.textContent = t('Live Popular Feed');
                                         renderPicks(topShows);
                                         return true;
                                     }
@@ -1668,7 +1963,7 @@
                         // Waiting for the viewer: no timeout, and no retry that would prompt again.
                         prompted = true;
                         clearTimeout(timer);
-                        showToast('Accept the request on screen so Free My TV can list your installed apps.', 15000);
+                        showToast(t('Accept the request on screen so Free My TV can list your installed apps.'), 15000);
                     } else if (msg.type === 'registered') {
                         try { localStorage.setItem('fmtv_ssap_key', msg.payload['client-key']); } catch (e) {}
                         ws.send(JSON.stringify({ id: 'apps', type: 'request', uri: 'ssap://com.webos.applicationManager/listLaunchPoints' }));
@@ -1692,7 +1987,7 @@
             var app = arrFind(state.catalog, function(item) { return item.id === appId; });
             var title = app ? (devicePreset(app, state.hdmiDevices).title || app.title) : appId;
             if (!window.webOS || !window.webOS.service || typeof window.webOS.service.request !== 'function') {
-                showToast('Open ' + title + ' on your LG TV. Launching is unavailable in this preview.', 5000);
+                showToast(t('Open %s on your LG TV. Launching is unavailable in this preview.', title), 5000);
                 return;
             }
             var request = { timer: null };
@@ -1709,9 +2004,9 @@
             function failure(error) {
                 var detail = error && error.errorText || '';
                 if (/not installed|not found|does not exist|unknown app/i.test(detail)) {
-                    finish(title + ' is not installed or is unavailable on this TV.');
+                    finish(t('%s is not installed or is unavailable on this TV.', title));
                 } else {
-                    finish('Could not open ' + title + '. Check that it is installed, then try again.');
+                    finish(t('Could not open %s. Check that it is installed, then try again.', title));
                 }
             }
             function fallback(originalError) {
@@ -1727,17 +2022,17 @@
                             if (pendingLaunch !== request) return;
                             var reply = null;
                             try { reply = JSON.parse(result && result.stdout || ''); } catch (e) {}
-                            if (reply && reply.returnValue === true) finish('Opening ' + title + '…');
+                            if (reply && reply.returnValue === true) finish(t('Opening %s…', title));
                             else if (reply && reply.returnValue === false) failure(reply);
-                            else finish('Could not confirm ' + title + ' opened. Please try again.');
+                            else finish(t('Could not confirm %s opened. Please try again.', title));
                         },
                         onFailure: function() { failure(originalError); }
                     });
                 } catch (e) { failure(originalError); }
             }
-            showToast('Opening ' + title + '…', 8000);
+            showToast(t('Opening %s…', title), 8000);
             request.timer = setTimeout(function() {
-                finish('No response opening ' + title + '. Please try again.');
+                finish(t('No response opening %s. Please try again.', title));
             }, 8000);
             try {
                 webOS.service.request('luna://com.webos.applicationManager', {
@@ -1746,7 +2041,7 @@
                     onSuccess: function(result) {
                         if (pendingLaunch !== request) return;
                         if (result && result.returnValue === false) fallback(result);
-                        else finish('Opening ' + title + '…');
+                        else finish(t('Opening %s…', title));
                     },
                     onFailure: fallback
                 });
@@ -1816,8 +2111,14 @@
                 grid.appendChild(btn);
             });
 
-            document.getElementById('shelfCountHint').textContent = shelfEdit ? (movingTileId ? '← / → Move • OK Place • Back Cancel' : 'Select a tile • OK Pick up • Done to save') : favItems.length + ' Apps • Instant Launch';
+            document.getElementById('shelfCountHint').textContent = shelfEdit ? (movingTileId ? t('← / → Move • OK Place • Back Cancel') : t('Select a tile • OK Pick up • Done to save')) : t('%s Apps • Instant Launch', favItems.length);
             refreshMainNavList();
+        }
+
+        // Curated entries store 'Watch on X' in English; API-built ones are already localized.
+        function pickService(service) {
+            var m = /^Watch on (.+)$/.exec(service || '');
+            return m ? t('Watch on %s', m[1]) : t(service || '');
         }
 
         function renderPicks(picks) {
@@ -1843,7 +2144,7 @@
                 // Pick text comes from TMDB/TVMaze (TVMaze is community-edited), so it is set as text, never HTML.
                 var meta = document.createElement('div');
                 meta.className = 'pick-meta';
-                [['pick-badge', pick.badge], ['pick-title', pick.title], ['pick-service', pick.service]].forEach(function(part) {
+                [['pick-badge', pick.badge], ['pick-title', pick.title], ['pick-service', pickService(pick.service)]].forEach(function(part) {
                     var el = document.createElement('div');
                     el.className = part[0];
                     el.textContent = part[1];
@@ -1866,7 +2167,7 @@
             if (tile) setMainFocus(tile);
         }
         function moveShelfTile(direction) {
-            if (!shelfEdit || !movingTileId) { showToast('Select a tile first'); return; }
+            if (!shelfEdit || !movingTileId) { showToast(t('Select a tile first')); return; }
             var index = shelfEdit.indexOf(movingTileId);
             var destination = index + direction;
             if (index < 0 || destination < 0 || destination >= shelfEdit.length) return;
@@ -1879,7 +2180,7 @@
             if (!shelfEdit) return;
             if (save) {
                 try { localStorage.setItem('fmtv_favorites', JSON.stringify(shelfEdit)); }
-                catch (e) { showToast('Could not save the order. Please try again.', 5000); return; }
+                catch (e) { showToast(t('Could not save the order. Please try again.'), 5000); return; }
                 state.favorites = shelfEdit.slice();
             }
             shelfEdit = null;
@@ -1888,7 +2189,7 @@
             document.getElementById('shelfEditActions').hidden = true;
             renderAppsShelf();
             setMainFocus(document.getElementById('reorderShelfBtn'));
-            showToast(save ? 'Tile order saved' : 'Reordering cancelled');
+            showToast(t(save ? 'Tile order saved' : 'Reordering cancelled'));
         }
         document.getElementById('reorderShelfBtn').addEventListener('click', function() {
             shelfEdit = state.favorites.slice();
@@ -1936,9 +2237,9 @@
             item.focus({ preventScroll: true });
             curIndex = mainNavItems.indexOf(item);
 
-            heroTag.textContent = item.dataset.tag || 'Selection';
-            heroTitle.textContent = item.dataset.title || '';
-            heroDesc.textContent = item.dataset.desc || '';
+            heroTag.textContent = t(item.dataset.tag || 'Selection');
+            heroTitle.textContent = t(item.dataset.title || '');
+            heroDesc.textContent = t(item.dataset.desc || '');
 
             var color = item.dataset.color || '#0a84ff';
             if (state.perfMode !== 'high') {
@@ -2001,6 +2302,7 @@
             document.getElementById('cfgClockFormat').value = state.clockFormat;
             document.getElementById('cfgPerfMode').value = state.perfMode;
             document.getElementById('cfgIpLocate').value = state.ipLocate;
+            document.getElementById('cfgLang').value = state.lang;
             document.getElementById('cfgTmdbKey').value = state.tmdbKey;
 
             renderAppSelectorGrid();
@@ -2059,7 +2361,7 @@
                     } else if (tempFavorites.length < 8) {
                         tempFavorites.push(app.id);
                     } else {
-                        showToast('Max 8 apps on shelf');
+                        showToast(t('Max 8 apps on shelf'));
                     }
                     renderAppSelectorGrid();
                     refreshModalNavList();
@@ -2207,10 +2509,11 @@
             document.getElementById('cfgClockFormat').value = '24h';
             document.getElementById('cfgPerfMode').value = 'standard';
             document.getElementById('cfgIpLocate').value = 'off';
+            document.getElementById('cfgLang').value = 'auto';
             document.getElementById('cfgTmdbKey').value = '';
             renderAppSelectorGrid();
             refreshModalNavList();
-            showToast('Defaults restored');
+            showToast(t('Defaults restored'));
         });
 
         document.getElementById('saveModalBtn').addEventListener('click', function() {
@@ -2222,6 +2525,7 @@
             state.clockFormat = document.getElementById('cfgClockFormat').value;
             state.perfMode = document.getElementById('cfgPerfMode').value;
             state.ipLocate = document.getElementById('cfgIpLocate').value;
+            state.lang = document.getElementById('cfgLang').value;
             state.tmdbKey = document.getElementById('cfgTmdbKey').value.trim();
 
             localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
@@ -2230,8 +2534,10 @@
             localStorage.setItem('fmtv_clock_format', state.clockFormat);
             localStorage.setItem('fmtv_perf_mode', state.perfMode);
             localStorage.setItem('fmtv_ip_locate', state.ipLocate);
+            localStorage.setItem('fmtv_lang', state.lang);
             localStorage.setItem('fmtv_tmdb_key', state.tmdbKey);
 
+            applyStaticTranslations();
             applyPerfMode();
             renderAppsShelf();
             applyTheme();
@@ -2239,7 +2545,7 @@
             fetchWeather();
             fetchTrendingPicks();
             closeSettingsModal();
-            showToast('Saved & Applied!');
+            showToast(t('Saved & Applied!'));
         });
 
         // --- Remote Control Key Handler ---
@@ -2332,6 +2638,7 @@
         });
 
         // --- Boot Sequence ---
+        applyStaticTranslations();
         applyPerfMode();
         renderAppsShelf();
         renderPicks(FALLBACK_MOVIES);
