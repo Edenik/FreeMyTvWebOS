@@ -11,6 +11,7 @@ import socket
 import urllib.request
 import subprocess
 import shutil
+import getpass
 
 # Windows' default console codepage can't encode the emoji in the success
 # message below; UTF-8 output works on every platform this script runs on.
@@ -82,7 +83,7 @@ def install_app(tv_ip, passphrase=None):
     # Download key from TV if not present
     if not os.path.exists(dec_key):
         if not passphrase:
-            passphrase = input(f"Enter the 6-character Passphrase shown in Developer Mode on TV ({tv_ip}): ").strip()
+            passphrase = getpass.getpass(f"Enter the 6-character Passphrase shown in Developer Mode on TV ({tv_ip}): ").strip()
 
         print(f"[*] Downloading authentication key from http://{tv_ip}:9991/webos_rsa ...")
         try:
@@ -128,7 +129,10 @@ def install_app(tv_ip, passphrase=None):
     # below before ssh.exe ever sees them. Passing argv as a list sidesteps
     # every local shell's quoting rules; the single remote command string
     # still reaches the TV's real POSIX shell exactly as written.
-    ssh_opts = ["-o", "StrictHostKeyChecking=no", "-o", "HostKeyAlgorithms=+ssh-rsa", "-o", "PubkeyAcceptedKeyTypes=+ssh-rsa"]
+    # Trust-on-first-use: the TV's host key is recorded on the first connection
+    # and a later mismatch at the same IP aborts instead of being ignored.
+    known_hosts = os.path.join(ssh_dir, "webos_tv_known_hosts")
+    ssh_opts = ["-o", "StrictHostKeyChecking=accept-new", "-o", f"UserKnownHostsFile={known_hosts}", "-o", "HostKeyAlgorithms=+ssh-rsa", "-o", "PubkeyAcceptedKeyTypes=+ssh-rsa"]
     scp_args = ["scp", *ssh_opts, "-P", "9922", "-i", dec_key, DIST_IPK, f"prisoner@{tv_ip}:/media/developer/temp/app.ipk"]
     res = subprocess.run(scp_args)
     if res.returncode != 0:
@@ -188,12 +192,39 @@ def install_app(tv_ip, passphrase=None):
     print("\n[+] SUCCESS! Free My TV is installed and running on your LG TV! Enjoy! 🎉")
     return True
 
-if __name__ == "__main__":
-    ip = sys.argv[1] if len(sys.argv) > 1 else None
-    passphrase = sys.argv[2] if len(sys.argv) > 2 else None
+def confirm(question):
+    try:
+        return input(f"{question} [y/N]: ").strip().lower() in ("y", "yes")
+    except EOFError:
+        return False
 
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Install Free My TV on an LG webOS TV.")
+    parser.add_argument("ip", nargs="?", help="TV IP address (skips network discovery)")
+    parser.add_argument("legacy_passphrase", nargs="?", help=argparse.SUPPRESS)
+    parser.add_argument("--passphrase-stdin", action="store_true",
+                        help="read the Developer Mode passphrase from stdin")
+    parser.add_argument("-y", "--yes", action="store_true",
+                        help="don't ask to confirm a TV found by network discovery")
+    args = parser.parse_args()
+
+    # The passphrase never needs to be on the command line (where `ps` and shell
+    # history would expose it): use FMTV_PASSPHRASE, --passphrase-stdin, or the prompt.
+    passphrase = os.environ.get("FMTV_PASSPHRASE")
+    if args.passphrase_stdin:
+        passphrase = sys.stdin.readline().strip()
+    elif args.legacy_passphrase:
+        print("[!] Passing the passphrase as an argument is deprecated (visible in `ps` and shell history).")
+        print("    Use the interactive prompt, FMTV_PASSPHRASE, or --passphrase-stdin instead.")
+        passphrase = args.legacy_passphrase
+
+    ip = args.ip
     if not ip:
         ip = discover_lg_tv()
+        if ip and not args.yes and not confirm(f"[?] Found a device at {ip}. Install Free My TV on it?"):
+            print("[!] Aborted. Re-run with the TV's IP address to choose a device explicitly.")
+            sys.exit(1)
         if not ip:
             print("[!] TV not found automatically via SSDP network scan.")
             print("    Make sure your device and TV are on the same Wi-Fi network (not a guest network),")
@@ -204,4 +235,4 @@ if __name__ == "__main__":
         print("[!] No IP address provided. Aborting.")
         sys.exit(1)
 
-    install_app(ip, passphrase)
+    sys.exit(0 if install_app(ip, passphrase) else 1)

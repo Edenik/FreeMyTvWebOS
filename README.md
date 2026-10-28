@@ -74,6 +74,9 @@ All you need is an LG Smart TV (webOS 3.0+) and a computer or Android phone on t
 2. Open **Developer Mode**, sign in with your free LG Developer account ([webostv.developer.lge.com](https://webostv.developer.lge.com)), and switch **Dev Mode Status** to **ON**.
 3. After the TV restarts, open **Developer Mode** again and toggle **Key Server** to **ON**. Note the **IP Address** and 6-character **Passphrase** on screen.
 
+> [!NOTE]
+> While **Key Server** is ON, anyone on your Wi-Fi who knows the passphrase can fetch the TV's SSH key. Turn it **OFF** (and Dev Mode too, if you like) once the install finishes. The installer records the TV's SSH host key on first use (`~/.ssh/webos_tv_known_hosts`) and asks you to confirm a TV found by network discovery (`-y` skips the question; pass the TV's IP to skip discovery). The passphrase is asked interactively; for scripts use `FMTV_PASSPHRASE` or `--passphrase-stdin` rather than a command-line argument.
+
 ### Step 2A: Automated One-Command Install (Recommended)
 Run our automated Python installer—it discovers your TV on the network, pairs the SSH key, packages the app, and installs it:
 
@@ -260,6 +263,9 @@ Tudo que você precisa é de uma Smart TV LG (webOS 3.0+) e um computador ou cel
 1. Abra a **LG Content Store** na sua TV, procure por **`Developer Mode`** e instale.
 2. Abra o **Developer Mode**, entre com sua conta gratuita de desenvolvedor LG ([webostv.developer.lge.com](https://webostv.developer.lge.com)) e mude o **Dev Mode Status** para **ON**.
 3. Depois da TV reiniciar, abra o **Developer Mode** de novo e ative o **Key Server**. Anote o **Endereço IP** e a **Senha** de 6 caracteres mostrados na tela.
+
+> [!NOTE]
+> Enquanto o **Key Server** estiver ativo, quem estiver no seu Wi-Fi e souber a senha pode baixar a chave SSH da TV. Desative-o assim que a instalação terminar. O instalador registra a chave de host da TV no primeiro uso (`~/.ssh/webos_tv_known_hosts`) e pede confirmação para a TV encontrada na rede (`-y` pula a pergunta). A senha é pedida de forma interativa; em scripts use `FMTV_PASSPHRASE` ou `--passphrase-stdin`, nunca como argumento.
 
 ### Passo 2A: Instalação Automática em Um Comando (Recomendado)
 Rode nosso instalador Python automatizado — ele descobre sua TV na rede, pareia a chave SSH, empacota o app e instala:
