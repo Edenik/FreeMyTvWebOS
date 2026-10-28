@@ -155,6 +155,19 @@ See the full [ROADMAP.md](ROADMAP.md) for detailed technical specifications.
 
 ---
 
+## 🔒 Network Requests This App Makes
+
+| Service | Purpose | When |
+|---|---|---|
+| Open-Meteo (`api.open-meteo.com`, `geocoding-api.open-meteo.com`) | Weather, sunrise/sunset, city lookup | Always (uses your city, or São Paulo by default) |
+| ipapi.co | Approximate location from your public IP | **Only if enabled** in Customize → *Auto-locate by IP* |
+| TVMaze (`api.tvmaze.com`) | Zero-key trending shows | Shows tab without a TMDB key |
+| TMDB (`api.themoviedb.org`) | Trending movies/shows | Only with your key. v3 keys only work as a URL query parameter; prefer the v4 token (sent as a header). The key is stored in plain text in the TV's `localStorage` |
+
+No telemetry, no ads, no other destinations.
+
+---
+
 ## 🛠️ How It Works
 
 ```
@@ -332,6 +345,19 @@ Veja o [ROADMAP.md](ROADMAP.md) completo para as especificações técnicas deta
 - [ ] **v1.3 — Proteção de Tela OLED e Wake-on-LAN 📅:** Protetor de tela ambiente 4K com deslocamento de pixels embutido e envio automático de pacotes Wake-on-LAN para acordar seu PC gamer ao selecionar o HDMI.
 - [ ] **v1.4 — Repositório Oficial no Homebrew e Atalho do Botão Home 🚀:** Instalação em um clique pela loja na TV do `webosbrew.org` e vínculo opcional do botão físico Home para TVs com root.
 - [ ] **v2.0 — Companheiro QR no Celular e Hub Smart Home 🌟:** Escaneie um QR code para configurar pelo celular e disparar webhooks de iluminação do Home Assistant.
+
+---
+
+## 🔒 Conexões de Rede do App
+
+| Serviço | Para quê | Quando |
+|---|---|---|
+| Open-Meteo (`api.open-meteo.com`, `geocoding-api.open-meteo.com`) | Clima, nascer/pôr do sol e busca da cidade | Sempre (usa sua cidade ou São Paulo por padrão) |
+| ipapi.co | Localização aproximada pelo seu IP público | **Só se ativado** em Personalizar → *Auto-locate by IP* |
+| TVMaze (`api.tvmaze.com`) | Séries em alta sem chave | Aba Shows sem chave TMDB |
+| TMDB (`api.themoviedb.org`) | Filmes/séries em alta | Só com a sua chave. Chaves v3 só funcionam na query string da URL; prefira o token v4 (enviado em cabeçalho). A chave fica em texto simples no `localStorage` da TV |
+
+Sem telemetria, sem anúncios, sem outros destinos.
 
 ---
 

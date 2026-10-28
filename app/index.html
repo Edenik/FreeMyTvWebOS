@@ -1049,6 +1049,13 @@
                             <option value="high">High Performance (60 FPS Boost)</option>
                         </select>
                     </div>
+                    <div class="field-group">
+                        <label>Auto-locate by IP (sends your IP to ipapi.co)</label>
+                        <select class="field-input modal-nav" id="cfgIpLocate">
+                            <option value="off">Off (use the city above)</option>
+                            <option value="on">On</option>
+                        </select>
+                    </div>
                     <div class="field-group" style="grid-column: span 2;">
                         <label>TMDB API Key (Optional)</label>
                         <input type="text" class="field-input modal-nav" id="cfgTmdbKey" placeholder="Optional for TMDB Trending">
@@ -1232,6 +1239,7 @@
             clockFormat: localStorage.getItem('fmtv_clock_format') || '24h',
             perfMode: localStorage.getItem('fmtv_perf_mode') || 'standard',
             tmdbKey: localStorage.getItem('fmtv_tmdb_key') || '',
+            ipLocate: localStorage.getItem('fmtv_ip_locate') || 'off',
             catalog: DEFAULT_CATALOG.slice(),
             picksTab: 'movies',
             hourlyForecast: [],
@@ -1387,8 +1395,8 @@
 
             geoPromise
                 .then(function() {
-                    // Auto-locate by IP if not set
-                    if (!lat && !lon) {
+                    // IP lookup sends the user's public IP to a third party, so it is opt-in
+                    if (!lat && !lon && state.ipLocate === 'on') {
                         return fetch('https://ipapi.co/json/')
                             .then(function(ipRes) { return ipRes.json(); })
                             .then(function(ipData) {
@@ -1992,6 +2000,7 @@
             document.getElementById('cfgTheme').value = state.theme;
             document.getElementById('cfgClockFormat').value = state.clockFormat;
             document.getElementById('cfgPerfMode').value = state.perfMode;
+            document.getElementById('cfgIpLocate').value = state.ipLocate;
             document.getElementById('cfgTmdbKey').value = state.tmdbKey;
 
             renderAppSelectorGrid();
@@ -2197,6 +2206,7 @@
             document.getElementById('cfgTheme').value = 'auto';
             document.getElementById('cfgClockFormat').value = '24h';
             document.getElementById('cfgPerfMode').value = 'standard';
+            document.getElementById('cfgIpLocate').value = 'off';
             document.getElementById('cfgTmdbKey').value = '';
             renderAppSelectorGrid();
             refreshModalNavList();
@@ -2211,6 +2221,7 @@
             state.theme = document.getElementById('cfgTheme').value;
             state.clockFormat = document.getElementById('cfgClockFormat').value;
             state.perfMode = document.getElementById('cfgPerfMode').value;
+            state.ipLocate = document.getElementById('cfgIpLocate').value;
             state.tmdbKey = document.getElementById('cfgTmdbKey').value.trim();
 
             localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
@@ -2218,6 +2229,7 @@
             localStorage.setItem('fmtv_theme', state.theme);
             localStorage.setItem('fmtv_clock_format', state.clockFormat);
             localStorage.setItem('fmtv_perf_mode', state.perfMode);
+            localStorage.setItem('fmtv_ip_locate', state.ipLocate);
             localStorage.setItem('fmtv_tmdb_key', state.tmdbKey);
 
             applyPerfMode();
