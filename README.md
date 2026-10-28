@@ -24,6 +24,15 @@ Open source. Zero ads. 100% Onboard. No root required.
 
 </div>
 
+
+<details>
+<summary><b>More screenshots</b> (rendered from the app in a desktop browser at 1920×1080)</summary>
+<br>
+<img src="docs/assets/screenshot-customize.png" width="440" alt="Customize modal: shelf apps, HDMI devices, theme, clock, language and TMDB key">
+<img src="docs/assets/screenshot-weather.png" width="440" alt="Weather and sun drawer with hourly forecast, sunrise and sunset">
+<img src="docs/assets/screenshot-pt-br.png" width="440" alt="Free My TV in Brazilian Portuguese">
+</details>
+
 ---
 
 ## ⚡ Why This Exists
