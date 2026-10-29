@@ -2526,6 +2526,42 @@
 
         closeDrawerBtn.addEventListener('click', closeDrawer);
 
+        // --- Ambient (Unsplash) screensaver: pure helpers ---
+        var AMBIENT_THEMES = ['night sky stars', 'aurora', 'dark mountains night', 'aerial earth', 'forest fog'];
+        var AMBIENT_HOUR_MS = 3600000;
+        var AMBIENT_MAX_CALLS = 40; // our own cap inside Unsplash's 50 requests per hour
+        var AMBIENT_PING_CAP = 30;  // download pings stop here, keeping 10 calls for refreshes
+
+        // Opacity for a photo from its average colour: dark photos 0.55, white 0.25.
+        function ambientDim(color) {
+            var lum = 0.5;
+            var m = /^#?([0-9a-f]{6})$/i.exec(color || '');
+            if (m) {
+                var n = parseInt(m[1], 16);
+                lum = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+            }
+            return Math.max(0.25, Math.min(0.55, Math.round((0.55 - lum * 0.3) * 100) / 100));
+        }
+
+        // log = timestamps (ms) of earlier calls; true while fewer than `limit` happened in the last hour.
+        function ambientBudgetAllows(log, now, limit) {
+            var recent = 0;
+            for (var i = 0; i < log.length; i++) {
+                if (log[i] > now - AMBIENT_HOUR_MS) recent++;
+            }
+            return recent < limit;
+        }
+
+        function ambientPhotoUrl(raw, screenWidth) {
+            return raw + (raw.indexOf('?') === -1 ? '?' : '&') + 'w=' + (screenWidth >= 3840 ? 3840 : 1920) + '&q=70&fm=jpg';
+        }
+
+        // The few fields we keep from an Unsplash photo, or null when one is missing.
+        function ambientShape(p) {
+            if (!p || !p.id || !p.urls || !p.urls.raw || !p.user || !p.user.name || !p.links || !p.links.download_location) return null;
+            return { id: p.id, raw: p.urls.raw, color: p.color || '', name: p.user.name, dl: p.links.download_location };
+        }
+
         // --- OLED-Safe Idle Screensaver ---
         var IDLE_TIMEOUT_MS = 3 * 60 * 1000;
         var PIXEL_SHIFT_MS = 25 * 1000;

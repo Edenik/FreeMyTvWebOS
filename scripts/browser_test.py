@@ -54,6 +54,46 @@ setTimeout(function () {
     if (!isBrand && !Object.prototype.hasOwnProperty.call(I18N.pt, v)) out.missing.push(v);
   });
   out.text = document.getElementById('customizeBtn').textContent.replace(/^\s+|\s+$/g, '').replace('⚙️ ', '');
+  out.ambient = [];
+  function eq(name, got, want) {
+    if (got !== want) out.ambient.push(name + ': got ' + JSON.stringify(got) + ' want ' + JSON.stringify(want));
+  }
+  function need(name) {
+    if (typeof window[name] !== 'function') { out.ambient.push(name + ' missing'); return false; }
+    return true;
+  }
+  if (need('ambientDim')) {
+    eq('dim black', ambientDim('#000000'), 0.55);
+    eq('dim white', ambientDim('#ffffff'), 0.25);
+    eq('dim mid', ambientDim('#808080'), 0.4);
+    eq('dim bad', ambientDim('nope'), 0.4);
+    eq('dim none', ambientDim(undefined), 0.4);
+  }
+  if (need('ambientBudgetAllows')) {
+    var now = 10000000, recent = [], old = [], i;
+    for (i = 0; i < 40; i++) { recent.push(now - 1000); old.push(now - 3700000); }
+    eq('budget full', ambientBudgetAllows(recent, now, 40), false);
+    eq('budget 39', ambientBudgetAllows(recent.slice(1), now, 40), true);
+    eq('budget old', ambientBudgetAllows(old, now, 40), true);
+    eq('budget empty', ambientBudgetAllows([], now, 40), true);
+    eq('budget ping cap', ambientBudgetAllows(recent.slice(0, 30), now, 30), false);
+  }
+  if (need('ambientPhotoUrl')) {
+    eq('url 4k', ambientPhotoUrl('https://images.unsplash.com/p?ixid=1', 3840), 'https://images.unsplash.com/p?ixid=1&w=3840&q=70&fm=jpg');
+    eq('url hd', ambientPhotoUrl('https://images.unsplash.com/p?ixid=1', 1920), 'https://images.unsplash.com/p?ixid=1&w=1920&q=70&fm=jpg');
+    eq('url bare', ambientPhotoUrl('https://x.test/y', 1280), 'https://x.test/y?w=1920&q=70&fm=jpg');
+  }
+  if (need('ambientShape')) {
+    var shaped = ambientShape({ id: 'a1', color: '#0a0a20', urls: { raw: 'https://images.unsplash.com/p?ixid=1' },
+      user: { name: 'Ann' }, links: { download_location: 'https://api.unsplash.com/photos/a1/download?ixid=1' } });
+    eq('shape id', shaped && shaped.id, 'a1');
+    eq('shape raw', shaped && shaped.raw, 'https://images.unsplash.com/p?ixid=1');
+    eq('shape color', shaped && shaped.color, '#0a0a20');
+    eq('shape name', shaped && shaped.name, 'Ann');
+    eq('shape dl', shaped && shaped.dl, 'https://api.unsplash.com/photos/a1/download?ixid=1');
+    eq('shape partial', ambientShape({ id: 'x' }), null);
+    eq('shape null', ambientShape(null), null);
+  }
   var pre = document.createElement('pre');
   pre.id = '__result';
   pre.textContent = JSON.stringify(out);
@@ -115,6 +155,8 @@ def main():
                     failures.append(f"translation keys differ in: {result['keyDiff']}")
                 if result["missing"]:
                     failures.append(f"strings without translations: {result['missing']}")
+                if result["ambient"]:
+                    failures.append(f"ambient checks: {result['ambient']}")
             print(f"[*] {lang}: ok" if not any(x.startswith(lang + ":") for x in failures) else f"[!] {lang}: failed")
     for f in failures:
         print(f"[!] {f}")
