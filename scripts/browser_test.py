@@ -235,6 +235,84 @@ setTimeout(function () {
     setTimeout(function () { eq('nokey calls', calls.length, 0); done(); }, 200);
   });
 
+  if (typeof ambientStart !== 'function') { fails.push('ambientStart missing'); write(); return; }
+  var overlay = document.getElementById('screensaverOverlay');
+  function isAmbient() { return /\bambient\b/.test(overlay.className); }
+  function seedCache() {
+    reset();
+    localStorage.setItem('fmtv_ambient_cache', JSON.stringify({ at: Date.now(), photos: [
+      { id: 'z1', raw: 'assets/icon.png', color: '#000000', name: 'Ann', dl: 'https://api.unsplash.com/photos/z1/download' }] }));
+  }
+  window.ambientPhotoUrl = function (raw) { return raw; }; // load the local test asset as-is
+
+  steps.push(function (done) { // ambient shows a photo, the credit, and pings the download endpoint once
+    seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'kenburns'; state.perfMode = 'standard';
+    var calls = []; window.fetch = fakeFetch(200, '49', calls);
+    enterScreensaver();
+    setTimeout(function () {
+      var a = document.getElementById('ssPhotoA').style.opacity, b = document.getElementById('ssPhotoB').style.opacity;
+      eq('ambient class', isAmbient(), true);
+      eq('credit', document.getElementById('screensaverCredit').textContent, t('Photo by %s on Unsplash', 'Ann'));
+      eq('photo visible', a === '0.55' || b === '0.55', true);
+      eq('ping once', calls.filter(function (c) { return c.url.indexOf('/photos/z1/download') !== -1; }).length, 1);
+      exitScreensaver();
+      eq('ambient removed', isAmbient(), false);
+      eq('credit cleared', document.getElementById('screensaverCredit').textContent, '');
+      done();
+    }, 500);
+  });
+  steps.push(function (done) { // no key falls back to the black clock
+    seedCache(); state.ambient = 'on'; state.unsplashKey = '';
+    enterScreensaver();
+    setTimeout(function () { eq('nokey ambient', isAmbient(), false); exitScreensaver(); done(); }, 200);
+  });
+  steps.push(function (done) { // Off falls back to the black clock
+    seedCache(); state.ambient = 'off'; state.unsplashKey = 'k';
+    enterScreensaver();
+    setTimeout(function () { eq('off ambient', isAmbient(), false); exitScreensaver(); done(); }, 200);
+  });
+  steps.push(function (done) { // an empty cache falls back to the black clock
+    reset(); state.ambient = 'on'; state.unsplashKey = 'k';
+    enterScreensaver();
+    setTimeout(function () { eq('empty ambient', isAmbient(), false); exitScreensaver(); done(); }, 200);
+  });
+  steps.push(function (done) { // motion None and performance mode both leave the photo still
+    seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none'; state.perfMode = 'standard';
+    window.fetch = fakeFetch(200, '49', []);
+    enterScreensaver();
+    setTimeout(function () {
+      var img = document.getElementById('ssPhotoB');
+      eq('none transform', img.style.transform, 'translate(0%, 0%) scale(1.06)');
+      exitScreensaver();
+      state.ambientMotion = 'kenburns'; state.perfMode = 'high';
+      enterScreensaver();
+      setTimeout(function () {
+        var other = document.getElementById('ssPhotoB');
+        eq('perf transform', other.style.transform, 'translate(0%, 0%) scale(1.06)');
+        exitScreensaver();
+        state.perfMode = 'standard';
+        done();
+      }, 400);
+    }, 400);
+  });
+  steps.push(function (done) { // Ken Burns zooms and drifts within 2.5%
+    seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'kenburns';
+    window.fetch = fakeFetch(200, '49', []);
+    enterScreensaver();
+    setTimeout(function () {
+      var shown = document.getElementById('ssPhotoA').style.opacity === '0.55' ? document.getElementById('ssPhotoA') : document.getElementById('ssPhotoB');
+      var m = /translate\((-?[\d.]+)%, (-?[\d.]+)%\) scale\(([\d.]+)\)/.exec(shown.style.transform);
+      eq('kb parsed', !!m, true);
+      if (m) {
+        eq('kb dx', Math.abs(parseFloat(m[1])) <= 2.5, true);
+        eq('kb dy', Math.abs(parseFloat(m[2])) <= 2.5, true);
+        eq('kb scale', m[3], '1.14');
+      }
+      exitScreensaver();
+      done();
+    }, 400);
+  });
+
   (function run(i) {
     if (i >= steps.length) { write(); return; }
     steps[i](function () { setTimeout(function () { run(i + 1); }, 100); });

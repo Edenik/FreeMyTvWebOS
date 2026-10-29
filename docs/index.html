@@ -928,6 +928,55 @@
             color: rgba(255, 255, 255, 0.4);
             margin-top: 6px;
         }
+
+        /* Ambient photo layer: dimmed photos behind the clock; only opacity and transform animate. */
+        .screensaver .screensaver-clock-wrap {
+            position: relative;
+            z-index: 1;
+        }
+
+        .screensaver-photos {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            background: #000000;
+        }
+
+        .screensaver.ambient .screensaver-photos {
+            display: block;
+        }
+
+        .screensaver-photos:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.65) 100%);
+        }
+
+        .ss-photo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            will-change: opacity, transform;
+        }
+
+        .screensaver-credit {
+            font-size: 16px;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.35);
+            margin-top: 14px;
+        }
     </style>
     <script>
         (function() {
@@ -1187,9 +1236,14 @@
 
     <!-- OLED-Safe Idle Screensaver -->
     <div class="screensaver" id="screensaverOverlay">
+        <div class="screensaver-photos" id="screensaverPhotos">
+            <img class="ss-photo" id="ssPhotoA" alt="">
+            <img class="ss-photo" id="ssPhotoB" alt="">
+        </div>
         <div class="screensaver-clock-wrap" id="screensaverClockWrap">
             <div class="screensaver-clock" id="screensaverClock">20:30</div>
             <div class="screensaver-date" id="screensaverDate">Mon, Oct 19</div>
+            <div class="screensaver-credit" id="screensaverCredit"></div>
         </div>
     </div>
 
@@ -2714,6 +2768,91 @@
             next();
         }
 
+        // --- Ambient (Unsplash) screensaver: photo layer ---
+        var ambientOn = false;
+        var ambientTimer = null;
+        var ambientPos = 0;
+        var ambientFailures = 0;
+        var ambientFront = 'ssPhotoA';
+
+        function ambientReady() {
+            var cache = ambientRead('fmtv_ambient_cache', null);
+            return state.ambient === 'on' && !!state.unsplashKey && !!cache && !!cache.photos && cache.photos.length > 0;
+        }
+
+        // Slow zoom and drift (Ken Burns), drift only, or still. Only transform and opacity animate.
+        function ambientMove(img, secs) {
+            var still = state.ambientMotion === 'none' || state.perfMode === 'high';
+            img.style.transition = 'none';
+            img.style.transform = 'translate(0%, 0%) scale(1.06)';
+            void img.offsetWidth;
+            img.style.transition = 'opacity 4s linear' + (still ? '' : ', transform ' + (secs + 4) + 's linear');
+            if (still) return;
+            var dx = Math.round((Math.random() - 0.5) * 50) / 10; // -2.5 .. 2.5 (% of the photo size)
+            var dy = Math.round((Math.random() - 0.5) * 50) / 10;
+            var scale = state.ambientMotion === 'drift' ? 1.06 : 1.14;
+            img.style.transform = 'translate(' + dx + '%, ' + dy + '%) scale(' + scale + ')';
+        }
+
+        // Tell Unsplash once per photo; pings stop while 30+ calls were made in the last hour.
+        function ambientPing(p) {
+            var pinged = ambientRead('fmtv_ambient_pinged', []);
+            if (pinged.indexOf(p.id) !== -1) return;
+            pinged.push(p.id);
+            localStorage.setItem('fmtv_ambient_pinged', JSON.stringify(pinged.slice(-300)));
+            ambientApi(p.dl, AMBIENT_PING_CAP, function() {});
+        }
+
+        function ambientShow() {
+            var cache = ambientRead('fmtv_ambient_cache', null);
+            if (!ambientOn || !cache || !cache.photos || !cache.photos.length) return;
+            var p = cache.photos[ambientPos % cache.photos.length];
+            ambientPos++;
+            var secs = parseInt(state.ambientSecs, 10) || 90;
+            var cur = document.getElementById(ambientFront);
+            var next = document.getElementById(ambientFront === 'ssPhotoA' ? 'ssPhotoB' : 'ssPhotoA');
+            var pre = new Image();
+            pre.onload = function() {
+                if (!ambientOn) return;
+                ambientFailures = 0;
+                next.src = pre.src;
+                ambientMove(next, secs);
+                next.style.opacity = String(ambientDim(p.color));
+                cur.style.opacity = '0';
+                ambientFront = next.id;
+                document.getElementById('screensaverCredit').textContent = t('Photo by %s on Unsplash', p.name);
+                ambientPing(p);
+            };
+            pre.onerror = function() {
+                ambientFailures++;
+                if (ambientOn && ambientFailures < 5) ambientShow();
+            };
+            pre.src = ambientPhotoUrl(p.raw, window.screen.width * (window.devicePixelRatio || 1));
+        }
+
+        function ambientStart() {
+            ambientOn = true;
+            ambientFailures = 0;
+            ambientFront = 'ssPhotoA'; // the first photo of every run fades in on ssPhotoB
+            ambientPos = Math.floor(Math.random() * 1000);
+            document.getElementById('screensaverOverlay').classList.add('ambient');
+            ambientShow();
+            ambientTimer = setInterval(ambientShow, (parseInt(state.ambientSecs, 10) || 90) * 1000);
+        }
+
+        function ambientStop() {
+            ambientOn = false;
+            clearInterval(ambientTimer);
+            document.getElementById('screensaverOverlay').classList.remove('ambient');
+            ['ssPhotoA', 'ssPhotoB'].forEach(function(id) {
+                var img = document.getElementById(id);
+                img.style.transition = 'none';
+                img.style.opacity = '0';
+                img.removeAttribute('src');
+            });
+            document.getElementById('screensaverCredit').textContent = '';
+        }
+
         // --- OLED-Safe Idle Screensaver ---
         function idleTimeoutMs() {
             var mins = parseInt(state.idleMins, 10);
@@ -2737,6 +2876,7 @@
         function enterScreensaver() {
             screensaverOn = true;
             screensaverOverlay.classList.add('active');
+            if (ambientReady()) ambientStart();
             shiftScreensaverClock();
             pixelShiftTimer = setInterval(shiftScreensaverClock, PIXEL_SHIFT_MS);
         }
@@ -2745,6 +2885,7 @@
             screensaverOn = false;
             screensaverOverlay.classList.remove('active');
             clearInterval(pixelShiftTimer);
+            ambientStop();
         }
 
         function markActivity() {
