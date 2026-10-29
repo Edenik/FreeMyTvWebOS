@@ -123,6 +123,105 @@ setTimeout(function () {
 }, 1500);
 """
 
+# Drives the app with a stubbed fetch and reports into <pre id="__scenario">.
+SCENARIO = r"""
+setTimeout(function () {
+  var fails = [], steps = [];
+  function eq(name, got, want) {
+    if (got !== want) fails.push(name + ': got ' + JSON.stringify(got) + ' want ' + JSON.stringify(want));
+  }
+  function write() {
+    var pre = document.createElement('pre');
+    pre.id = '__scenario';
+    pre.textContent = JSON.stringify({ fails: fails });
+    document.body.appendChild(pre);
+  }
+  function reset() {
+    ['fmtv_ambient_cache', 'fmtv_ambient_calls', 'fmtv_ambient_pause', 'fmtv_ambient_pinged'].forEach(function (k) {
+      localStorage.removeItem(k);
+    });
+  }
+  function fakeFetch(status, remaining, calls) {
+    return function (url, opts) {
+      calls.push({ url: url, auth: opts && opts.headers && opts.headers.Authorization });
+      var n = calls.length, list = [], i;
+      for (i = 0; i < 30; i++) {
+        list.push({ id: 'p' + n + '_' + i, color: '#101020', urls: { raw: 'assets/icon.png' }, user: { name: 'Ann' },
+          links: { download_location: 'https://api.unsplash.com/photos/p' + n + '_' + i + '/download' } });
+      }
+      return Promise.resolve({ status: status, ok: status === 200, headers: { get: function () { return remaining; } },
+        json: function () { return Promise.resolve(list); } });
+    };
+  }
+  function cacheSize() {
+    var c = JSON.parse(localStorage.getItem('fmtv_ambient_cache') || 'null');
+    return c ? c.photos.length : null;
+  }
+  if (typeof ambientRefresh !== 'function') { fails.push('ambientRefresh missing'); write(); return; }
+
+  steps.push(function (done) { // a normal refresh: 5 themes x 30 photos
+    reset(); state.unsplashKey = 'test-key'; state.ambient = 'on';
+    var calls = []; window.fetch = fakeFetch(200, '49', calls);
+    ambientRefresh(true);
+    setTimeout(function () {
+      eq('refresh calls', calls.length, 5);
+      eq('refresh auth', calls[0] && calls[0].auth, 'Client-ID test-key');
+      eq('refresh url', !!calls[0] && calls[0].url.indexOf('https://api.unsplash.com/photos/random?count=30&orientation=landscape&content_filter=high&query=') === 0, true);
+      eq('refresh cache', cacheSize(), 150);
+      eq('refresh log', JSON.parse(localStorage.getItem('fmtv_ambient_calls')).length, 5);
+      done();
+    }, 400);
+  });
+  steps.push(function (done) { // 403 pauses fetching and keeps the old cache untouched
+    reset(); var calls = []; window.fetch = fakeFetch(403, null, calls);
+    ambientRefresh(true);
+    setTimeout(function () {
+      eq('403 calls', calls.length, 1);
+      eq('403 cache', cacheSize(), null);
+      eq('403 paused', parseInt(localStorage.getItem('fmtv_ambient_pause'), 10) > Date.now(), true);
+      ambientRefresh(true);
+      setTimeout(function () { eq('403 stays paused', calls.length, 1); done(); }, 200);
+    }, 300);
+  });
+  steps.push(function (done) { // low X-Ratelimit-Remaining keeps the data but stops further calls
+    reset(); var calls = []; window.fetch = fakeFetch(200, '3', calls);
+    ambientRefresh(true);
+    setTimeout(function () {
+      eq('low calls', calls.length, 1);
+      eq('low cache', cacheSize(), 30);
+      eq('low paused', parseInt(localStorage.getItem('fmtv_ambient_pause'), 10) > Date.now(), true);
+      done();
+    }, 300);
+  });
+  steps.push(function (done) { // our own hourly cap of 40 calls
+    reset(); var calls = [], log = [], i;
+    for (i = 0; i < 40; i++) log.push(Date.now() - 1000);
+    localStorage.setItem('fmtv_ambient_calls', JSON.stringify(log));
+    window.fetch = fakeFetch(200, '49', calls);
+    ambientRefresh(true);
+    setTimeout(function () { eq('cap calls', calls.length, 0); done(); }, 200);
+  });
+  steps.push(function (done) { // a fresh, big-enough cache is not refreshed unless forced
+    reset(); var calls = [], photos = [], i;
+    for (i = 0; i < 150; i++) photos.push({ id: 'c' + i, raw: 'assets/icon.png', color: '#000000', name: 'Ann', dl: 'https://api.unsplash.com/photos/c' + i + '/download' });
+    localStorage.setItem('fmtv_ambient_cache', JSON.stringify({ photos: photos, at: Date.now() }));
+    window.fetch = fakeFetch(200, '49', calls);
+    ambientRefresh(false);
+    setTimeout(function () { eq('fresh calls', calls.length, 0); done(); }, 200);
+  });
+  steps.push(function (done) { // no key, no calls
+    reset(); state.unsplashKey = ''; var calls = []; window.fetch = fakeFetch(200, '49', calls);
+    ambientRefresh(true);
+    setTimeout(function () { eq('nokey calls', calls.length, 0); done(); }, 200);
+  });
+
+  (function run(i) {
+    if (i >= steps.length) { write(); return; }
+    steps[i](function () { setTimeout(function () { run(i + 1); }, 100); });
+  })(0);
+}, 2000);
+"""
+
 ERROR_HOOK = "<script>window.__errors=[];window.addEventListener('error',function(e){window.__errors.push(String(e.message))});</script>"
 
 
@@ -139,21 +238,24 @@ def run_language(chrome, lang, workdir):
     with open(APP, encoding="utf-8") as f:
         html = f.read()
     html = html.replace("<head>", f'<head>{ERROR_HOOK}<script>localStorage.setItem("fmtv_lang","{lang}")</script>', 1)
-    html = html.replace("</body>", f"<script>{PROBE}</script></body>")
+    html = html.replace("</body>", f"<script>{PROBE}</script><script>{SCENARIO}</script></body>")
     page = os.path.join(workdir, f"app_{lang}.html")
     with open(page, "w", encoding="utf-8") as f:
         f.write(html)
     shutil.copytree(os.path.join(REPO_DIR, "app", "assets"), os.path.join(workdir, "assets"), dirs_exist_ok=True)
     res = subprocess.run(
         [chrome, "--headless=new", "--disable-gpu", "--no-sandbox", "--window-size=1920,1080",
-         "--virtual-time-budget=6000", f"--user-data-dir={os.path.join(workdir, 'profile_' + lang)}",
+         "--virtual-time-budget=15000", f"--user-data-dir={os.path.join(workdir, 'profile_' + lang)}",
          "--dump-dom", f"file://{page}"],
         capture_output=True, text=True, timeout=120)
     m = re.search(r'<pre id="__result">(.*?)</pre>', res.stdout, re.S)
     if not m:
         return None, res.stderr[-400:]
     import html as htmllib
-    return json.loads(htmllib.unescape(m.group(1))), ""
+    result = json.loads(htmllib.unescape(m.group(1)))
+    m2 = re.search(r'<pre id="__scenario">(.*?)</pre>', res.stdout, re.S)
+    result["scenario"] = json.loads(htmllib.unescape(m2.group(1))) if m2 else None
+    return result, ""
 
 
 def main():
@@ -179,6 +281,10 @@ def main():
                     failures.append(f"strings without translations: {result['missing']}")
                 if result["ambient"]:
                     failures.append(f"ambient checks: {result['ambient']}")
+                if result["scenario"] is None:
+                    failures.append("ambient scenario did not finish")
+                elif result["scenario"]["fails"]:
+                    failures.append(f"ambient scenario: {result['scenario']['fails']}")
             print(f"[*] {lang}: ok" if not any(x.startswith(lang + ":") for x in failures) else f"[!] {lang}: failed")
     for f in failures:
         print(f"[!] {f}")
