@@ -247,6 +247,17 @@
             transform: scale(1.05);
         }
 
+        /* Text size setting: scales the weather widget, clock and weather drawer. */
+        :root.ts-large .weather-widget, :root.ts-large .clock-group, :root.ts-large .drawer-panel { zoom: 1.3; }
+        :root.ts-xlarge .weather-widget, :root.ts-xlarge .clock-group, :root.ts-xlarge .drawer-panel { zoom: 1.6; }
+
+        .modal-version {
+            margin-right: auto;
+            align-self: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
         .weather-sub {
             font-size: 12px;
             color: var(--text-secondary);
@@ -1061,6 +1072,14 @@
                         </select>
                     </div>
                     <div class="field-group">
+                        <label>Text Size (weather & clock)</label>
+                        <select class="field-input modal-nav" id="cfgTextSize">
+                            <option value="normal">Normal</option>
+                            <option value="large">Large</option>
+                            <option value="xlarge">Extra large</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
                         <label>Auto-locate by IP (sends your IP to ipapi.co)</label>
                         <select class="field-input modal-nav" id="cfgIpLocate">
                             <option value="off">Off (use the city above)</option>
@@ -1075,6 +1094,7 @@
             </div>
 
             <div class="modal-actions">
+                <span class="modal-version" id="appVersion"></span>
                 <button class="btn-secondary modal-nav" id="resetDefaultBtn">Reset Defaults</button>
                 <button class="btn-secondary modal-nav" id="closeModalBtn">Cancel</button>
                 <button class="btn-primary modal-nav" id="saveModalBtn">Save & Apply</button>
@@ -1252,6 +1272,7 @@
             tmdbKey: localStorage.getItem('fmtv_tmdb_key') || '',
             ipLocate: localStorage.getItem('fmtv_ip_locate') || 'off',
             lang: localStorage.getItem('fmtv_lang') || 'auto',
+            textSize: localStorage.getItem('fmtv_text_size') || 'normal',
             catalog: DEFAULT_CATALOG.slice(),
             picksTab: 'movies',
             hourlyForecast: [],
@@ -1265,6 +1286,8 @@
         // English is the source language: every UI string below is looked up by its
         // English text, and anything without a translation simply stays English.
         // Written in plain ES5 for the Chromium 38 engine on webOS 3.x.
+        var APP_VERSION = '1.4.0'; // keep equal to app/appinfo.json (scripts/check.py enforces it)
+
         var I18N = {
             pt: {
                 '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritos', 'Reorder': 'Reordenar', 'Done': 'Concluir', 'Cancel': 'Cancelar',
@@ -1280,6 +1303,7 @@
                 'Performance Mode': 'Modo de Desempenho', 'Standard (Glass & Glow)': 'Padrão (Vidro e Brilho)', 'High Performance (60 FPS Boost)': 'Alto Desempenho (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Localizar por IP (envia seu IP ao ipapi.co)', 'Off (use the city above)': 'Desligado (usar a cidade acima)', 'On': 'Ligado',
                 'TMDB API Key (Optional)': 'Chave da API TMDB (Opcional)', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma da TV)',
+                'Text Size (weather & clock)': 'Tamanho do texto (clima e relógio)', 'Normal': 'Normal', 'Large': 'Grande', 'Extra large': 'Extra grande',
                 'Reset Defaults': 'Restaurar Padrões', 'Save & Apply': 'Salvar e Aplicar',
                 'Weather & Sun': 'Clima e Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Nascer do Sol', 'Sunset': 'Pôr do Sol', 'Close': 'Fechar',
                 'e.g. Sao Paulo, Lisbon, NYC': 'ex.: São Paulo, Lisboa, Nova York', 'Optional for TMDB Trending': 'Opcional para o TMDB em Alta',
@@ -1339,6 +1363,7 @@
                 'Performance Mode': 'Modo de Rendimiento', 'Standard (Glass & Glow)': 'Estándar (Cristal y Brillo)', 'High Performance (60 FPS Boost)': 'Alto Rendimiento (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Ubicar por IP (envía tu IP a ipapi.co)', 'Off (use the city above)': 'Desactivado (usar la ciudad de arriba)', 'On': 'Activado',
                 'TMDB API Key (Optional)': 'Clave API de TMDB (Opcional)', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma del TV)',
+                'Text Size (weather & clock)': 'Tamaño del texto (clima y reloj)', 'Normal': 'Normal', 'Large': 'Grande', 'Extra large': 'Extra grande',
                 'Reset Defaults': 'Restablecer', 'Save & Apply': 'Guardar y Aplicar',
                 'Weather & Sun': 'Clima y Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Amanecer', 'Sunset': 'Atardecer', 'Close': 'Cerrar',
                 'e.g. Sao Paulo, Lisbon, NYC': 'p. ej. Madrid, Lisboa, Nueva York', 'Optional for TMDB Trending': 'Opcional para tendencias de TMDB',
@@ -1398,6 +1423,7 @@
                 'Performance Mode': 'Leistungsmodus', 'Standard (Glass & Glow)': 'Standard (Glas & Glanz)', 'High Performance (60 FPS Boost)': 'Hohe Leistung (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Standort per IP (sendet Ihre IP an ipapi.co)', 'Off (use the city above)': 'Aus (Stadt oben verwenden)', 'On': 'An',
                 'TMDB API Key (Optional)': 'TMDB-API-Schlüssel (optional)', 'Language': 'Sprache', 'Auto (TV language)': 'Auto (TV-Sprache)',
+                'Text Size (weather & clock)': 'Textgröße (Wetter & Uhr)', 'Normal': 'Normal', 'Large': 'Groß', 'Extra large': 'Sehr groß',
                 'Reset Defaults': 'Zurücksetzen', 'Save & Apply': 'Speichern & Anwenden',
                 'Weather & Sun': 'Wetter & Sonne', 'Next Hours': 'Nächste Stunden', 'Sunrise': 'Sonnenaufgang', 'Sunset': 'Sonnenuntergang', 'Close': 'Schließen',
                 'e.g. Sao Paulo, Lisbon, NYC': 'z. B. Berlin, Wien, Zürich', 'Optional for TMDB Trending': 'Optional für TMDB-Trends',
@@ -1457,6 +1483,7 @@
                 'Performance Mode': 'Mode Performance', 'Standard (Glass & Glow)': 'Standard (Verre et Lueur)', 'High Performance (60 FPS Boost)': 'Haute Performance (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Localiser par IP (envoie votre IP à ipapi.co)', 'Off (use the city above)': 'Désactivé (utiliser la ville ci-dessus)', 'On': 'Activé',
                 'TMDB API Key (Optional)': 'Clé API TMDB (Facultatif)', 'Language': 'Langue', 'Auto (TV language)': 'Auto (langue de la TV)',
+                'Text Size (weather & clock)': 'Taille du texte (météo et horloge)', 'Normal': 'Normal', 'Large': 'Grand', 'Extra large': 'Très grand',
                 'Reset Defaults': 'Réinitialiser', 'Save & Apply': 'Enregistrer et Appliquer',
                 'Weather & Sun': 'Météo et Soleil', 'Next Hours': 'Prochaines Heures', 'Sunrise': 'Lever du Soleil', 'Sunset': 'Coucher du Soleil', 'Close': 'Fermer',
                 'e.g. Sao Paulo, Lisbon, NYC': 'p. ex. Paris, Lisbonne, New York', 'Optional for TMDB Trending': 'Facultatif pour les tendances TMDB',
@@ -1520,7 +1547,7 @@
             return out;
         }
 
-        var I18N_SKIP_IDS = { themeBadge: 1, shelfCountHint: 1, picksSourceBadge: 1, toastMsg: 1 };
+        var I18N_SKIP_IDS = { appVersion: 1, themeBadge: 1, shelfCountHint: 1, picksSourceBadge: 1, toastMsg: 1 };
 
         // Static markup is written in English; remember each translatable leaf's
         // original text the first time through so switching languages is lossless.
@@ -1609,6 +1636,12 @@
             toastEl.style.display = 'block';
             clearTimeout(window._toastTimer);
             window._toastTimer = setTimeout(function() { toastEl.style.display = 'none'; }, duration || 2400);
+        }
+
+        function applyTextSize() {
+            var root = document.documentElement;
+            root.classList.remove('ts-large', 'ts-xlarge');
+            if (state.textSize === 'large' || state.textSize === 'xlarge') root.classList.add('ts-' + state.textSize);
         }
 
         function applyPerfMode() {
@@ -2339,6 +2372,7 @@
             document.getElementById('cfgPerfMode').value = state.perfMode;
             document.getElementById('cfgIpLocate').value = state.ipLocate;
             document.getElementById('cfgLang').value = state.lang;
+            document.getElementById('cfgTextSize').value = state.textSize;
             document.getElementById('cfgTmdbKey').value = state.tmdbKey;
 
             renderAppSelectorGrid();
@@ -2546,6 +2580,7 @@
             document.getElementById('cfgPerfMode').value = 'standard';
             document.getElementById('cfgIpLocate').value = 'off';
             document.getElementById('cfgLang').value = 'auto';
+            document.getElementById('cfgTextSize').value = 'normal';
             document.getElementById('cfgTmdbKey').value = '';
             renderAppSelectorGrid();
             refreshModalNavList();
@@ -2562,6 +2597,7 @@
             state.perfMode = document.getElementById('cfgPerfMode').value;
             state.ipLocate = document.getElementById('cfgIpLocate').value;
             state.lang = document.getElementById('cfgLang').value;
+            state.textSize = document.getElementById('cfgTextSize').value;
             state.tmdbKey = document.getElementById('cfgTmdbKey').value.trim();
 
             localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
@@ -2571,10 +2607,12 @@
             localStorage.setItem('fmtv_perf_mode', state.perfMode);
             localStorage.setItem('fmtv_ip_locate', state.ipLocate);
             localStorage.setItem('fmtv_lang', state.lang);
+            localStorage.setItem('fmtv_text_size', state.textSize);
             localStorage.setItem('fmtv_tmdb_key', state.tmdbKey);
 
             applyStaticTranslations();
             applyPerfMode();
+            applyTextSize();
             renderAppsShelf();
             applyTheme();
             updateClock();
@@ -2674,8 +2712,10 @@
         });
 
         // --- Boot Sequence ---
+        document.getElementById('appVersion').textContent = 'Free My TV v' + APP_VERSION;
         applyStaticTranslations();
         applyPerfMode();
+        applyTextSize();
         renderAppsShelf();
         renderPicks(FALLBACK_MOVIES);
         applyTheme();

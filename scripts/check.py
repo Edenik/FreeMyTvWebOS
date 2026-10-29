@@ -5,7 +5,8 @@ Free My TV for webOS - repository checks (run by CI, runnable locally).
   1. scripts compile
   2. docs/ mirrors app/ (see sync_docs.py)
   3. the committed dist/ ipk matches app/appinfo.json's version
-  4. the ipk has no epoch-zero tar timestamps (webOS 5.x "-5: ipk verified failed")
+  4. APP_VERSION in app/index.html equals appinfo.json's version
+  5. the ipk has no epoch-zero tar timestamps (webOS 5.x "-5: ipk verified failed")
 
 `--extract-js PATH` writes app/index.html's inline JS to PATH so CI can run an
 ES5 syntax check on it (webOS 3.x ships Chromium 38).
@@ -72,6 +73,10 @@ def main():
 
     with open(os.path.join(REPO_DIR, "app", "appinfo.json"), encoding="utf-8") as f:
         info = json.load(f)
+    with open(os.path.join(REPO_DIR, "app", "index.html"), encoding="utf-8") as f:
+        m = re.search(r"var APP_VERSION = '([^']+)'", f.read())
+    if not m or m.group(1) != info["version"]:
+        errors.append(f"APP_VERSION in app/index.html ({m.group(1) if m else 'missing'}) != appinfo.json version {info['version']}")
     ipk = os.path.join(REPO_DIR, "dist", f"{info['id']}_{info['version']}_all.ipk")
     if not os.path.exists(ipk):
         errors.append(f"missing {os.path.relpath(ipk, REPO_DIR)} for appinfo version {info['version']} "
