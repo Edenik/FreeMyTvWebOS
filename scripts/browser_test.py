@@ -94,6 +94,28 @@ setTimeout(function () {
     eq('shape partial', ambientShape({ id: 'x' }), null);
     eq('shape null', ambientShape(null), null);
   }
+  eq('state ambient', state.ambient, 'on');
+  eq('state secs', state.ambientSecs, '90');
+  eq('state motion', state.ambientMotion, 'kenburns');
+  eq('state idle', state.idleMins, '3');
+  eq('state key', state.unsplashKey, '');
+  if (need('idleTimeoutMs')) {
+    var keepIdle = state.idleMins;
+    state.idleMins = '10';
+    eq('idle 10', idleTimeoutMs(), 600000);
+    state.idleMins = 'x';
+    eq('idle bad', idleTimeoutMs(), 180000);
+    state.idleMins = keepIdle;
+  }
+  ['cfgIdleMins', 'cfgAmbient', 'cfgAmbientSecs', 'cfgAmbientMotion', 'cfgUnsplashKey'].forEach(function (id) {
+    if (!document.getElementById(id)) out.ambient.push('missing #' + id);
+  });
+  ['Screensaver Starts After', '1 minute', '3 minutes', '5 minutes', '10 minutes', '30 minutes',
+   'Ambient Photo Screensaver', 'Off', 'Photo Duration', '30 seconds', '90 seconds', 'Photo Motion',
+   'Ken Burns (zoom & drift)', 'Drift only', 'None', 'Unsplash Access Key (Optional)',
+   'Optional for photo screensaver', 'Photo by %s on Unsplash'].forEach(function (k) {
+    if (!Object.prototype.hasOwnProperty.call(I18N.pt, k)) out.ambient.push('no translation: ' + k);
+  });
   var pre = document.createElement('pre');
   pre.id = '__result';
   pre.textContent = JSON.stringify(out);

@@ -1091,6 +1091,45 @@
                         <input type="text" class="field-input modal-nav" id="cfgTmdbKey" placeholder="Optional for TMDB Trending">
                     </div>
                 </div>
+                <div class="settings-row" style="margin-top: 14px;">
+                    <div class="field-group">
+                        <label>Screensaver Starts After</label>
+                        <select class="field-input modal-nav" id="cfgIdleMins">
+                            <option value="1">1 minute</option>
+                            <option value="3">3 minutes</option>
+                            <option value="5">5 minutes</option>
+                            <option value="10">10 minutes</option>
+                            <option value="30">30 minutes</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Ambient Photo Screensaver</label>
+                        <select class="field-input modal-nav" id="cfgAmbient">
+                            <option value="on">On</option>
+                            <option value="off">Off</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Photo Duration</label>
+                        <select class="field-input modal-nav" id="cfgAmbientSecs">
+                            <option value="30">30 seconds</option>
+                            <option value="90">90 seconds</option>
+                            <option value="300">5 minutes</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Photo Motion</label>
+                        <select class="field-input modal-nav" id="cfgAmbientMotion">
+                            <option value="kenburns">Ken Burns (zoom &amp; drift)</option>
+                            <option value="drift">Drift only</option>
+                            <option value="none">None</option>
+                        </select>
+                    </div>
+                    <div class="field-group" style="grid-column: span 2;">
+                        <label>Unsplash Access Key (Optional)</label>
+                        <input type="text" class="field-input modal-nav" id="cfgUnsplashKey" placeholder="Optional for photo screensaver">
+                    </div>
+                </div>
             </div>
 
             <div class="modal-actions">
@@ -1273,6 +1312,11 @@
             ipLocate: localStorage.getItem('fmtv_ip_locate') || 'off',
             lang: localStorage.getItem('fmtv_lang') || 'auto',
             textSize: localStorage.getItem('fmtv_text_size') || 'normal',
+            idleMins: localStorage.getItem('fmtv_idle_mins') || '3',
+            unsplashKey: localStorage.getItem('fmtv_unsplash_key') || '',
+            ambient: localStorage.getItem('fmtv_ambient') || 'on',
+            ambientSecs: localStorage.getItem('fmtv_ambient_secs') || '90',
+            ambientMotion: localStorage.getItem('fmtv_ambient_motion') || 'kenburns',
             catalog: DEFAULT_CATALOG.slice(),
             picksTab: 'movies',
             hourlyForecast: [],
@@ -1302,7 +1346,11 @@
                 'Clock Format': 'Formato do Relógio', '24-Hour (20:30)': '24 Horas (20:30)', '12-Hour (8:30 PM)': '12 Horas (8:30 PM)',
                 'Performance Mode': 'Modo de Desempenho', 'Standard (Glass & Glow)': 'Padrão (Vidro e Brilho)', 'High Performance (60 FPS Boost)': 'Alto Desempenho (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Localizar por IP (envia seu IP ao ipapi.co)', 'Off (use the city above)': 'Desligado (usar a cidade acima)', 'On': 'Ligado',
-                'TMDB API Key (Optional)': 'Chave da API TMDB (Opcional)', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma da TV)',
+                'TMDB API Key (Optional)': 'Chave da API TMDB (Opcional)',
+                'Screensaver Starts After': 'Protetor de Tela Inicia Após', '1 minute': '1 minuto', '3 minutes': '3 minutos', '5 minutes': '5 minutos', '10 minutes': '10 minutos', '30 minutes': '30 minutos',
+                'Ambient Photo Screensaver': 'Protetor de Tela com Fotos', 'Off': 'Desligado', 'Photo Duration': 'Duração da Foto', '30 seconds': '30 segundos', '90 seconds': '90 segundos',
+                'Photo Motion': 'Movimento da Foto', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom e deslize)', 'Drift only': 'Só deslize', 'None': 'Nenhum',
+                'Unsplash Access Key (Optional)': 'Chave de Acesso Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para o protetor de fotos', 'Photo by %s on Unsplash': 'Foto de %s no Unsplash', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma da TV)',
                 'Text Size (weather & clock)': 'Tamanho do texto (clima e relógio)', 'Normal': 'Normal', 'Large': 'Grande', 'Extra large': 'Extra grande',
                 'Reset Defaults': 'Restaurar Padrões', 'Save & Apply': 'Salvar e Aplicar',
                 'Weather & Sun': 'Clima e Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Nascer do Sol', 'Sunset': 'Pôr do Sol', 'Close': 'Fechar',
@@ -1362,7 +1410,11 @@
                 'Clock Format': 'Formato del Reloj', '24-Hour (20:30)': '24 Horas (20:30)', '12-Hour (8:30 PM)': '12 Horas (8:30 PM)',
                 'Performance Mode': 'Modo de Rendimiento', 'Standard (Glass & Glow)': 'Estándar (Cristal y Brillo)', 'High Performance (60 FPS Boost)': 'Alto Rendimiento (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Ubicar por IP (envía tu IP a ipapi.co)', 'Off (use the city above)': 'Desactivado (usar la ciudad de arriba)', 'On': 'Activado',
-                'TMDB API Key (Optional)': 'Clave API de TMDB (Opcional)', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma del TV)',
+                'TMDB API Key (Optional)': 'Clave API de TMDB (Opcional)',
+                'Screensaver Starts After': 'El Protector de Pantalla Inicia Tras', '1 minute': '1 minuto', '3 minutes': '3 minutos', '5 minutes': '5 minutos', '10 minutes': '10 minutos', '30 minutes': '30 minutos',
+                'Ambient Photo Screensaver': 'Protector de Pantalla con Fotos', 'Off': 'Desactivado', 'Photo Duration': 'Duración de la Foto', '30 seconds': '30 segundos', '90 seconds': '90 segundos',
+                'Photo Motion': 'Movimiento de la Foto', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom y desplazamiento)', 'Drift only': 'Solo desplazamiento', 'None': 'Ninguno',
+                'Unsplash Access Key (Optional)': 'Clave de acceso de Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para el protector con fotos', 'Photo by %s on Unsplash': 'Foto de %s en Unsplash', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma del TV)',
                 'Text Size (weather & clock)': 'Tamaño del texto (clima y reloj)', 'Normal': 'Normal', 'Large': 'Grande', 'Extra large': 'Extra grande',
                 'Reset Defaults': 'Restablecer', 'Save & Apply': 'Guardar y Aplicar',
                 'Weather & Sun': 'Clima y Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Amanecer', 'Sunset': 'Atardecer', 'Close': 'Cerrar',
@@ -1422,7 +1474,11 @@
                 'Clock Format': 'Uhrzeitformat', '24-Hour (20:30)': '24 Stunden (20:30)', '12-Hour (8:30 PM)': '12 Stunden (8:30 PM)',
                 'Performance Mode': 'Leistungsmodus', 'Standard (Glass & Glow)': 'Standard (Glas & Glanz)', 'High Performance (60 FPS Boost)': 'Hohe Leistung (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Standort per IP (sendet Ihre IP an ipapi.co)', 'Off (use the city above)': 'Aus (Stadt oben verwenden)', 'On': 'An',
-                'TMDB API Key (Optional)': 'TMDB-API-Schlüssel (optional)', 'Language': 'Sprache', 'Auto (TV language)': 'Auto (TV-Sprache)',
+                'TMDB API Key (Optional)': 'TMDB-API-Schlüssel (optional)',
+                'Screensaver Starts After': 'Bildschirmschoner startet nach', '1 minute': '1 Minute', '3 minutes': '3 Minuten', '5 minutes': '5 Minuten', '10 minutes': '10 Minuten', '30 minutes': '30 Minuten',
+                'Ambient Photo Screensaver': 'Foto-Bildschirmschoner', 'Off': 'Aus', 'Photo Duration': 'Fotodauer', '30 seconds': '30 Sekunden', '90 seconds': '90 Sekunden',
+                'Photo Motion': 'Fotobewegung', 'Ken Burns (zoom & drift)': 'Ken Burns (Zoom & Drift)', 'Drift only': 'Nur Drift', 'None': 'Keine',
+                'Unsplash Access Key (Optional)': 'Unsplash-Zugriffsschlüssel (optional)', 'Optional for photo screensaver': 'Optional für den Foto-Bildschirmschoner', 'Photo by %s on Unsplash': 'Foto von %s auf Unsplash', 'Language': 'Sprache', 'Auto (TV language)': 'Auto (TV-Sprache)',
                 'Text Size (weather & clock)': 'Textgröße (Wetter & Uhr)', 'Normal': 'Normal', 'Large': 'Groß', 'Extra large': 'Sehr groß',
                 'Reset Defaults': 'Zurücksetzen', 'Save & Apply': 'Speichern & Anwenden',
                 'Weather & Sun': 'Wetter & Sonne', 'Next Hours': 'Nächste Stunden', 'Sunrise': 'Sonnenaufgang', 'Sunset': 'Sonnenuntergang', 'Close': 'Schließen',
@@ -1482,7 +1538,11 @@
                 'Clock Format': 'Format de l’Horloge', '24-Hour (20:30)': '24 Heures (20:30)', '12-Hour (8:30 PM)': '12 Heures (8:30 PM)',
                 'Performance Mode': 'Mode Performance', 'Standard (Glass & Glow)': 'Standard (Verre et Lueur)', 'High Performance (60 FPS Boost)': 'Haute Performance (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Localiser par IP (envoie votre IP à ipapi.co)', 'Off (use the city above)': 'Désactivé (utiliser la ville ci-dessus)', 'On': 'Activé',
-                'TMDB API Key (Optional)': 'Clé API TMDB (Facultatif)', 'Language': 'Langue', 'Auto (TV language)': 'Auto (langue de la TV)',
+                'TMDB API Key (Optional)': 'Clé API TMDB (Facultatif)',
+                'Screensaver Starts After': 'Écran de veille après', '1 minute': '1 minute', '3 minutes': '3 minutes', '5 minutes': '5 minutes', '10 minutes': '10 minutes', '30 minutes': '30 minutes',
+                'Ambient Photo Screensaver': 'Écran de veille photo', 'Off': 'Désactivé', 'Photo Duration': 'Durée de la photo', '30 seconds': '30 secondes', '90 seconds': '90 secondes',
+                'Photo Motion': 'Mouvement de la photo', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom et dérive)', 'Drift only': 'Dérive seule', 'None': 'Aucun',
+                'Unsplash Access Key (Optional)': 'Clé d’accès Unsplash (Facultatif)', 'Optional for photo screensaver': 'Facultatif pour l’écran de veille photo', 'Photo by %s on Unsplash': 'Photo de %s sur Unsplash', 'Language': 'Langue', 'Auto (TV language)': 'Auto (langue de la TV)',
                 'Text Size (weather & clock)': 'Taille du texte (météo et horloge)', 'Normal': 'Normal', 'Large': 'Grand', 'Extra large': 'Très grand',
                 'Reset Defaults': 'Réinitialiser', 'Save & Apply': 'Enregistrer et Appliquer',
                 'Weather & Sun': 'Météo et Soleil', 'Next Hours': 'Prochaines Heures', 'Sunrise': 'Lever du Soleil', 'Sunset': 'Coucher du Soleil', 'Close': 'Fermer',
@@ -2374,6 +2434,11 @@
             document.getElementById('cfgLang').value = state.lang;
             document.getElementById('cfgTextSize').value = state.textSize;
             document.getElementById('cfgTmdbKey').value = state.tmdbKey;
+            document.getElementById('cfgIdleMins').value = state.idleMins;
+            document.getElementById('cfgAmbient').value = state.ambient;
+            document.getElementById('cfgAmbientSecs').value = state.ambientSecs;
+            document.getElementById('cfgAmbientMotion').value = state.ambientMotion;
+            document.getElementById('cfgUnsplashKey').value = state.unsplashKey;
 
             renderAppSelectorGrid();
             settingsModal.classList.add('active');
@@ -2563,7 +2628,10 @@
         }
 
         // --- OLED-Safe Idle Screensaver ---
-        var IDLE_TIMEOUT_MS = 3 * 60 * 1000;
+        function idleTimeoutMs() {
+            var mins = parseInt(state.idleMins, 10);
+            return (mins > 0 ? mins : 3) * 60 * 1000;
+        }
         var PIXEL_SHIFT_MS = 25 * 1000;
         var screensaverOverlay = document.getElementById('screensaverOverlay');
         var screensaverClockWrap = document.getElementById('screensaverClockWrap');
@@ -2600,7 +2668,7 @@
         document.addEventListener('mousedown', markActivity);
 
         setInterval(function() {
-            if (!screensaverOn && !modalOpen && !drawerOpen && Date.now() - lastActivity > IDLE_TIMEOUT_MS) {
+            if (!screensaverOn && !modalOpen && !drawerOpen && Date.now() - lastActivity > idleTimeoutMs()) {
                 enterScreensaver();
             }
         }, 10000);
@@ -2618,6 +2686,11 @@
             document.getElementById('cfgLang').value = 'auto';
             document.getElementById('cfgTextSize').value = 'normal';
             document.getElementById('cfgTmdbKey').value = '';
+            document.getElementById('cfgIdleMins').value = '3';
+            document.getElementById('cfgAmbient').value = 'on';
+            document.getElementById('cfgAmbientSecs').value = '90';
+            document.getElementById('cfgAmbientMotion').value = 'kenburns';
+            document.getElementById('cfgUnsplashKey').value = '';
             renderAppSelectorGrid();
             refreshModalNavList();
             showToast(t('Defaults restored'));
@@ -2635,6 +2708,12 @@
             state.lang = document.getElementById('cfgLang').value;
             state.textSize = document.getElementById('cfgTextSize').value;
             state.tmdbKey = document.getElementById('cfgTmdbKey').value.trim();
+            var previousUnsplashKey = state.unsplashKey;
+            state.idleMins = document.getElementById('cfgIdleMins').value;
+            state.ambient = document.getElementById('cfgAmbient').value;
+            state.ambientSecs = document.getElementById('cfgAmbientSecs').value;
+            state.ambientMotion = document.getElementById('cfgAmbientMotion').value;
+            state.unsplashKey = document.getElementById('cfgUnsplashKey').value.trim();
 
             localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
             localStorage.setItem('fmtv_city', state.city);
@@ -2645,6 +2724,11 @@
             localStorage.setItem('fmtv_lang', state.lang);
             localStorage.setItem('fmtv_text_size', state.textSize);
             localStorage.setItem('fmtv_tmdb_key', state.tmdbKey);
+            localStorage.setItem('fmtv_idle_mins', state.idleMins);
+            localStorage.setItem('fmtv_ambient', state.ambient);
+            localStorage.setItem('fmtv_ambient_secs', state.ambientSecs);
+            localStorage.setItem('fmtv_ambient_motion', state.ambientMotion);
+            localStorage.setItem('fmtv_unsplash_key', state.unsplashKey);
 
             applyStaticTranslations();
             applyPerfMode();
