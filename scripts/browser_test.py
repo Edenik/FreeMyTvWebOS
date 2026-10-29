@@ -173,15 +173,35 @@ setTimeout(function () {
     }, 400);
   });
   steps.push(function (done) { // 403 pauses fetching and keeps the old cache untouched
-    reset(); var calls = []; window.fetch = fakeFetch(403, null, calls);
+    reset(); var calls = [], old = [], i;
+    for (i = 0; i < 30; i++) old.push({ id: 'o' + i, raw: 'assets/icon.png', color: '#000000', name: 'Ann', dl: 'https://api.unsplash.com/photos/o' + i + '/download' });
+    localStorage.setItem('fmtv_ambient_cache', JSON.stringify({ photos: old, at: Date.now() - 13 * 3600000 }));
+    window.fetch = fakeFetch(403, null, calls);
     ambientRefresh(true);
     setTimeout(function () {
+      var kept = JSON.parse(localStorage.getItem('fmtv_ambient_cache') || 'null');
       eq('403 calls', calls.length, 1);
-      eq('403 cache', cacheSize(), null);
+      eq('403 cache', cacheSize(), 30);
+      eq('403 cache same', !!kept && kept.photos[0].id === 'o0' && kept.photos[29].id === 'o29', true);
       eq('403 paused', parseInt(localStorage.getItem('fmtv_ambient_pause'), 10) > Date.now(), true);
       ambientRefresh(true);
       setTimeout(function () { eq('403 stays paused', calls.length, 1); done(); }, 200);
     }, 300);
+  });
+  steps.push(function (done) { // storage that throws must not wedge later refreshes
+    reset(); var calls = [], origSet = Storage.prototype.setItem;
+    window.fetch = fakeFetch(200, '49', calls);
+    Storage.prototype.setItem = function (k, v) {
+      if (k === 'fmtv_ambient_calls') throw new Error('quota');
+      return origSet.call(this, k, v);
+    };
+    try { ambientRefresh(true); } catch (e) { fails.push('storage throw escaped: ' + e.message); }
+    setTimeout(function () {
+      Storage.prototype.setItem = origSet;
+      eq('storage-throw calls', calls.length, 0);
+      try { ambientRefresh(true); } catch (e2) { fails.push('second refresh threw: ' + e2.message); }
+      setTimeout(function () { eq('storage-throw recovery', calls.length > 0, true); done(); }, 300);
+    }, 200);
   });
   steps.push(function (done) { // low X-Ratelimit-Remaining keeps the data but stops further calls
     reset(); var calls = []; window.fetch = fakeFetch(200, '3', calls);

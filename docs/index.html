@@ -2652,7 +2652,11 @@
         }
 
         function ambientPaused() {
-            return Date.now() < (parseInt(localStorage.getItem('fmtv_ambient_pause'), 10) || 0);
+            try {
+                return Date.now() < (parseInt(localStorage.getItem('fmtv_ambient_pause'), 10) || 0);
+            } catch (e) {
+                return false;
+            }
         }
 
         // GET an Unsplash API path (or a full URL); done(err, json). Every call is logged against the hourly cap.
@@ -2662,13 +2666,18 @@
                 done(new Error('blocked'));
                 return;
             }
-            log.push(now);
-            localStorage.setItem('fmtv_ambient_calls', JSON.stringify(log));
+            try {
+                log.push(now);
+                localStorage.setItem('fmtv_ambient_calls', JSON.stringify(log));
+            } catch (e) {
+                done(e);
+                return;
+            }
             var url = pathOrUrl.indexOf('http') === 0 ? pathOrUrl : 'https://api.unsplash.com' + pathOrUrl;
             fetch(url, { headers: { 'Authorization': 'Client-ID ' + state.unsplashKey, 'Accept-Version': 'v1' } }).then(function(res) {
                 var remaining = parseInt(res.headers.get('X-Ratelimit-Remaining'), 10);
                 if (res.status === 403 || res.status === 429 || remaining < AMBIENT_MIN_REMAINING) {
-                    localStorage.setItem('fmtv_ambient_pause', String(Date.now() + AMBIENT_HOUR_MS));
+                    try { localStorage.setItem('fmtv_ambient_pause', String(Date.now() + AMBIENT_HOUR_MS)); } catch (e) {}
                 }
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 return res.json();
@@ -2686,7 +2695,7 @@
             function finish() {
                 ambientRefreshing = false;
                 if (photos.length >= AMBIENT_MIN_CACHED) {
-                    localStorage.setItem('fmtv_ambient_cache', JSON.stringify({ photos: photos, at: Date.now() }));
+                    try { localStorage.setItem('fmtv_ambient_cache', JSON.stringify({ photos: photos, at: Date.now() })); } catch (e) {}
                 }
             }
 
