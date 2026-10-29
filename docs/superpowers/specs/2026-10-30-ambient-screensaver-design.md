@@ -89,10 +89,12 @@ screensaver without error UI. A single photo that fails to load is skipped.
 
 ## Testing
 
-- `scripts/check.py`: a luminance-to-dim function and the rate-limit budget logic are pure functions, covered with
-  fixed inputs. Settings keys and defaults present.
-- `scripts/browser_test.py`: with `fetch` stubbed, the ambient layer shows when a key is set and the cache is
-  populated; the black clock shows with no key, with a 403, and when offline.
+- `scripts/browser_test.py` (headless Chrome, all five languages): the dim, budget, photo-URL and photo-shape helpers
+  are checked with fixed inputs; settings defaults, the new controls and all translations must exist; with `fetch`
+  stubbed, a refresh makes 5 calls and caches 150 photos, a 403 or a low `X-Ratelimit-Remaining` pauses fetching, the
+  hourly cap blocks calls, and the ambient layer shows (with credit and one download ping) only when a key is set,
+  the setting is On and the cache is non-empty; Ken Burns stays within 2.5% drift and performance mode stays still.
+- `scripts/check.py` and the CI ES5 check keep passing (docs in sync, no ES6 syntax).
 - On the TV: install, set the key, force the screensaver, screenshot to confirm photo, credit text and dimming.
 
 ## Git
