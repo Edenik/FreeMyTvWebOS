@@ -55,7 +55,7 @@ Modern LG webOS (especially webOS 6, 22, 23, and 24) replaced the classic, snapp
 - **🎬 Movies & Shows Trending Tabs.** Separate tabs for trending movies and TV shows—TMDB-ranked with your optional key, or our built-in zero-key live feed (TVMaze for Shows, curated picks for Movies).
 - **🌤️ Weather & Sun Drawer.** Click the weather widget for an hourly forecast and exact sunrise/sunset times, powered by Open-Meteo.
 - **🌍 Multi-Language.** English, Português (Brasil), Español, Deutsch and Français, following your TV's language or picked in Customize → Language.
-- **🌑 OLED-Safe Idle Screensaver.** A pure-black floating clock kicks in after a few minutes idle and gently shifts position to avoid burn-in—dismissed by any key or remote movement.
+- **🌑 OLED-Safe Idle Screensaver.** After the idle time you choose (1 to 30 minutes), a dimmed, slowly moving [Unsplash](https://unsplash.com) night-sky, aurora and landscape photo fades in behind a floating clock that shifts position to avoid burn-in. Without an Unsplash key it is a pure-black floating clock. Dismissed by any key or remote movement.
 - **🎮 Full Magic Remote & D-Pad Support.** Point and click with the LG Magic Remote cursor, or fly across tiles with the directional arrow keys and scroll wheel.
 - **💻 100% Onboard & Independent.** Installed as a native `.ipk` package on your TV. Your computer does **not** need to stay on.
 - **🛡️ Safe & Reversible.** Works on stock unrooted TVs via official LG Developer Mode (or Homebrew Channel). Your factory home screen is untouched.
@@ -149,6 +149,10 @@ Some newer webOS releases block Developer Mode apps from listing installed apps.
 | **Clock Format** | Toggle between `24-Hour (20:30)` and `12-Hour (8:30 PM)` display. |
 | **Performance Mode** | Choose between `Standard (Glass & Glow)` and `High Performance (60 FPS Boost)` to disable heavy backdrop filters on resource-constrained TVs. |
 | **TMDB API Key** | Paste a free [TMDB API Key](https://www.themoviedb.org/settings/api) for live weekly trending movies & shows, or leave empty to use the built-in zero-key live popular feed. |
+| **Screensaver Starts After** | Idle time before the screensaver starts: 1, 3, 5, 10 or 30 minutes. Applies to the photo and the black-clock screensaver. |
+| **Ambient Photo Screensaver** | `On` or `Off`. Photos need an Unsplash key and a TV with `fetch` support (webOS 4 or newer); otherwise the black clock is used. |
+| **Photo Duration / Photo Motion** | 30 seconds, 90 seconds or 5 minutes per photo; `Ken Burns (zoom & drift)`, `Drift only` or `None`. High Performance mode always uses no motion. |
+| **Unsplash Access Key** | Paste the Access Key of a free [Unsplash developer app](https://unsplash.com/developers) (50 requests per hour). The app makes about 5 calls per refresh, at most every 12 hours, and shows "Photo by NAME on Unsplash". |
 
 ---
 
@@ -259,7 +263,7 @@ O webOS moderno da LG (especialmente webOS 6, 22, 23 e 24) substituiu a clássic
 - **🎬 Abas de Filmes e Séries em Alta.** Abas separadas para filmes e séries em alta — ranqueadas pelo TMDB com sua chave opcional, ou nosso feed ao vivo sem chave (TVMaze para séries, curadoria para filmes).
 - **🌤️ Gaveta de Clima e Sol.** Clique no widget de clima para ver a previsão hora a hora e os horários exatos de nascer/pôr do sol, via Open-Meteo.
 - **🌍 Multi-idioma.** English, Português (Brasil), Español, Deutsch e Français, seguindo o idioma da TV ou escolhido em Personalizar → Language.
-- **🌑 Screensaver Seguro para OLED.** Um relógio flutuante em tela totalmente preta aparece após alguns minutos parado e muda de posição aos poucos para evitar marcação de imagem — some com qualquer tecla ou movimento do controle.
+- **🌑 Screensaver Seguro para OLED.** Após o tempo parado que você escolher (1 a 30 minutos), uma foto escura e em movimento lento do [Unsplash](https://unsplash.com) aparece atrás de um relógio flutuante que muda de posição para evitar marcação de imagem. Sem chave do Unsplash, é só o relógio em tela preta. Some com qualquer tecla ou movimento do controle.
 - **🎮 Suporte Completo ao Magic Remote e D-Pad.** Aponte e clique com o cursor do Magic Remote da LG, ou navegue pelos cards com as setas direcionais e a roda de rolagem.
 - **💻 100% Independente na TV.** Instalado como um pacote `.ipk` nativo na sua TV. Seu computador **não** precisa ficar ligado.
 - **🛡️ Seguro e Reversível.** Funciona em TVs de fábrica sem root via o Developer Mode oficial da LG (ou Homebrew Channel). Sua home screen de fábrica fica intocada.
@@ -343,6 +347,8 @@ Clique no botão **⚙️ Customize** no canto superior direito do painel usando
 | **Formato do Relógio** | Alterne entre exibição em `24 Horas (20:30)` ou `12 Horas (8:30 PM)`. |
 | **Modo de Performance** | Escolha entre `Padrão (Vidro & Brilho)` ou `Alta Performance (60 FPS Boost)` para desativar filtros pesados de desfoque em TVs mais modestas. |
 | **Chave da API do TMDB** | Cole uma [chave gratuita da API do TMDB](https://www.themoviedb.org/settings/api) para ver filmes e séries em alta da semana ao vivo, ou deixe em branco para usar o feed ao vivo popular embutido (sem necessidade de chave). |
+| **Protetor de Tela Inicia Após** | Tempo parado antes do protetor de tela: 1, 3, 5, 10 ou 30 minutos. |
+| **Protetor de Tela com Fotos** | `Ligado` ou `Desligado`, com duração (30 s, 90 s ou 5 min) e movimento (Ken Burns, só deslize ou nenhum). Precisa de uma chave de acesso do [Unsplash](https://unsplash.com/developers) (50 requisições por hora). |
 
 ---
 
