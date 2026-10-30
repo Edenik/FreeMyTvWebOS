@@ -1228,6 +1228,13 @@
                             <option value="on">On</option>
                         </select>
                     </div>
+                    <div class="field-group">
+                        <label>Keep LG Screensaver Away</label>
+                        <select class="field-input modal-nav" id="cfgKeepAwake">
+                            <option value="on">On</option>
+                            <option value="off">Off</option>
+                        </select>
+                    </div>
                     <div class="field-group" style="grid-column: span 2;">
                         <label>Unsplash Access Key (Optional)</label>
                         <input type="password" autocomplete="off" class="field-input modal-nav" id="cfgUnsplashKey" placeholder="Optional for photo screensaver">
@@ -1289,6 +1296,8 @@
     </div>
 
     <!-- OLED-Safe Idle Screensaver -->
+    <canvas id="keepAwakeCanvas" width="64" height="36" hidden></canvas>
+    <video id="keepAwakeVideo" muted loop playsinline aria-hidden="true" style="position: fixed; right: 0; bottom: 0; width: 4px; height: 4px; opacity: 0.02; pointer-events: none;"></video>
     <div class="screensaver" id="screensaverOverlay">
         <div class="screensaver-photos" id="screensaverPhotos">
             <img class="ss-photo" id="ssPhotoA" alt="">
@@ -1426,6 +1435,7 @@
             ambientSecs: localStorage.getItem('fmtv_ambient_secs') || '90',
             ambientMotion: localStorage.getItem('fmtv_ambient_motion') || 'kenburns',
             homePhotos: localStorage.getItem('fmtv_home_photos') || 'off',
+            keepAwake: localStorage.getItem('fmtv_keep_awake') || 'on',
             catalog: DEFAULT_CATALOG.slice(),
             picksTab: 'movies',
             hourlyForecast: [],
@@ -1459,7 +1469,7 @@
                 'Screensaver Starts After': 'Protetor de Tela Inicia Após', '1 minute': '1 minuto', '3 minutes': '3 minutos', '5 minutes': '5 minutos', '10 minutes': '10 minutos', '30 minutes': '30 minutos',
                 'Ambient Photo Screensaver': 'Protetor de Tela com Fotos', 'Off': 'Desligado', 'Photo Duration': 'Duração da Foto', '30 seconds': '30 segundos', '90 seconds': '90 segundos',
                 'Photo Motion': 'Movimento da Foto', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom e deslize)', 'Drift only': 'Só deslize', 'None': 'Nenhum',
-                'Unsplash Access Key (Optional)': 'Chave de Acesso Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para o protetor de fotos', 'Photo by %s on Unsplash': 'Foto de %s no Unsplash', 'Photos on Home Screen': 'Fotos na Tela Inicial', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma da TV)',
+                'Unsplash Access Key (Optional)': 'Chave de Acesso Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para o protetor de fotos', 'Photo by %s on Unsplash': 'Foto de %s no Unsplash', 'Photos on Home Screen': 'Fotos na Tela Inicial', 'Keep LG Screensaver Away': 'Evitar o Protetor de Tela da LG', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma da TV)',
                 'Text Size (weather & clock)': 'Tamanho do texto (clima e relógio)', 'Normal': 'Normal', 'Large': 'Grande', 'Extra large': 'Extra grande',
                 'Reset Defaults': 'Restaurar Padrões', 'Save & Apply': 'Salvar e Aplicar',
                 'Weather & Sun': 'Clima e Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Nascer do Sol', 'Sunset': 'Pôr do Sol', 'Close': 'Fechar',
@@ -1523,7 +1533,7 @@
                 'Screensaver Starts After': 'El Protector de Pantalla Inicia Tras', '1 minute': '1 minuto', '3 minutes': '3 minutos', '5 minutes': '5 minutos', '10 minutes': '10 minutos', '30 minutes': '30 minutos',
                 'Ambient Photo Screensaver': 'Protector de Pantalla con Fotos', 'Off': 'Desactivado', 'Photo Duration': 'Duración de la Foto', '30 seconds': '30 segundos', '90 seconds': '90 segundos',
                 'Photo Motion': 'Movimiento de la Foto', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom y desplazamiento)', 'Drift only': 'Solo desplazamiento', 'None': 'Ninguno',
-                'Unsplash Access Key (Optional)': 'Clave de acceso de Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para el protector con fotos', 'Photo by %s on Unsplash': 'Foto de %s en Unsplash', 'Photos on Home Screen': 'Fotos en la Pantalla de Inicio', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma del TV)',
+                'Unsplash Access Key (Optional)': 'Clave de acceso de Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para el protector con fotos', 'Photo by %s on Unsplash': 'Foto de %s en Unsplash', 'Photos on Home Screen': 'Fotos en la Pantalla de Inicio', 'Keep LG Screensaver Away': 'Evitar el Protector de Pantalla de LG', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma del TV)',
                 'Text Size (weather & clock)': 'Tamaño del texto (clima y reloj)', 'Normal': 'Normal', 'Large': 'Grande', 'Extra large': 'Extra grande',
                 'Reset Defaults': 'Restablecer', 'Save & Apply': 'Guardar y Aplicar',
                 'Weather & Sun': 'Clima y Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Amanecer', 'Sunset': 'Atardecer', 'Close': 'Cerrar',
@@ -1587,7 +1597,7 @@
                 'Screensaver Starts After': 'Bildschirmschoner startet nach', '1 minute': '1 Minute', '3 minutes': '3 Minuten', '5 minutes': '5 Minuten', '10 minutes': '10 Minuten', '30 minutes': '30 Minuten',
                 'Ambient Photo Screensaver': 'Foto-Bildschirmschoner', 'Off': 'Aus', 'Photo Duration': 'Fotodauer', '30 seconds': '30 Sekunden', '90 seconds': '90 Sekunden',
                 'Photo Motion': 'Fotobewegung', 'Ken Burns (zoom & drift)': 'Ken Burns (Zoom & Drift)', 'Drift only': 'Nur Drift', 'None': 'Keine',
-                'Unsplash Access Key (Optional)': 'Unsplash-Zugriffsschlüssel (optional)', 'Optional for photo screensaver': 'Optional für den Foto-Bildschirmschoner', 'Photo by %s on Unsplash': 'Foto von %s auf Unsplash', 'Photos on Home Screen': 'Fotos auf dem Startbildschirm', 'Language': 'Sprache', 'Auto (TV language)': 'Auto (TV-Sprache)',
+                'Unsplash Access Key (Optional)': 'Unsplash-Zugriffsschlüssel (optional)', 'Optional for photo screensaver': 'Optional für den Foto-Bildschirmschoner', 'Photo by %s on Unsplash': 'Foto von %s auf Unsplash', 'Photos on Home Screen': 'Fotos auf dem Startbildschirm', 'Keep LG Screensaver Away': 'LG-Bildschirmschoner verhindern', 'Language': 'Sprache', 'Auto (TV language)': 'Auto (TV-Sprache)',
                 'Text Size (weather & clock)': 'Textgröße (Wetter & Uhr)', 'Normal': 'Normal', 'Large': 'Groß', 'Extra large': 'Sehr groß',
                 'Reset Defaults': 'Zurücksetzen', 'Save & Apply': 'Speichern & Anwenden',
                 'Weather & Sun': 'Wetter & Sonne', 'Next Hours': 'Nächste Stunden', 'Sunrise': 'Sonnenaufgang', 'Sunset': 'Sonnenuntergang', 'Close': 'Schließen',
@@ -1651,7 +1661,7 @@
                 'Screensaver Starts After': 'Écran de veille après', '1 minute': '1 minute', '3 minutes': '3 minutes', '5 minutes': '5 minutes', '10 minutes': '10 minutes', '30 minutes': '30 minutes',
                 'Ambient Photo Screensaver': 'Écran de veille photo', 'Off': 'Désactivé', 'Photo Duration': 'Durée de la photo', '30 seconds': '30 secondes', '90 seconds': '90 secondes',
                 'Photo Motion': 'Mouvement de la photo', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom et dérive)', 'Drift only': 'Dérive seule', 'None': 'Aucun',
-                'Unsplash Access Key (Optional)': 'Clé d’accès Unsplash (Facultatif)', 'Optional for photo screensaver': 'Facultatif pour l’écran de veille photo', 'Photo by %s on Unsplash': 'Photo de %s sur Unsplash', 'Photos on Home Screen': 'Photos sur l’écran d’accueil', 'Language': 'Langue', 'Auto (TV language)': 'Auto (langue de la TV)',
+                'Unsplash Access Key (Optional)': 'Clé d’accès Unsplash (Facultatif)', 'Optional for photo screensaver': 'Facultatif pour l’écran de veille photo', 'Photo by %s on Unsplash': 'Photo de %s sur Unsplash', 'Photos on Home Screen': 'Photos sur l’écran d’accueil', 'Keep LG Screensaver Away': 'Éviter l’écran de veille LG', 'Language': 'Langue', 'Auto (TV language)': 'Auto (langue de la TV)',
                 'Text Size (weather & clock)': 'Taille du texte (météo et horloge)', 'Normal': 'Normal', 'Large': 'Grand', 'Extra large': 'Très grand',
                 'Reset Defaults': 'Réinitialiser', 'Save & Apply': 'Enregistrer et Appliquer',
                 'Weather & Sun': 'Météo et Soleil', 'Next Hours': 'Prochaines Heures', 'Sunrise': 'Lever du Soleil', 'Sunset': 'Coucher du Soleil', 'Close': 'Fermer',
@@ -2548,6 +2558,7 @@
             document.getElementById('cfgAmbientSecs').value = state.ambientSecs;
             document.getElementById('cfgAmbientMotion').value = state.ambientMotion;
             document.getElementById('cfgHomePhotos').value = state.homePhotos;
+            document.getElementById('cfgKeepAwake').value = state.keepAwake;
             document.getElementById('cfgUnsplashKey').value = state.unsplashKey;
 
             renderAppSelectorGrid();
@@ -2966,6 +2977,40 @@
             else if (!wanted && homePhotoPlayer.on) homePhotoPlayer.stop();
         }
 
+        // --- Keep LG's own screensaver away while ours shows ---
+        // A playing video holds the TV's screensaver off (checked on an LG UR91, webOS 23). A 64x36 canvas stream
+        // shown in a 4x4 px muted <video> is enough; engines without canvas.captureStream just skip it.
+        var keepAwakeTimer = null;
+
+        function keepAwakeStart() {
+            if (state.keepAwake !== 'on' || keepAwakeTimer !== null) return;
+            var canvas = document.getElementById('keepAwakeCanvas');
+            var video = document.getElementById('keepAwakeVideo');
+            if (!canvas || !video || !canvas.captureStream) return;
+            try {
+                var ctx = canvas.getContext('2d');
+                keepAwakeTimer = setInterval(function() {
+                    ctx.fillStyle = 'hsl(' + (Date.now() / 20 % 360) + ',60%,35%)';
+                    ctx.fillRect(0, 0, 64, 36);
+                }, 200);
+                video.srcObject = canvas.captureStream(10);
+                var played = video.play();
+                if (played && played.catch) played.catch(function() {});
+            } catch (e) {
+                keepAwakeStop();
+            }
+        }
+
+        function keepAwakeStop() {
+            clearInterval(keepAwakeTimer);
+            keepAwakeTimer = null;
+            var video = document.getElementById('keepAwakeVideo');
+            if (video) {
+                try { video.pause(); } catch (e) {}
+                video.srcObject = null;
+            }
+        }
+
         // --- OLED-Safe Idle Screensaver ---
         function idleTimeoutMs() {
             var mins = parseInt(state.idleMins, 10);
@@ -2991,6 +3036,7 @@
             syncHomePhotos();
             screensaverOverlay.classList.add('active');
             if (ambientReady()) ambientStart();
+            keepAwakeStart();
             shiftScreensaverClock();
             pixelShiftTimer = setInterval(shiftScreensaverClock, PIXEL_SHIFT_MS);
         }
@@ -3001,6 +3047,7 @@
             screensaverOverlay.classList.remove('active');
             clearInterval(pixelShiftTimer);
             ambientStop();
+            keepAwakeStop();
         }
 
         function markActivity() {
@@ -3039,6 +3086,7 @@
             document.getElementById('cfgAmbientSecs').value = '90';
             document.getElementById('cfgAmbientMotion').value = 'kenburns';
             document.getElementById('cfgHomePhotos').value = 'off';
+            document.getElementById('cfgKeepAwake').value = 'on';
             document.getElementById('cfgUnsplashKey').value = '';
             renderAppSelectorGrid();
             refreshModalNavList();
@@ -3063,6 +3111,7 @@
             state.ambientSecs = document.getElementById('cfgAmbientSecs').value;
             state.ambientMotion = document.getElementById('cfgAmbientMotion').value;
             state.homePhotos = document.getElementById('cfgHomePhotos').value;
+            state.keepAwake = document.getElementById('cfgKeepAwake').value;
             state.unsplashKey = document.getElementById('cfgUnsplashKey').value.trim();
 
             localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
@@ -3079,6 +3128,7 @@
             localStorage.setItem('fmtv_ambient_secs', state.ambientSecs);
             localStorage.setItem('fmtv_ambient_motion', state.ambientMotion);
             localStorage.setItem('fmtv_home_photos', state.homePhotos);
+            localStorage.setItem('fmtv_keep_awake', state.keepAwake);
             localStorage.setItem('fmtv_unsplash_key', state.unsplashKey);
 
             applyStaticTranslations();

@@ -110,6 +110,10 @@ setTimeout(function () {
   ['cfgIdleMins', 'cfgAmbient', 'cfgAmbientSecs', 'cfgAmbientMotion', 'cfgUnsplashKey'].forEach(function (id) {
     if (!document.getElementById(id)) out.ambient.push('missing #' + id);
   });
+  eq('state keep awake', state.keepAwake, 'on');
+  if (!document.getElementById('cfgKeepAwake')) out.ambient.push('missing #cfgKeepAwake');
+  if (!document.getElementById('keepAwakeVideo')) out.ambient.push('missing #keepAwakeVideo');
+  if (!Object.prototype.hasOwnProperty.call(I18N.pt, 'Keep LG Screensaver Away')) out.ambient.push('no translation: Keep LG Screensaver Away');
   eq('state home photos', state.homePhotos, 'off');
   if (!document.getElementById('cfgHomePhotos')) out.ambient.push('missing #cfgHomePhotos');
   if (!document.getElementById('homePhotos')) out.ambient.push('missing #homePhotos');
@@ -519,6 +523,50 @@ setTimeout(function () {
         done();
       }, 200);
     }, 400);
+  });
+
+  var awakeVideo = document.getElementById('keepAwakeVideo'), awakeCanvas = document.getElementById('keepAwakeCanvas');
+  if (typeof keepAwakeStart !== 'function') { fails.push('keepAwakeStart missing'); write(); return; }
+
+  steps.push(function (done) { // On: the hidden video plays only while our screensaver shows
+    seedMany([photo('k1', 'Ann')]);
+    state.ambient = 'on'; state.unsplashKey = 'k'; state.keepAwake = 'on'; state.homePhotos = 'off';
+    window.fetch = fakeFetch(200, '49', []);
+    eq('awake idle', awakeVideo.srcObject === null || awakeVideo.srcObject === undefined, true);
+    enterScreensaver();
+    setTimeout(function () {
+      eq('awake playing', !!awakeVideo.srcObject, true);
+      eq('awake timer', keepAwakeTimer !== null, true);
+      exitScreensaver();
+      eq('awake stopped', awakeVideo.srcObject === null || awakeVideo.srcObject === undefined, true);
+      eq('awake timer cleared', keepAwakeTimer, null);
+      done();
+    }, 300);
+  });
+  steps.push(function (done) { // Off: nothing plays; the black-clock screensaver is unaffected
+    reset(); state.keepAwake = 'off';
+    enterScreensaver();
+    setTimeout(function () {
+      eq('awake off video', !!awakeVideo.srcObject, false);
+      eq('awake off timer', keepAwakeTimer, null);
+      exitScreensaver();
+      state.keepAwake = 'on';
+      done();
+    }, 200);
+  });
+  steps.push(function (done) { // an engine without captureStream is skipped without errors
+    reset(); state.keepAwake = 'on';
+    awakeCanvas.captureStream = undefined; // shadows the prototype method on this element
+    var threw = false;
+    try { enterScreensaver(); } catch (e) { threw = true; }
+    setTimeout(function () {
+      eq('awake no captureStream threw', threw, false);
+      eq('awake no captureStream video', !!awakeVideo.srcObject, false);
+      eq('awake no captureStream timer', keepAwakeTimer, null);
+      exitScreensaver();
+      delete awakeCanvas.captureStream;
+      done();
+    }, 200);
   });
 
   (function run(i) {
