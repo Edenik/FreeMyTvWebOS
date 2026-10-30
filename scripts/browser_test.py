@@ -1675,6 +1675,65 @@ setTimeout(function () {
     done();
   });
 
+  steps.push(function (done) { // wizard polish: the saved look is marked, Continue stays on screen with 45 apps, this app and duplicates are not listed
+    var keepSetup = localStorage.getItem('fmtv_setup_done');
+    var oldTheme = state.theme, keepCat = state.catalog, keepFav = state.favorites.slice();
+    function key(k) { handleWizardKey({ key: k, keyCode: 0, preventDefault: function () {} }); }
+    var wzq = function (sel) { return document.querySelectorAll('#wizardOverlay ' + sel); };
+    state.theme = 'oled'; applyTheme();
+    openWizard(); wizardGo(3);
+    eq('look: one selected badge', wzq('.wz-look .wz-sel').length, 1);
+    eq('look: badge sits on the saved theme card', wzq('.wz-look.on')[0].dataset.look + ':' + wzq('.wz-look .wz-sel')[0].parentNode.dataset.look, 'oled:oled');
+    eq('look: badge label', wzq('.wz-sel')[0].textContent, t('Selected'));
+    eq('look: selected card keeps a blue outline', getComputedStyle(wzq('.wz-look.on')[0]).borderTopColor, 'rgb(77, 163, 255)');
+    eq('look: initial focus is the saved card', wizard.items[wizard.focus].dataset.look, 'oled');
+    key('ArrowRight');
+    eq('look: moving previews the next card', state.theme, 'day');
+    eq('look: the badge stays on the saved card', wzq('.wz-look .wz-sel')[0].parentNode.dataset.look, 'oled');
+    eq('look: preview is not saved', localStorage.getItem('fmtv_theme') === 'day', false);
+    key('Escape');
+    eq('look: leaving without choosing restores the saved theme', state.theme, 'oled');
+    wizardGo(3); key('ArrowLeft'); key('ArrowLeft');
+    eq('look: previewing again', state.theme !== 'oled', true);
+    closeWizard();
+    eq('look: closing the wizard restores the saved theme', state.theme, 'oled');
+    openWizard(); wizardGo(3); key('ArrowRight'); key('Enter');
+    eq('look: OK saves the card', state.theme + ':' + localStorage.getItem('fmtv_theme'), 'day:day');
+    eq('look: badge moved to the picked card', wzq('.wz-look .wz-sel')[0].parentNode.dataset.look, 'day');
+    eq('look: still exactly one badge', wzq('.wz-sel').length, 1);
+    closeWizard();
+    state.theme = oldTheme; try { localStorage.setItem('fmtv_theme', oldTheme); } catch (e) {} applyTheme();
+
+    var many = [], i;
+    for (i = 0; i < 45; i++) many.push({ id: 'app.n' + i, title: 'Application ' + i, tag: 'Installed App', desc: '', color: '#0a84ff', badge: 'APP', bg: '#123' });
+    many.push({ id: 'app.n3-copy', title: 'application 3', tag: 'Installed App', desc: '', color: '#0a84ff', badge: 'APP', bg: '#123' });
+    many.push({ id: 'app.n4', title: 'Same id again', tag: 'Installed App', desc: '', color: '#0a84ff', badge: 'APP', bg: '#123' });
+    many.push({ id: 'org.webos.freemytv', title: 'Free My TV', tag: 'Installed App', desc: '', color: '#0a84ff', badge: 'FMT', bg: '#123' });
+    many.push({ id: 'other.id', title: 'free my tv', tag: 'Installed App', desc: '', color: '#0a84ff', badge: 'FMT', bg: '#123' });
+    state.catalog = many; state.favorites = ['app.n0'];
+    openWizard(); wizardGo(2);
+    var names = [].map.call(wzq('.wz-tile .wz-tile-name'), function (n) { return n.textContent.toLowerCase(); });
+    eq('apps: 45 tiles after de-duplication', names.length, 45);
+    eq('apps: no duplicate names', names.filter(function (n, k) { return names.indexOf(n) !== k; }).length, 0);
+    eq('apps: this app is not listed', names.indexOf('free my tv'), -1);
+    var cont = wzq('.wz-footer .wz-primary')[0].getBoundingClientRect();
+    eq('apps: Continue stays on screen with 45 apps', cont.bottom <= 1080 && cont.top >= 0, true);
+    var scr = document.getElementById('wzScroll');
+    eq('apps: grid area scrolls instead of growing', scr.scrollHeight > scr.clientHeight, true);
+    wizard.focus = 40; paintWizardFocus();
+    var tileRect = wizard.items[40].getBoundingClientRect(), scrRect = scr.getBoundingClientRect();
+    eq('apps: focused tile is scrolled into view', tileRect.top >= scrRect.top - 1 && tileRect.bottom <= scrRect.bottom + 1, true);
+    wizard.focus = 40; key('ArrowDown'); key('ArrowDown');
+    eq('apps: Down from the last rows reaches Continue', wizard.items[wizard.focus].classList.contains('wz-primary'), true);
+    closeWizard();
+    state.catalog = [{ id: 'keep.me', title: 'Keep Me', tag: 'x', desc: '', color: '#000', badge: 'K', bg: '#000' }];
+    addLaunchPoints([{ id: 'org.webos.freemytv', title: 'Free My TV' }, { id: 'x.self', title: 'FREE MY TV' }, { id: 'dup.keep', title: 'keep me' }, { id: 'new.one', title: 'New One' }, { id: 'new.two', title: 'new one' }]);
+    eq('discovery: skips this app and duplicate names', state.catalog.map(function (c) { return c.id; }).join(','), 'keep.me,new.one');
+    state.catalog = keepCat; state.favorites = keepFav; renderAppsShelf();
+    if (keepSetup === null) localStorage.removeItem('fmtv_setup_done'); else localStorage.setItem('fmtv_setup_done', keepSetup);
+    done();
+  });
+
   steps.push(function (done) { // profiles swap shelf, look and name; a locked profile hides the settings buttons
     localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
     var base = snapshotProfile();
