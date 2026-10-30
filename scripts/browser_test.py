@@ -1246,6 +1246,26 @@ setTimeout(function () {
     eq('pickup cleared again', document.getElementById('pickupSection').hidden, true);
     done();
   });
+  steps.push(function (done) { // D-pad focus draws a white ring on every kind of focusable element
+    var ids = ['customizeBtn', 'tvSettingsBtn', 'weatherWidget', 'tabMovies'];
+    var els = ids.map(function (id) { return document.getElementById(id); });
+    var tile = document.querySelector('.app-tile'), card = document.querySelector('.pick-card');
+    if (tile) els.push(tile);
+    if (card) els.push(card);
+    localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on';
+    recordLaunch('netflix', Date.now()); renderPickup();
+    var pc = document.querySelector('#pickupRow .pickup-card');
+    if (pc) els.push(pc);
+    els.forEach(function (el, i) {
+      el.classList.add('focused');
+      var cs = getComputedStyle(el);
+      eq('ring style ' + i, cs.outlineStyle, 'solid');
+      eq('ring width ' + i, cs.outlineWidth, '3px');
+      el.classList.remove('focused');
+    });
+    localStorage.removeItem('fmtv_launch_hist'); renderPickup();
+    done();
+  });
   steps.push(function (done) { // an HDMI row changes its device with Right and saves at once
     var hd = hdmiSettings()[0];
     if (!hd) { fails.push('no HDMI row in the test catalog'); done(); return; }

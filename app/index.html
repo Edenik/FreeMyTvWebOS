@@ -537,6 +537,14 @@
             background: rgba(255, 255, 255, 0.14);
         }
 
+        /* One focus language: white ring + size + glow. Colour alone never marks focus. */
+        .header-btn.focused, .weather-widget.focused, .app-tile.focused, .pick-card.focused,
+        .picks-tab.focused, .scene-chip.focused {
+            outline: 3px solid #ffffff;
+            outline-offset: 3px;
+        }
+        .pickup-card.focused { outline: 3px solid #ffffff; outline-offset: 6px; border-radius: 14px; }
+
         .pick-poster {
             width: 92px;
             height: 100%;
@@ -3953,7 +3961,6 @@
         applyPerfMode();
         applyTextSize();
         applyTrendingClass();
-        renderPickup();
         renderAppsShelf();
         renderPicks(FALLBACK_MOVIES);
         applyTheme();
