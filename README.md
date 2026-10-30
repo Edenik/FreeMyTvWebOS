@@ -149,6 +149,7 @@ Some newer webOS releases block Developer Mode apps from listing installed apps.
 | **City Name** | Type any city (e.g., `São Paulo`, `Lisbon`, `New York`) for live Open-Meteo weather and accurate local sunset times, or leave blank for automatic IP geolocation. |
 | **Theme Mode** | Choose `Auto (Follows Sunset)`, `Deep Midnight`, `Pure OLED Black`, or `Daylight Blue`. |
 | **Clock Format** | Toggle between `24-Hour (20:30)` and `12-Hour (8:30 PM)` display. |
+| **Trending This Week** | `On` (default) or `Off`. Hides the movies and shows row on the home screen; the row is skipped by the remote and stops fetching. |
 | **Performance Mode** | Choose between `Standard (Glass & Glow)` and `High Performance (60 FPS Boost)` to disable heavy backdrop filters on resource-constrained TVs. |
 | **TMDB API Key** | Paste a free [TMDB API Key](https://www.themoviedb.org/settings/api) for live weekly trending movies & shows, or leave empty to use the built-in zero-key live popular feed. |
 | **Screensaver Starts After** | Idle time before the screensaver starts: 1, 3, 5, 10 or 30 minutes. Applies to the photo and the black-clock screensaver. |

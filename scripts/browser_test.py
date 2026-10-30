@@ -320,6 +320,22 @@ setTimeout(function () {
       }, 400);
     }, 400);
   });
+  steps.push(function (done) { // Trending This Week can be hidden: the row disappears, leaves the focus list and stops fetching
+    var sec = document.querySelector('.picks-section'), fetched = 0, realFetch = window.fetch;
+    window.fetch = function () { fetched++; return realFetch.apply(window, arguments); };
+    eq('trending default on', state.showTrending, 'on');
+    state.showTrending = 'off'; applyTrendingClass(); refreshMainNavList();
+    eq('trending hidden class', sec.classList.contains('picks-off'), true);
+    eq('trending hidden', sec.offsetParent === null, true);
+    eq('trending out of nav', mainNavItems.indexOf(document.getElementById('tabMovies')), -1);
+    fetchTrendingPicks();
+    eq('trending off no fetch', fetched, 0);
+    state.showTrending = 'on'; applyTrendingClass(); refreshMainNavList();
+    eq('trending shown', sec.offsetParent !== null, true);
+    eq('trending in nav', mainNavItems.indexOf(document.getElementById('tabMovies')) !== -1, true);
+    window.fetch = realFetch;
+    done();
+  });
   steps.push(function (done) { // Photo Brightness scales the opacity (capped at 1); Clock Position sets the overlay class
     seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none';
     eq('bright soft', (state.ambientBright = 'soft', ambientBrightness()), 0.75);
