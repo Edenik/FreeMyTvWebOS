@@ -1422,7 +1422,7 @@ setTimeout(function () {
       ['lang', 'city', 'ipLocate'],
       ['homePhotos', 'ambient', 'idleMins', 'ambientSecs', 'ambientMotion', 'ambientSpeed', 'ambientBright', 'nightDim', 'clockPos', 'keepAwake'],
       ['unsplashKey', 'tmdbKey'],
-      ['runSetup', 'reset', 'eraseAll', 'version']
+      ['runSetup', 'reset', 'eraseAll', 'version', 'about']
     ];
     var seen = {}, dupes = 0;
     SETTINGS.forEach(function (d) { if (seen[d.id]) dupes++; seen[d.id] = true; });
@@ -1431,7 +1431,7 @@ setTimeout(function () {
       eq('group ' + c + ' lists its settings in order', SETTINGS.filter(function (d) { return d.cat === c; }).map(function (d) { return d.id; }).join(','), ids.join(','));
     });
     eq('every setting is in a group', SETTINGS.filter(function (d) { return !(d.cat >= 0 && d.cat < 7); }).length, 0);
-    eq('Reset & About rows', settingsRowsFor(6).map(function (d) { return d.id; }).join(','), 'runSetup,reset,eraseAll,version');
+    eq('Reset & About rows', settingsRowsFor(6).map(function (d) { return d.id; }).join(','), 'runSetup,reset,eraseAll,version,about');
     eq('reset label', findSetting('reset').label, 'Reset settings');
     eq('version row shows the version', settingsRowsFor(6)[3].value(), APP_VERSION);
 
@@ -1458,14 +1458,14 @@ setTimeout(function () {
       press('ArrowUp');
       eq('group ' + c + ' Up from the first row leaves for the categories', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:' + c);
     }
-    var note = modalEl().querySelector('#settingsNote');
-    eq('independence note text', !!note && note.textContent, t('Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.'));
-    eq('independence note is not focusable', !!note && note.tagName === 'DIV' && !note.classList.contains('nav-item') && !note.classList.contains('settings-cat') && !note.hasAttribute('tabindex') && !note.hasAttribute('data-i'), true);
-    var nr = note.getBoundingClientRect(), clr = modalEl().querySelector('.settings-close').getBoundingClientRect(), lcr = modalEl().querySelectorAll('.settings-cat')[6].getBoundingClientRect();
-    eq('note sits between the categories and Close without overlap', nr.top >= lcr.bottom - 1 && nr.bottom <= clr.top + 1 && nr.height > 0, true);
-    var hr = document.getElementById('settingsHints').getBoundingClientRect(), pr = modalEl().querySelector('.settings-panel').getBoundingClientRect();
+    eq('no note in the left column', modalEl().querySelector('#settingsNote') === null && modalEl().querySelectorAll('#settingsCats .settings-note').length, 0);
+    var clr = modalEl().querySelector('.settings-close').getBoundingClientRect(), hr = document.getElementById('settingsHints').getBoundingClientRect();
     eq('Close ends above the hint bar', clr.bottom <= hr.top - 4, true);
-    eq('note is fully inside the modal', nr.top >= pr.top && nr.bottom <= pr.bottom && nr.left >= pr.left && nr.right <= pr.right, true);
+    settingsUi.zone = 'cats'; settingsUi.catFocus = 6; settingsUi.cat = 6; renderSettings();
+    var aboutRow = modalEl().querySelector('#settingsRows .settings-row[data-id="about"]');
+    eq('About row holds the independence note', !!aboutRow && aboutRow.textContent.indexOf(t('Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.')) !== -1, true);
+    eq('Reset & About has 5 rows with About last', settingsRowsFor(6).length === 5 && settingsRowsFor(6)[4].id === 'about', true);
+    eq('About row is info type (no OK action)', settingsRowsFor(6)[4].type, 'info');
     closeSettingsModal();
 
     // Reset keeps people and history
