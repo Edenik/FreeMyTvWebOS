@@ -145,6 +145,7 @@ Some newer webOS releases block Developer Mode apps from listing installed apps.
 
 | Setting | What It Does |
 |---|---|
+| **TV Settings button** | Next to Customize in the header: opens LG's built-in Settings app (picture, sound, network) without leaving the remote's D-pad. |
 | **App Shelf Selector** | Auto-discovers apps installed on your TV (`listLaunchPoints`) so you can pick up to 8 favorites for your glass dock. |
 | **City Name** | Type any city (e.g., `São Paulo`, `Lisbon`, `New York`) for live Open-Meteo weather and accurate local sunset times, or leave blank for automatic IP geolocation. |
 | **Theme Mode** | Choose `Auto (Follows Sunset)`, `Deep Midnight`, `Pure OLED Black`, or `Daylight Blue`. |

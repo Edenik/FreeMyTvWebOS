@@ -1180,6 +1180,9 @@
                 <button class="header-btn nav-item" id="customizeBtn" data-tag="Personalize" data-title="Customize Shelf & Settings" data-desc="Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.">
                     <span>⚙️ Customize</span>
                 </button>
+                <button class="header-btn nav-item" id="tvSettingsBtn" data-tag="Personalize" data-title="TV Settings" data-desc="Open the built-in LG TV settings (picture, sound, network and more).">
+                    <span>🔧 TV Settings</span>
+                </button>
                 <div class="weather-widget nav-item" id="weatherWidget" data-tag="Live Forecast" data-title="Local Weather & Sunset" data-desc="Live temperature and sky conditions powered by Open-Meteo.">
                     <span id="weatherIcon">☀️</span>
                     <div>
@@ -1451,7 +1454,7 @@
 
         var I18N = {
             pt: {
-                '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritos', 'Reorder': 'Reordenar', 'Done': 'Concluir', 'Cancel': 'Cancelar',
+                '🔧 TV Settings': '🔧 Config. da TV', 'TV Settings': 'Config. da TV', 'Open the built-in LG TV settings (picture, sound, network and more).': 'Abrir as configurações internas da TV LG (imagem, som, rede e mais).', '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritos', 'Reorder': 'Reordenar', 'Done': 'Concluir', 'Cancel': 'Cancelar',
                 'Trending This Week': 'Em Alta na Semana', 'Movies': 'Filmes', 'Shows': 'Séries',
                 'Customize Free My TV': 'Personalizar o Free My TV', 'Press BACK or ESC to close': 'Pressione VOLTAR ou ESC para fechar',
                 '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Escolha os Apps da Prateleira (Clique para Alternar)',
@@ -1527,7 +1530,7 @@
                 'OK or Right: open': 'OK ou Direita: abrir'
             },
             es: {
-                '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritas', 'Reorder': 'Reordenar', 'Done': 'Listo', 'Cancel': 'Cancelar',
+                '🔧 TV Settings': '🔧 Ajustes del TV', 'TV Settings': 'Ajustes del TV', 'Open the built-in LG TV settings (picture, sound, network and more).': 'Abrir los ajustes integrados del TV LG (imagen, sonido, red y más).', '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritas', 'Reorder': 'Reordenar', 'Done': 'Listo', 'Cancel': 'Cancelar',
                 'Trending This Week': 'Tendencias de la Semana', 'Movies': 'Películas', 'Shows': 'Series',
                 'Customize Free My TV': 'Personalizar Free My TV', 'Press BACK or ESC to close': 'Pulsa ATRÁS o ESC para cerrar',
                 '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Elige las Apps del Estante (Clic para Alternar)',
@@ -1603,7 +1606,7 @@
                 'OK or Right: open': 'OK o Derecha: abrir'
             },
             de: {
-                '⚙️ Customize': '⚙️ Anpassen', 'Favorite Apps': 'Lieblings-Apps', 'Reorder': 'Sortieren', 'Done': 'Fertig', 'Cancel': 'Abbrechen',
+                '🔧 TV Settings': '🔧 TV-Einstellungen', 'TV Settings': 'TV-Einstellungen', 'Open the built-in LG TV settings (picture, sound, network and more).': 'Die integrierten LG-TV-Einstellungen öffnen (Bild, Ton, Netzwerk und mehr).', '⚙️ Customize': '⚙️ Anpassen', 'Favorite Apps': 'Lieblings-Apps', 'Reorder': 'Sortieren', 'Done': 'Fertig', 'Cancel': 'Abbrechen',
                 'Trending This Week': 'Trends der Woche', 'Movies': 'Filme', 'Shows': 'Serien',
                 'Customize Free My TV': 'Free My TV anpassen', 'Press BACK or ESC to close': 'Zum Schließen ZURÜCK oder ESC drücken',
                 '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Apps für die Leiste wählen (Klicken zum Umschalten)',
@@ -1679,7 +1682,7 @@
                 'OK or Right: open': 'OK oder Rechts: öffnen'
             },
             fr: {
-                '⚙️ Customize': '⚙️ Personnaliser', 'Favorite Apps': 'Applis Favorites', 'Reorder': 'Réorganiser', 'Done': 'Terminé', 'Cancel': 'Annuler',
+                '🔧 TV Settings': '🔧 Réglages TV', 'TV Settings': 'Réglages TV', 'Open the built-in LG TV settings (picture, sound, network and more).': 'Ouvrir les réglages intégrés de la TV LG (image, son, réseau et plus).', '⚙️ Customize': '⚙️ Personnaliser', 'Favorite Apps': 'Applis Favorites', 'Reorder': 'Réorganiser', 'Done': 'Terminé', 'Cancel': 'Annuler',
                 'Trending This Week': 'Tendances de la Semaine', 'Movies': 'Films', 'Shows': 'Séries',
                 'Customize Free My TV': 'Personnaliser Free My TV', 'Press BACK or ESC to close': 'Appuyez sur RETOUR ou ÉCHAP pour fermer',
                 '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Choisissez les Applis de l’Étagère (Cliquez pour Basculer)',
@@ -2287,13 +2290,16 @@
         // legacy fallback below also interpolates them into a shell command).
         var CONTENT_TARGET_RE = /^https:\/\/www\.youtube\.com\/tv\?v=[A-Za-z0-9_-]{6,15}$/;
 
-        function launchApp(appId, contentTarget) {
+        var LG_SETTINGS_APP = 'com.palm.app.settings';
+
+        // titleOverride names apps that are not in the shelf catalog (the LG Settings app) in the toasts.
+        function launchApp(appId, contentTarget, titleOverride) {
             var launchParams = { id: appId };
             if (contentTarget && CONTENT_TARGET_RE.test(contentTarget)) launchParams.params = { contentTarget: contentTarget };
             else contentTarget = '';
             if (shelfEdit || pendingLaunch) return; // Ignore repeated remote presses while a request is pending.
             var app = arrFind(state.catalog, function(item) { return item.id === appId; });
-            var title = app ? (devicePreset(app, state.hdmiDevices).title || app.title) : appId;
+            var title = app ? (devicePreset(app, state.hdmiDevices).title || app.title) : (titleOverride || appId);
             if (!window.webOS || !window.webOS.service || typeof window.webOS.service.request !== 'function') {
                 showToast(t('Open %s on your LG TV. Launching is unavailable in this preview.', title), 5000);
                 return;
@@ -3163,6 +3169,10 @@
         document.getElementById('customizeBtn').addEventListener('click', openSettingsModal);
         document.getElementById('customizeBtn').addEventListener('mouseenter', function() {
             setMainFocus(document.getElementById('customizeBtn'));
+        });
+        document.getElementById('tvSettingsBtn').addEventListener('click', function() { launchApp(LG_SETTINGS_APP, '', t('TV Settings')); });
+        document.getElementById('tvSettingsBtn').addEventListener('mouseenter', function() {
+            setMainFocus(document.getElementById('tvSettingsBtn'));
         });
         document.getElementById('weatherWidget').addEventListener('click', function() {
             openDrawer();

@@ -336,6 +336,17 @@ setTimeout(function () {
     window.fetch = realFetch;
     done();
   });
+  steps.push(function (done) { // the TV Settings button launches the LG Settings app
+    var btn = document.getElementById('tvSettingsBtn'), got = null, oldWebOS = window.webOS;
+    eq('tv settings button', !!btn, true);
+    window.webOS = { service: { request: function (uri, o) { got = { uri: uri, o: o }; } } };
+    btn.click();
+    eq('tv settings uri', got && got.uri, 'luna://com.webos.applicationManager');
+    eq('tv settings id', got && got.o.parameters.id, 'com.palm.app.settings');
+    if (got) got.o.onSuccess({ returnValue: true });
+    window.webOS = oldWebOS;
+    done();
+  });
   steps.push(function (done) { // Photo Brightness scales the opacity (capped at 1); Clock Position sets the overlay class
     seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none';
     eq('bright soft', (state.ambientBright = 'soft', ambientBrightness()), 0.75);
