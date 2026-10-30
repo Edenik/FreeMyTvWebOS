@@ -551,6 +551,89 @@ setTimeout(function () {
       done();
     }, 400);
   });
+  steps.push(function (done) { // calm screensaver: quiet look without photos (hint for 60 s only without a key), photo look with them, night dimming in both
+    var ov = document.getElementById('screensaverOverlay'), wrap = document.getElementById('screensaverClockWrap');
+    var hint = document.getElementById('screensaverHint'), clock = document.getElementById('screensaverClock');
+    function cs(el, prop) { return getComputedStyle(el)[prop]; }
+    function still() { wrap.style.transition = 'none'; wrap.style.transform = 'none'; }
+    var realNight = window.nightFactor, realHintMs = SS_HINT_MS;
+    // 1. no key: quiet
+    seedCache(); state.ambient = 'on'; state.unsplashKey = ''; state.clockPos = 'bl'; state.nightDim = 'off';
+    enterScreensaver(); still();
+    eq('quiet: class without a key', ov.classList.contains('ss-quiet'), true);
+    eq('quiet: background', cs(ov, 'backgroundColor'), 'rgb(11, 13, 18)');
+    eq('quiet: clock 192px weight 300 #D3D8E1', cs(clock, 'fontSize') + '|' + cs(clock, 'fontWeight') + '|' + cs(clock, 'color'), '192px|300|rgb(211, 216, 225)');
+    var r = wrap.getBoundingClientRect();
+    eq('quiet: clock centered even with a corner setting', Math.abs((r.left + r.width / 2) - window.innerWidth / 2) < 3 && Math.abs((r.top + r.height / 2) - window.innerHeight / 2) < 3, true);
+    eq('quiet: hint shown with its text', cs(hint, 'display') + '|' + hint.textContent, 'block|' + t('Add photos in Settings, Screensaver'));
+    eq('quiet: hint 22px #8C95A4', cs(hint, 'fontSize') + '|' + cs(hint, 'color'), '22px|rgb(140, 149, 164)');
+    eq('quiet: date line has the long date', document.getElementById('screensaverDate').textContent.length > 8, true);
+    eq('quiet: date and weather are one inline line', cs(document.getElementById('screensaverDate'), 'display'), 'inline-block');
+    document.getElementById('screensaverWeather').textContent = '23° Tel Aviv';
+    eq('quiet: the weather part starts with a middle dot', getComputedStyle(document.getElementById('screensaverWeather'), ':before').content, '"·"');
+    eq('quiet: date 27px', cs(document.getElementById('screensaverDate'), 'fontSize'), '27px');
+    ssEnteredAt -= 61000; updateScreensaverHint();
+    eq('quiet: hint hidden after 61 s', ov.classList.contains('ss-hint') + '|' + cs(hint, 'display'), 'false|none');
+    // the real timer path
+    exitScreensaver(); SS_HINT_MS = 60; enterScreensaver();
+    eq('quiet: hint back for a new run', ov.classList.contains('ss-hint'), true);
+    setTimeout(function () {
+      eq('quiet: hint timer hides it', ov.classList.contains('ss-hint'), false);
+      SS_HINT_MS = realHintMs;
+      // night dimming in the quiet look
+      exitScreensaver();
+      eq('exit clears quiet and hint', ov.classList.contains('ss-quiet') || ov.classList.contains('ss-hint'), false);
+      state.nightDim = 'on'; window.nightFactor = function () { return 0.5; };
+      enterScreensaver(); still();
+      eq('quiet: night dimming scales the clock', wrap.style.opacity, '0.5');
+      exitScreensaver();
+      eq('exit clears the night opacity', wrap.style.opacity, '');
+      state.nightDim = 'off';
+      enterScreensaver();
+      eq('quiet: night dimming off leaves the clock at full strength', wrap.style.opacity, '1');
+      exitScreensaver();
+      window.nightFactor = realNight;
+      // 2. key, but ambient off: quiet, no hint (a key exists)
+      seedCache(); state.ambient = 'off'; state.unsplashKey = 'k';
+      enterScreensaver();
+      eq('quiet: ambient off', ov.classList.contains('ss-quiet'), true);
+      eq('quiet: no hint when a key is set', ov.classList.contains('ss-hint') + '|' + cs(hint, 'display'), 'false|none');
+      exitScreensaver();
+      // 3. key and an empty cache: quiet, no hint
+      reset(); state.ambient = 'on'; state.unsplashKey = 'k';
+      enterScreensaver();
+      eq('quiet: empty cache', ov.classList.contains('ss-quiet'), true);
+      eq('quiet: empty cache and a key shows no hint', ov.classList.contains('ss-hint'), false);
+      exitScreensaver();
+      // 4. photos: no quiet, bottom-left, 144px
+      seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none'; state.clockPos = 'bl'; state.nightDim = 'on';
+      window.nightFactor = function () { return 0.5; };
+      window.fetch = fakeFetch(200, '49', []);
+      enterScreensaver(); still();
+      eq('photo: no quiet class', ov.classList.contains('ss-quiet'), false);
+      eq('photo: no hint', cs(hint, 'display'), 'none');
+      eq('photo: background stays black', cs(ov, 'backgroundColor'), 'rgb(0, 0, 0)');
+      eq('photo: clock 144px weight 300', cs(clock, 'fontSize') + '|' + cs(clock, 'fontWeight'), '144px|300');
+      eq('photo: date 27px', cs(document.getElementById('screensaverDate'), 'fontSize'), '27px');
+      eq('photo: the clock keeps full strength (the photo is what dims)', wrap.style.opacity, '');
+      var pr = wrap.getBoundingClientRect();
+      eq('photo: clock bottom-left', pr.left < window.innerWidth / 3 && pr.bottom > window.innerHeight * 0.66, true);
+      state.clockPos = 'tr'; applyClockPosition(); still();
+      var tr = wrap.getBoundingClientRect();
+      eq('photo: top-right position still works', tr.right > window.innerWidth * 0.66 && tr.top < window.innerHeight / 3, true);
+      state.clockPos = 'bl'; applyClockPosition();
+      setTimeout(function () {
+        var a = document.getElementById('ssPhotoA').style.opacity, b = document.getElementById('ssPhotoB').style.opacity;
+        var cr = document.getElementById('screensaverCredit');
+        eq('photo: credit bottom-right 20px', cs(cr, 'fontSize') + '|' + cs(cr, 'position') + '|' + (cr.getBoundingClientRect().right > window.innerWidth - 100 && cr.getBoundingClientRect().bottom > window.innerHeight - 100 ? 'right' : 'elsewhere'), '20px|absolute|right');
+        eq('photo: night dimming still scales the photo', a === '0.43' || b === '0.43', true);
+        exitScreensaver();
+        window.nightFactor = realNight; state.nightDim = 'off';
+        eq('exit removes quiet', ov.classList.contains('ss-quiet'), false);
+        done();
+      }, 400);
+    }, 200);
+  });
   steps.push(function (done) { // Sliding panels: six strips slide away to reveal the next photo, then are removed
     seedMany([photo('p1', 'Ann'), photo('p2', 'Bob')]);
     state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'panels'; state.ambientBright = 'normal';
