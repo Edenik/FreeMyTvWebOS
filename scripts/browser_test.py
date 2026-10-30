@@ -110,6 +110,8 @@ setTimeout(function () {
   ['cfgIdleMins', 'cfgAmbient', 'cfgAmbientSecs', 'cfgAmbientMotion', 'cfgUnsplashKey'].forEach(function (id) {
     if (!document.getElementById(id)) out.ambient.push('missing #' + id);
   });
+  var keyField = document.getElementById('cfgUnsplashKey');
+  eq('unsplash key field masked', keyField && keyField.type, 'password');
   ['Screensaver Starts After', '1 minute', '3 minutes', '5 minutes', '10 minutes', '30 minutes',
    'Ambient Photo Screensaver', 'Off', 'Photo Duration', '30 seconds', '90 seconds', 'Photo Motion',
    'Ken Burns (zoom & drift)', 'Drift only', 'None', 'Unsplash Access Key (Optional)',
