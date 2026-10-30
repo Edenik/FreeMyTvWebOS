@@ -251,7 +251,7 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 
 **Interfaces:**
 - Consumes: `ambientPlayer(cfg)` from Task 1; `ambientRead`, `ambientRefresh`, `ambientReady`, `screensaverOn`, `enterScreensaver`, `exitScreensaver`, `ambientSecs()`.
-- Produces: `state.homePhotos` (string `'on'|'off'`, default `'off'`, key `fmtv_home_photos`); element ids `cfgHomePhotos`, `homePhotos`, `hpPhotoA`, `hpPhotoB`, `homePhotoCredit`; `ambientCacheReady() -> boolean` (fetch available, key set, cache non-empty); `homePhotos` (a player instance); `homePhotosWanted() -> boolean`; `syncHomePhotos()` (starts or stops the home player to match the settings and screensaver state).
+- Produces: `state.homePhotos` (string `'on'|'off'`, default `'off'`, key `fmtv_home_photos`); element ids `cfgHomePhotos`, `homePhotos`, `hpPhotoA`, `hpPhotoB`, `homePhotoCredit`; `ambientCacheReady() -> boolean` (fetch available, key set, cache non-empty); `homePhotoPlayer` (a player instance); `homePhotosWanted() -> boolean`; `syncHomePhotos()` (starts or stops the home player to match the settings and screensaver state).
 
 - [ ] **Step 1: Add failing probe assertions and scenario steps**
 
@@ -554,7 +554,7 @@ Then, directly after the line `        function ambientStop() { screensaverPhoto
 ```
 
         // Photos behind the home screen dashboard: dimmer than the screensaver, paused while the screensaver shows.
-        var homePhotos = ambientPlayer({
+        var homePhotoPlayer = ambientPlayer({
             a: 'hpPhotoA', b: 'hpPhotoB', credit: 'homePhotoCredit', dimScale: 0.55, secs: ambientSecs,
             onStart: function() { document.getElementById('homePhotos').classList.add('active'); },
             onStop: function() { document.getElementById('homePhotos').classList.remove('active'); }
@@ -567,8 +567,8 @@ Then, directly after the line `        function ambientStop() { screensaverPhoto
         // Start or stop the home photos so they match the settings and the screensaver state.
         function syncHomePhotos() {
             var wanted = homePhotosWanted();
-            if (wanted && !homePhotos.on) homePhotos.start();
-            else if (!wanted && homePhotos.on) homePhotos.stop();
+            if (wanted && !homePhotoPlayer.on) homePhotoPlayer.start();
+            else if (!wanted && homePhotoPlayer.on) homePhotoPlayer.stop();
         }
 ```
 
