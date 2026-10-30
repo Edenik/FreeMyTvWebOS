@@ -100,6 +100,21 @@ setTimeout(function () {
     eq('greet name', greetingText(19, 'Noa'), t('Good evening') + ', Noa');
     eq('greet no name', greetingText(19, ''), t('Good evening'));
   }
+  if (need('wizardNeeded')) {
+    var keep = { done: localStorage.getItem('fmtv_setup_done'), fav: localStorage.getItem('fmtv_favorites'), city: state.city };
+    localStorage.removeItem('fmtv_setup_done'); localStorage.removeItem('fmtv_favorites'); state.city = '';
+    eq('wizard fresh', wizardNeeded(), true);
+    localStorage.setItem('fmtv_favorites', '["netflix"]');
+    eq('wizard existing user', wizardNeeded(), false);
+    localStorage.removeItem('fmtv_favorites'); state.city = 'Tel Aviv';
+    eq('wizard has city', wizardNeeded(), false);
+    state.city = ''; localStorage.setItem('fmtv_setup_done', '1');
+    eq('wizard done', wizardNeeded(), false);
+    localStorage.removeItem('fmtv_setup_done');
+    if (keep.done !== null) localStorage.setItem('fmtv_setup_done', keep.done);
+    if (keep.fav !== null) localStorage.setItem('fmtv_favorites', keep.fav);
+    state.city = keep.city;
+  }
   if (need('recordLaunch') && need('recentApps') && need('relativeWhen')) {
     localStorage.removeItem('fmtv_launch_hist');
     var T = new Date(2026, 9, 30, 21, 10).getTime();
@@ -1507,6 +1522,53 @@ setTimeout(function () {
     done();
   });
 
+  steps.push(function (done) { // the setup wizard walks every step with the remote and saves name, look and photos
+    var keepSetup = localStorage.getItem('fmtv_setup_done');
+    localStorage.removeItem('fmtv_setup_done');
+    var oldTheme = state.theme, oldName = state.userName, oldAmbient = state.ambient, oldFavs = state.favorites.slice();
+    function key(k) { handleWizardKey({ key: k, keyCode: 0, preventDefault: function () {} }); }
+    openWizard();
+    eq('wizard open', wizard.open && !document.getElementById('wizardOverlay').hidden, true);
+    eq('wizard step welcome', WIZARD_STEPS[wizard.step], 'welcome');
+    key('Enter');
+    eq('wizard step who', WIZARD_STEPS[wizard.step], 'who');
+    var nameInput = document.getElementById('wzName');
+    nameInput.value = 'Noa'; nameInput.dispatchEvent(new Event('input'));
+    eq('wizard name saved', state.userName, 'Noa');
+    nameInput.focus(); wizard.focus = 0; key('ArrowDown');
+    eq('wizard Down leaves a closed-keyboard input', wizard.focus === 1 && document.activeElement !== nameInput, true);
+    wizard.focus = wizard.items.length - 2; key('Enter');
+    eq('wizard step apps', WIZARD_STEPS[wizard.step], 'apps');
+    var firstApp = state.catalog[0].id, had = state.favorites.indexOf(firstApp) !== -1;
+    wizard.focus = 0; key('Enter');
+    eq('wizard toggles an app', state.favorites.indexOf(firstApp) !== -1, !had);
+    wizard.focus = wizard.items.length - 1; key('Enter');
+    eq('wizard step look', WIZARD_STEPS[wizard.step], 'look');
+    wizard.focus = 0; key('ArrowRight');
+    eq('wizard previews a look', state.theme, 'night');
+    key('Enter');
+    eq('wizard look confirm moves to Continue', wizard.focus, wizard.items.length - 1);
+    key('Enter');
+    eq('wizard step photos', WIZARD_STEPS[wizard.step], 'photos');
+    state.ambient = 'on'; renderWizard(); wizard.focus = 0; key('Enter');
+    eq('wizard photos toggle', state.ambient, 'off');
+    wizard.focus = 1; key('Enter');
+    eq('wizard step done', WIZARD_STEPS[wizard.step], 'done');
+    key('Enter');
+    eq('wizard closed', wizard.open, false);
+    eq('wizard remembered', localStorage.getItem('fmtv_setup_done'), '1');
+    eq('wizard no longer needed', wizardNeeded(), false);
+    openWizard(); key('Escape');
+    eq('wizard back on first step closes', wizard.open, false);
+    var runDef = settingDef('runSetup');
+    eq('run setup row', !!runDef && runDef.type === 'run', true);
+    state.theme = oldTheme; state.userName = oldName; state.ambient = oldAmbient; state.favorites = oldFavs;
+    try { localStorage.setItem('fmtv_theme', oldTheme); localStorage.setItem('fmtv_user_name', oldName); localStorage.setItem('fmtv_ambient', oldAmbient); localStorage.setItem('fmtv_favorites', JSON.stringify(oldFavs)); } catch (e) {}
+    applyTheme(); renderAppsShelf(); updateGreeting();
+    if (keepSetup === null) localStorage.removeItem('fmtv_setup_done'); else localStorage.setItem('fmtv_setup_done', keepSetup);
+    done();
+  });
+
   (function run(i) {
     if (i >= steps.length) { write(); return; }
     steps[i](function () { setTimeout(function () { run(i + 1); }, 100); });
@@ -1529,7 +1591,7 @@ def find_chrome(explicit):
 def run_language(chrome, lang, workdir):
     with open(APP, encoding="utf-8") as f:
         html = f.read()
-    html = html.replace("<head>", f'<head>{ERROR_HOOK}<script>localStorage.setItem("fmtv_lang","{lang}")</script>', 1)
+    html = html.replace("<head>", f'<head>{ERROR_HOOK}<script>localStorage.setItem("fmtv_lang","{lang}");localStorage.setItem("fmtv_setup_done","1")</script>', 1)
     html = html.replace("</body>", f"<script>{PROBE}</script><script>{SCENARIO}</script></body>")
     page = os.path.join(workdir, f"app_{lang}.html")
     with open(page, "w", encoding="utf-8") as f:

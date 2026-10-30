@@ -152,6 +152,7 @@ Some newer webOS releases block Developer Mode apps from listing installed apps.
 | **Clock Format** | Toggle between `24-Hour (20:30)` and `12-Hour (8:30 PM)` display. |
 | **Trending This Week** | `On` (default) or `Off`. Hides the movies and shows row on the home screen; the row is skipped by the remote and stops fetching. |
 | **Scenes** | `On` (default) or `Off`. Three one-press chips under the greeting: Movie night (opens your last-used streaming app, Pure OLED Black, home photos off), Game on (opens the first HDMI input you named as a console or PC) and Background music (opens Spotify). Back in Free My TV, the look returns as it was. |
+| **Run setup again** | Opens the first-run setup (welcome, name and city, apps, look, screensaver photos). It appears by itself only on a fresh install, every step can be skipped, and every choice stays editable in Customize. |
 | **Performance Mode** | Choose between `Standard (Glass & Glow)` and `High Performance (60 FPS Boost)` to disable heavy backdrop filters on resource-constrained TVs. |
 | **TMDB API Key** | Paste a free [TMDB API Key](https://www.themoviedb.org/settings/api) for live weekly trending movies & shows, or leave empty to use the built-in zero-key live popular feed. |
 | **Screensaver Starts After** | Idle time before the screensaver starts: 1, 3, 5, 10 or 30 minutes. Applies to the photo and the black-clock screensaver. |
@@ -364,6 +365,7 @@ Cada entrada HDMI é uma linha em **Prateleira e Entradas**, logo depois de **Ap
 | **Modo de Tema** | Escolha entre `Automático (Segue o Pôr do Sol)`, `Meia-Noite Profunda`, `Preto OLED Puro`, ou `Azul Diurno`. |
 | **Formato do Relógio** | Alterne entre exibição em `24 Horas (20:30)` ou `12 Horas (8:30 PM)`. |
 | **Cenas** | `Ligado` (padrão) ou `Desligado`. Três botões de um toque sob a saudação: Noite de filme (abre seu último app de streaming, Preto OLED Puro, fotos da tela inicial desligadas), Hora do jogo (abre a primeira entrada HDMI que você nomeou como console ou PC) e Música de fundo (abre o Spotify). Ao voltar ao Free My TV, o visual volta como era. |
+| **Repetir a configuração** | Abre a configuração inicial (boas-vindas, nome e cidade, apps, visual, fotos do protetor de tela). Ela aparece sozinha apenas em uma instalação nova, qualquer passo pode ser pulado e tudo continua editável em Personalizar. |
 | **Modo de Performance** | Escolha entre `Padrão (Vidro & Brilho)` ou `Alta Performance (60 FPS Boost)` para desativar filtros pesados de desfoque em TVs mais modestas. |
 | **Chave da API do TMDB** | Cole uma [chave gratuita da API do TMDB](https://www.themoviedb.org/settings/api) para ver filmes e séries em alta da semana ao vivo, ou deixe em branco para usar o feed ao vivo popular embutido (sem necessidade de chave). |
 | **Protetor de Tela Inicia Após** | Tempo parado antes do protetor de tela: 1, 3, 5, 10 ou 30 minutos. |
