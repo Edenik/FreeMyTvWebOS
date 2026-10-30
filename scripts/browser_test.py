@@ -1598,6 +1598,14 @@ setTimeout(function () {
     wizard.focus = wizard.items.length - 1; key('Enter');
     eq('wizard step look', WIZARD_STEPS[wizard.step], 'look');
     var wzq = function (sel) { return document.querySelectorAll('#wizardOverlay ' + sel); };
+    eq('t substitutes special characters literally', t('How should it look, %s?', "A$&B$'C$`D"), t('How should it look, %s?', 'X').split('X').join("A$&B$'C$`D"));
+    wizard.focus = wizard.items.length - 1; key('ArrowLeft');
+    eq('wizard footer Left from primary stays put without Skip', wizard.focus, wizard.items.length - 1);
+    wizardGo(4); wizard.focus = 1; key('ArrowLeft');
+    eq('wizard footer Left from primary goes to Skip', wizard.focus, 2);
+    key('ArrowRight');
+    eq('wizard footer Right from Skip goes to primary', wizard.focus, 1);
+    wizardGo(3);
     eq('wizard look eyebrow', wzq('.wz-eyebrow')[0].textContent, t('Step %s of %s', 4, 5));
     eq('wizard rail has 5 rows', wzq('.wz-rail-row').length, 5);
     eq('wizard rail one current row', wzq('.wz-rail-row.current').length, 1);

@@ -578,7 +578,7 @@
         .wz-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 30px; }
         .wz-head { display: flex; flex-direction: column; gap: 9px; }
         .wz-eyebrow { font-size: 19px; letter-spacing: 0.12em; text-transform: uppercase; color: #ffbd7a; font-weight: 600; }
-        .wz-title { font-size: 66px; font-weight: 700; line-height: 1.05; }
+        .wz-title { overflow-wrap: anywhere; font-size: 66px; font-weight: 700; line-height: 1.05; }
         .wz-lead { font-size: 27px; color: #b3bdd3; max-width: 1200px; }
         .wz-fields { display: flex; flex-direction: column; gap: 24px; max-width: 900px; }
         .wz-field { display: flex; flex-direction: column; gap: 9px; }
@@ -1915,7 +1915,9 @@
         function t(text) {
             var dict = I18N[currentLang()];
             var out = (dict && Object.prototype.hasOwnProperty.call(dict, text)) ? dict[text] : text;
-            for (var i = 1; i < arguments.length; i++) out = out.replace('%s', arguments[i]);
+            var args = arguments;
+            // A function replacer keeps $&, $' and $` in names literal.
+            for (var i = 1; i < args.length; i++) out = out.replace('%s', (function(v) { return function() { return String(v); }; })(args[i]));
             return out;
         }
 
@@ -4790,6 +4792,18 @@
             if (key === 'Enter') {
                 var item = wizard.items[wizard.focus];
                 if (item && item.onOk) item.onOk();
+                e.preventDefault();
+                return;
+            }
+            // The footer shows Skip on the left and the primary button on the right, while items keep primary before Skip.
+            var cur = wizard.items[wizard.focus];
+            if ((key === 'ArrowLeft' || key === 'ArrowRight') && cur && (cur.classList.contains('wz-primary') || cur.classList.contains('wz-skip'))) {
+                var other = null;
+                wizard.items.forEach(function(it) {
+                    if (key === 'ArrowLeft' && cur.classList.contains('wz-primary') && it.classList.contains('wz-skip')) other = it;
+                    if (key === 'ArrowRight' && cur.classList.contains('wz-skip') && it.classList.contains('wz-primary')) other = it;
+                });
+                if (other) { wizard.focus = wizard.items.indexOf(other); paintWizardFocus(); }
                 e.preventDefault();
                 return;
             }
