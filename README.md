@@ -147,7 +147,7 @@ Some newer webOS releases block Developer Mode apps from listing installed apps.
 |---|---|
 | **TV Settings button** | Next to Customize in the header: opens LG's built-in Settings app (picture, sound, network) without leaving the remote's D-pad. |
 | **App Shelf Selector** | Auto-discovers apps installed on your TV (`listLaunchPoints`) so you can pick up to 8 favorites for your glass dock. |
-| **City Name** | Type any city (e.g., `São Paulo`, `Lisbon`, `New York`) for live Open-Meteo weather and accurate local sunset times, or leave blank for automatic IP geolocation. |
+| **City Name** | Type any city (e.g., `São Paulo`, `Lisbon`, `New York`) for live Open-Meteo weather and accurate local sunset times, or leave blank for São Paulo, or turn on *Auto-locate by IP* to find your city from your IP address. |
 | **Theme Mode** | Choose `Auto (Follows Sunset)`, `Deep Midnight`, `Pure OLED Black`, or `Daylight Blue`. |
 | **Clock Format** | Toggle between `24-Hour (20:30)` and `12-Hour (8:30 PM)` display. |
 | **Trending This Week** | `On` (default) or `Off`. Hides the movies and shows row on the home screen; the row is skipped by the remote and stops fetching. |
@@ -189,7 +189,7 @@ See the full [ROADMAP.md](ROADMAP.md) for detailed technical specifications.
 | Unsplash (`api.unsplash.com`) | Screensaver and home photos | Only with your key (Customize → Accounts & Keys) |
 | Poster and photo images (`image.tmdb.org`, TVMaze image hosts, Unsplash's image CDN) | The posters and photos you see | Only while those rows or photos are displayed (the bundled curated movie picks load their posters from `image.tmdb.org`, no key needed) |
 
-In short: the only services contacted are Open-Meteo (weather), TMDB (trending titles, with your key; otherwise TVMaze for shows and bundled curated picks for movies), Unsplash (photos, only with your key), their image hosts, and ipapi.co (optional IP-based city lookup, off by default). Only the city or coordinates, your own API keys and, if you turn it on, your IP address are sent, each to its own service; nothing else is shared and there is no account. That is what the home screen's "No ads. No account. Your settings stay on this TV." line means.
+In short: the only services contacted are Open-Meteo (weather), TMDB (trending titles, with your key; otherwise TVMaze for shows and bundled curated picks for movies), Unsplash (photos, only with your key), their image hosts, and ipapi.co (optional IP-based city lookup, off by default). Only the city or coordinates and your own API keys are sent, each to its own service. Like on any website, every request exposes your public IP to the server you contact; turning on *Auto-locate by IP* additionally sends a request to ipapi.co, which uses your IP to look up your city. Nothing else is shared and there is no account. That is what the home screen's "No ads. No account. Your settings stay on this TV." line means.
 
 No telemetry, no ads, no other destinations.
 
@@ -359,7 +359,7 @@ Cada entrada HDMI é uma linha em **Prateleira e Entradas**, logo depois de **Ap
 | Configuração | O Que Faz |
 |---|---|
 | **Seletor de Prateleira de Apps** | Descobre automaticamente os apps instalados na sua TV (`listLaunchPoints`) para você escolher até 8 favoritos para sua prateleira de vidro. |
-| **Nome da Cidade** | Digite qualquer cidade (ex.: `São Paulo`, `Lisboa`, `Nova York`) para clima ao vivo via Open-Meteo e horários precisos de pôr do sol, ou deixe em branco para geolocalização automática por IP. |
+| **Nome da Cidade** | Digite qualquer cidade (ex.: `São Paulo`, `Lisboa`, `Nova York`) para clima ao vivo via Open-Meteo e horários precisos de pôr do sol, ou deixe em branco para São Paulo, ou ative *Localizar por IP* para achar sua cidade pelo seu endereço IP. |
 | **Modo de Tema** | Escolha entre `Automático (Segue o Pôr do Sol)`, `Meia-Noite Profunda`, `Preto OLED Puro`, ou `Azul Diurno`. |
 | **Formato do Relógio** | Alterne entre exibição em `24 Horas (20:30)` ou `12 Horas (8:30 PM)`. |
 | **Modo de Performance** | Escolha entre `Padrão (Vidro & Brilho)` ou `Alta Performance (60 FPS Boost)` para desativar filtros pesados de desfoque em TVs mais modestas. |
@@ -393,9 +393,9 @@ Veja o [ROADMAP.md](ROADMAP.md) completo para as especificações técnicas deta
 | TVMaze (`api.tvmaze.com`) | Séries em alta sem chave | Aba Shows sem chave TMDB |
 | TMDB (`api.themoviedb.org`) | Filmes/séries em alta | Só com a sua chave. Chaves v3 só funcionam na query string da URL; prefira o token v4 (enviado em cabeçalho). A chave fica em texto simples no `localStorage` da TV |
 | Unsplash (`api.unsplash.com`) | Fotos do protetor de tela e da tela inicial | Só com a sua chave (Personalizar → Contas e Chaves) |
-| Imagens de pôsteres e fotos (`image.tmdb.org`, servidores de imagem do TVMaze, CDN de imagens do Unsplash) | Os pôsteres e fotos que você vê | Só enquanto essas fileiras ou fotos aparecem (as sugestões embutidas de filmes carregam os pôsteres de `image.tmdb.org`, sem chave) |
+| Imagens de pôsteres e fotos (`image.tmdb.org`, servidores de imagem do TVMaze, CDN de imagens do Unsplash) | Os pôsteres e fotos que você vê | Só enquanto essas linhas ou fotos aparecem (as sugestões embutidas de filmes carregam os pôsteres de `image.tmdb.org`, sem chave) |
 
-Resumindo: os únicos serviços contatados são Open-Meteo (clima), TMDB (títulos em alta, com a sua chave; senão TVMaze para séries e sugestões embutidas para filmes), Unsplash (fotos, só com a sua chave), seus servidores de imagem e ipapi.co (busca opcional da cidade pelo IP, desativada por padrão). Só são enviados a cidade ou as coordenadas, suas próprias chaves de API e, se você ativar, seu endereço IP, cada um ao seu próprio serviço; nada mais é compartilhado e não há conta.
+Resumindo: os únicos serviços contatados são Open-Meteo (clima), TMDB (títulos em alta, com a sua chave; senão TVMaze para séries e sugestões embutidas para filmes), Unsplash (fotos, só com a sua chave), os servidores de imagem desses serviços e ipapi.co (busca opcional da cidade pelo IP, desativada por padrão). Só são enviados a cidade ou as coordenadas, suas próprias chaves de API, cada uma ao seu próprio serviço. Como em qualquer site, toda requisição expõe seu IP público ao servidor contatado; ativar *Localizar por IP* envia ainda uma requisição ao ipapi.co, que usa seu IP para descobrir sua cidade; nada mais é compartilhado e não há conta.
 
 Sem telemetria, sem anúncios, sem outros destinos.
 
