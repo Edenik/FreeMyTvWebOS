@@ -1773,7 +1773,7 @@ setTimeout(function () {
     var launched = [], lastReq = null;
     window.webOS = { service: { request: function (uri, o) { lastReq = o; launched.push(o.parameters.id); } } };
     function settle() { if (lastReq && lastReq.onSuccess) lastReq.onSuccess({ returnValue: true }); lastReq = null; pendingLaunch = null; }
-    function kd(k, repeat) { var ev = new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, repeat: !!repeat }); document.dispatchEvent(ev); return ev; }
+    function kd(k, repeat) { if (k === 'Enter' && !repeat) document.dispatchEvent(new KeyboardEvent('keyup', { key: k, bubbles: true, cancelable: true })); var ev = new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, repeat: !!repeat }); document.dispatchEvent(ev); return ev; }
     function ku(k) { document.dispatchEvent(new KeyboardEvent('keyup', { key: k, bubbles: true, cancelable: true })); }
     function order() { return toArray(document.querySelectorAll('#appsGrid .app-tile[data-id]')).map(function (el) { return el.dataset.id; }); }
     function stored() { return JSON.parse(localStorage.getItem('fmtv_favorites')); }
@@ -1911,19 +1911,23 @@ setTimeout(function () {
             kd('ArrowUp');
             eq('Up reaches the Arrange on Home row', settingsUi.appIdx, -1);
             eq('Arrange on Home row has the focus ring', document.getElementById('arrangeRow').classList.contains('sf'), true);
+            eq('Arrange row hint', document.getElementById('settingsHints').textContent, t('OK start') + ' · ' + t('Back return'));
             kd('ArrowDown');
             eq('Down returns to the first app', settingsUi.appIdx, 0);
             kd('ArrowUp'); kd('Enter');
             eq('Arrange on Home closes Settings', modalOpen, false);
             eq('Arrange on Home starts arranging', !!shelfEdit && document.body.classList.contains('arranging'), true);
             eq('the first shelf tile is lifted', movingTileId, ids[0]);
-            // an empty shelf: Down on the last app leaves arranging and shows the Add app tile
+            // the last app cannot be removed
             kd('Enter'); ku('Enter');
             setFav([ids[0]]);
             startArranging(ids[0]);
             kd('ArrowDown');
-            eq('removing the last app leaves arranging', !shelfEdit && !document.body.classList.contains('arranging'), true);
-            eq('the shelf is empty and saved', JSON.stringify(stored()) + JSON.stringify(state.favorites), '[][]');
+            eq('Down keeps the last app', state.favorites.join() === ids[0] && !!shelfEdit, true);
+            eq('last app toast', document.getElementById('toastMsg').textContent, t('Keep at least one app on the shelf.'));
+            finishShelfEdit();
+            // an empty shelf (from storage) shows the Add app tile
+            setFav([]);
             eq('Home shows the Add app tile', document.querySelectorAll('#appsGrid .tile-add').length, 1);
             eq('and no app tiles', document.querySelectorAll('#appsGrid .app-tile[data-id]').length, 0);
             eq('Add app tile has the focus', document.querySelector('.nav-item.focused').classList.contains('tile-add'), true);
@@ -1940,6 +1944,47 @@ setTimeout(function () {
             closeSettingsModal();
             finishShelfEdit();
             eq('left clean', !shelfEdit && !document.body.classList.contains('arranging'), true);
+            function rawDown() { document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })); }
+            // Kids lock: nothing can be arranged or added
+            setFav(ids); state.locked = true; renderAppsShelf();
+            eq('locked: no Add app tile on an empty shelf', (setFav([]), document.querySelectorAll('#appsGrid .tile-add').length), 0);
+            setFav(ids);
+            openShelfPicker(false); eq('locked: picker does not open', modalOpen, false);
+            arrangeFromSettings(); startArranging(ids[0]);
+            eq('locked: no arranging', !shelfEdit && !document.body.classList.contains('arranging'), true);
+            launched.length = 0; setMainFocus(tileOf(ids[1]));
+            kd('Enter');
+            eq('locked: a shelf tile launches on keydown', launched.join(), ids[1]);
+            settle(); ku('Enter');
+            state.locked = false; renderAppsShelf();
+            // a TV that never sends keyup launches on keydown, no timer
+            keyupSeen = false; launched.length = 0; setMainFocus(tileOf(ids[2]));
+            rawDown();
+            eq('no keyup seen: launches on keydown', launched.join(), ids[2]);
+            settle();
+            eq('and starts no timer', enterTimer, null);
+            ku('Enter');
+            eq('after a keyup the fallback is off', keyupSeen, true);
+            // a lost keyup after a long press must not eat the next short press
+            swallowEnterUp = true; swallowAt = Date.now(); guardUntil = 0; launched.length = 0; setMainFocus(tileOf(ids[3]));
+            rawDown(); ku('Enter');
+            eq('stale swallow: the next short press launches', launched.join(), ids[3]);
+            settle();
+            // coming back to the app resets the key state
+            swallowEnterUp = true; guardUntil = Date.now() + 9999; onVisibilityChange();
+            eq('visibility change clears the swallow', swallowEnterUp, false);
+            eq('visibility change clears the guard', guardUntil, 0);
+            // OK held through the transition: repeats without e.repeat do not finish arranging
+            startArranging(ids[0]);
+            rawDown(); rawDown(); rawDown();
+            eq('held OK (no repeat flag) does not finish arranging', !!shelfEdit, true);
+            ku('Enter'); rawDown();
+            eq('OK after the keyup finishes', !shelfEdit, true);
+            ku('Enter');
+            // a press whose tile left the DOM does not launch
+            launched.length = 0; setMainFocus(tileOf(ids[1]));
+            rawDown(); renderAppsShelf(); ku('Enter');
+            eq('keyup on a removed tile launches nothing', launched.length, 0);
             window.webOS = oldWeb; settle();
             state.favorites = keepFav; state.pickup = keepPickup;
             if (keepStore === null) localStorage.removeItem('fmtv_favorites'); else localStorage.setItem('fmtv_favorites', keepStore);
