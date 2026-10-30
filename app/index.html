@@ -1100,6 +1100,8 @@
         .screensaver.ss-quiet .screensaver-date, .screensaver.ss-quiet .screensaver-weather { color: #8C95A4; }
         .screensaver-hint { display: none; position: absolute; left: 0; right: 0; bottom: 64px; text-align: center; font-size: 22px; color: #8C95A4; z-index: 1; }
         .screensaver.ss-quiet.ss-hint .screensaver-hint { display: block; }
+        /* Top center unless the clock is at the top, so the hint never meets the clock block. */
+        .screensaver.ss-quiet:not(.pos-tl):not(.pos-tr) .screensaver-hint { top: 64px; bottom: auto; }
 
         /* Ambient photo layer: dimmed photos behind the clock; only opacity and transform animate. */
         .screensaver .screensaver-clock-wrap {
@@ -1179,6 +1181,8 @@
             letter-spacing: 1px;
             color: rgba(255, 255, 255, 0.45);
         }
+        /* The credit takes the bottom corner the clock is not in. */
+        .screensaver.pos-br .screensaver-credit { right: auto; left: 80px; }
 
         .screensaver-credit:empty { display: none; }
 
@@ -4472,6 +4476,8 @@
         var SS_HINT_MS = 60 * 1000;
         var ssEnteredAt = 0;
         var ssHintTimer = null;
+        var ssHintShown = false; // the hint appears once per app run
+        var ssHintRun = false;
 
         function screensaverIsQuiet() { return screensaverOverlay.classList.contains('ss-quiet'); }
 
@@ -4483,7 +4489,7 @@
 
         // The "add photos" hint: only without a key, and only during the first minute of each screensaver.
         function updateScreensaverHint() {
-            var show = screensaverOn && screensaverIsQuiet() && !state.unsplashKey && Date.now() - ssEnteredAt < SS_HINT_MS;
+            var show = screensaverOn && ssHintRun && screensaverIsQuiet() && !state.unsplashKey && Date.now() - ssEnteredAt < SS_HINT_MS;
             if (show) screensaverOverlay.classList.add('ss-hint'); else screensaverOverlay.classList.remove('ss-hint');
         }
 
@@ -4511,6 +4517,8 @@
             if (ambientReady()) ambientStart();
             keepAwakeStart();
             ssEnteredAt = Date.now();
+            ssHintRun = !ssHintShown && screensaverIsQuiet() && !state.unsplashKey;
+            if (ssHintRun) ssHintShown = true;
             clearTimeout(ssHintTimer);
             ssHintTimer = setTimeout(updateScreensaverHint, SS_HINT_MS + 50);
             updateScreensaverHint();

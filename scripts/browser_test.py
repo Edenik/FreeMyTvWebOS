@@ -559,6 +559,7 @@ setTimeout(function () {
     var realNight = window.nightFactor, realHintMs = SS_HINT_MS;
     // 1. no key: quiet
     seedCache(); state.ambient = 'on'; state.unsplashKey = ''; state.clockPos = 'bl'; state.nightDim = 'off';
+    ssHintShown = false;
     enterScreensaver(); still();
     eq('quiet: class without a key', ov.classList.contains('ss-quiet'), true);
     eq('quiet: background', cs(ov, 'backgroundColor'), 'rgb(11, 13, 18)');
@@ -568,11 +569,16 @@ setTimeout(function () {
       tl: function (r) { return r.left < window.innerWidth / 3 && r.top < window.innerHeight / 3; },
       tr: function (r) { return r.right > window.innerWidth * 0.66 && r.top < window.innerHeight / 3; },
       center: function (r) { return Math.abs((r.left + r.width / 2) - window.innerWidth / 2) < 3 && Math.abs((r.top + r.height / 2) - window.innerHeight / 2) < 3; } };
+    function hit(a, b) { return !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top); }
     ['bl', 'br', 'tl', 'tr', 'center'].forEach(function (pos) {
       state.clockPos = pos; applyClockPosition(); still();
+      ov.classList.add('ss-hint');
+      eq('quiet: the hint never meets the clock block at ' + pos + ' (' + currentLang() + ')', hit(hint.getBoundingClientRect(), wrap.getBoundingClientRect()), false);
+      eq('quiet: hint at ' + pos + ' is ' + (pos === 'tl' || pos === 'tr' ? 'at the bottom' : 'at the top'), (hint.getBoundingClientRect().top < window.innerHeight / 2) === !(pos === 'tl' || pos === 'tr'), true);
       eq('quiet: clock position ' + pos + ' applies', POS[pos](wrap.getBoundingClientRect()), true);
       eq('quiet: ' + pos + ' keeps the quiet sizes', cs(clock, 'fontSize') + '|' + cs(ov, 'backgroundColor'), '192px|rgb(11, 13, 18)');
     });
+    ov.classList.remove('ss-hint'); updateScreensaverHint();
     state.clockPos = 'center'; applyClockPosition();
     var seen = {}, drifted = false;
     for (var q = 0; q < 12; q++) { shiftScreensaverClock(); var mm = /translate\((-?\d+)px, (-?\d+)px\)/.exec(wrap.style.transform); if (mm && (Math.abs(+mm[1]) > 6 || Math.abs(+mm[2]) > 6)) drifted = true; }
@@ -591,8 +597,10 @@ setTimeout(function () {
     ssEnteredAt -= 61000; updateScreensaverHint();
     eq('quiet: hint hidden after 61 s', ov.classList.contains('ss-hint') + '|' + cs(hint, 'display'), 'false|none');
     // the real timer path
-    exitScreensaver(); SS_HINT_MS = 60; enterScreensaver();
-    eq('quiet: hint back for a new run', ov.classList.contains('ss-hint'), true);
+    exitScreensaver(); enterScreensaver();
+    eq('quiet: the hint shows once per app run, not on every start', ov.classList.contains('ss-hint'), false);
+    exitScreensaver(); SS_HINT_MS = 60; ssHintShown = false; enterScreensaver();
+    eq('quiet: hint back for a fresh app run', ov.classList.contains('ss-hint'), true);
     setTimeout(function () {
       eq('quiet: hint timer hides it', ov.classList.contains('ss-hint'), false);
       SS_HINT_MS = realHintMs;
@@ -641,6 +649,12 @@ setTimeout(function () {
       setTimeout(function () {
         var a = document.getElementById('ssPhotoA').style.opacity, b = document.getElementById('ssPhotoB').style.opacity;
         var cr = document.getElementById('screensaverCredit');
+        cr.textContent = t('Photo by %s on Unsplash', 'Someone With A Long Name');
+        ['bl', 'br', 'tl', 'tr', 'center'].forEach(function (pos) {
+          state.clockPos = pos; applyClockPosition(); still();
+          eq('photo: the credit never meets the clock block at ' + pos, hit(cr.getBoundingClientRect(), wrap.getBoundingClientRect()), false);
+        });
+        state.clockPos = 'bl'; applyClockPosition(); still();
         eq('photo: credit bottom-right 20px', cs(cr, 'fontSize') + '|' + cs(cr, 'position') + '|' + (cr.getBoundingClientRect().right > window.innerWidth - 100 && cr.getBoundingClientRect().bottom > window.innerHeight - 100 ? 'right' : 'elsewhere'), '20px|absolute|right');
         eq('photo: night dimming still scales the photo', a === '0.43' || b === '0.43', true);
         exitScreensaver();
