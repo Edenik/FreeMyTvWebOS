@@ -24,11 +24,11 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP = os.path.join(REPO_DIR, "app", "index.html")
 
 EXPECTED = {  # language -> (element id, expected text)
-    "en": ("customizeBtn", "Customize"),
-    "pt": ("customizeBtn", "Personalizar"),
-    "es": ("customizeBtn", "Personalizar"),
-    "de": ("customizeBtn", "Anpassen"),
-    "fr": ("customizeBtn", "Personnaliser"),
+    "en": ("customizeBtn", "Settings"),
+    "pt": ("customizeBtn", "Ajustes"),
+    "es": ("customizeBtn", "Ajustes"),
+    "de": ("customizeBtn", "Einstellungen"),
+    "fr": ("customizeBtn", "Réglages"),
 }
 
 # Runs inside the page after boot and reports into <pre id="__result">.
@@ -53,7 +53,7 @@ setTimeout(function () {
     var isBrand = DEFAULT_CATALOG.some(function (a) { return a.title === v; }) || /^HDMI \d$/.test(v);
     if (!isBrand && !Object.prototype.hasOwnProperty.call(I18N.pt, v)) out.missing.push(v);
   });
-  out.text = document.getElementById('customizeBtn').textContent.replace(/^\s+|\s+$/g, '').replace('⚙️ ', '');
+  out.text = document.getElementById('customizeBtn').textContent.replace(/^\s+|\s+$/g, '');
   out.ambient = [];
   function eq(name, got, want) {
     if (got !== want) out.ambient.push(name + ': got ' + JSON.stringify(got) + ' want ' + JSON.stringify(want));
@@ -485,11 +485,11 @@ setTimeout(function () {
     window.webOS = oldWebOS;
     done();
   });
-  steps.push(function (done) { // the TV Settings button launches the LG Settings app
-    var btn = document.getElementById('tvSettingsBtn'), got = null, oldWebOS = window.webOS;
-    eq('tv settings button', !!btn, true);
+  steps.push(function (done) { // openLgTvSettings launches the LG Settings app (the button left the top bar; Settings reuses the function)
+    var got = null, oldWebOS = window.webOS;
+    eq('tv settings function', typeof openLgTvSettings, 'function');
     window.webOS = { service: { request: function (uri, o) { got = { uri: uri, o: o }; } } };
-    btn.click();
+    openLgTvSettings();
     eq('tv settings uri', got && got.uri, 'luna://com.webos.applicationManager');
     eq('tv settings id', got && got.o.parameters.id, 'com.palm.app.settings');
     if (got) got.o.onSuccess({ returnValue: true });
@@ -1332,44 +1332,123 @@ setTimeout(function () {
     eq('greeting no name', document.getElementById('greetingTitle').textContent, t(greetingKey(new Date().getHours())));
     done();
   });
-  steps.push(function (done) { // the pick-up row lists the last apps, newest first, and hides when off or empty
-    localStorage.removeItem('fmtv_launch_hist');
-    state.pickup = 'on'; renderPickup();
-    eq('pickup empty hidden', document.getElementById('pickupSection').hidden, true);
-    var T = Date.now();
-    recordLaunch('netflix', T - 5000); recordLaunch('youtube.leanback.v4', T - 1000);
+  steps.push(function (done) { // calm home: one headline, logo-only tiles, one caption, quiet corners
+    function vis(el) { return el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden'; }
+    var keepFav = state.favorites.slice(), keepPickup = state.pickup;
+    localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on'; renderAppsShelf();
+    ['FPS', 'Instant', 'Curated', 'Favorite Apps', 'No ads', 'Live Feed'].forEach(function (word) {
+      var hits = toArray(document.querySelectorAll('.container *')).filter(function (el) {
+        if (el.children.length || el.id === 'trustLine' || (el.parentNode && el.parentNode.id === 'trustLine')) return false; // the privacy line stays on Home (decision 5)
+        return el.textContent.indexOf(word) !== -1 && vis(el);
+      });
+      eq('home shows no "' + word + '"', hits.map(function (el) { return el.id || el.className; }).join(','), '');
+    });
+    ['heroTag', 'heroTitle', 'heroDesc', 'themeBadge', 'greetingSub', 'shelfCountHint', 'picksSourceBadge'].forEach(function (id) {
+      eq(id + ' hidden', vis(document.getElementById(id)), false);
+    });
+    var tvBtn = document.getElementById('tvSettingsBtn');
+    eq('TV Settings button not in the top bar', !tvBtn || !vis(tvBtn), true);
+    eq('weather is not a nav item', mainNavItems.indexOf(document.getElementById('weatherWidget')), -1);
+    var gear = document.getElementById('customizeBtn');
+    eq('gear has aria-label', !!gear.getAttribute('aria-label'), true);
+    eq('gear is 60px round', gear.getBoundingClientRect().width + 'x' + gear.getBoundingClientRect().height, '60x60');
+    var tile = document.querySelector('#appsGrid .app-tile');
+    eq('tile is 216px', Math.round(tile.offsetWidth) + 'x' + Math.round(tile.offsetHeight), '216x216');
+    eq('greeting title 78px', getComputedStyle(document.getElementById('greetingTitle')).fontSize, '78px');
+    eq('clock 39px', getComputedStyle(document.getElementById('clockText')).fontSize, '39px');
+    eq('greeting eyebrow is the weekday', document.getElementById('greetingEyebrow').textContent, new Date().toLocaleDateString(LANG_LOCALES[currentLang()], { weekday: 'long' }));
+    // one caption, on the focused tile
+    var labels = toArray(document.querySelectorAll('.app-tile .app-label')).filter(vis);
+    eq('exactly one visible tile caption', labels.length, 1);
+    var focused = document.querySelector('.app-tile.focused');
+    eq('the focused tile owns the caption', !!focused && labels[0] === focused.querySelector('.app-label'), true);
+    eq('caption is the app name', labels[0].textContent, focused.dataset.title);
+    focused.style.transition = 'none';
+    eq('focused tile scales 1.06', getComputedStyle(focused).transform.indexOf('1.06') !== -1, true);
+    // pick-up with an app on the shelf: focus and caption
+    var T = Date.now(), id = state.favorites[2], hist = {};
+    hist[id] = { t: T - 60000, n: 1 };
+    localStorage.setItem('fmtv_launch_hist', JSON.stringify(hist));
+    document.querySelectorAll('.nav-item.focused').forEach(function (el) { el.classList.remove('focused'); });
+    renderAppsShelf();
+    var f2 = document.querySelector('.nav-item.focused');
+    eq('pick-up focuses the last opened tile', f2 && f2.dataset.id, id);
+    var title = f2.dataset.title, hhmm = pad2(new Date(T - 60000).getHours()) + ':' + pad2(new Date(T - 60000).getMinutes());
+    eq('pick-up caption', f2.querySelector('.app-label').textContent, t('%s, opened at %s', title, hhmm));
+    eq('pick-up caption mentions the time', f2.querySelector('.app-label').textContent.indexOf(hhmm) !== -1, true);
+    eq('shelf order unchanged', toArray(document.querySelectorAll('#appsGrid .app-tile:not(.tile-recent)')).map(function (el) { return el.dataset.id; }).join(','), state.favorites.join(','));
+    eq('pick-up section stays hidden', vis(document.getElementById('pickupSection')), false);
+    // an earlier day shows the weekday
+    hist[id] = { t: T - 3 * 86400000, n: 1 };
+    localStorage.setItem('fmtv_launch_hist', JSON.stringify(hist));
+    renderAppsShelf();
+    eq('earlier caption uses the weekday', document.querySelector('#appsGrid .app-tile[data-id="' + id + '"] .app-label').textContent,
+      t('%s, opened %s', title, new Date(T - 3 * 86400000).toLocaleDateString(LANG_LOCALES[currentLang()], { weekday: 'long' })));
+    // pick-up off: the first tile has the focus
+    state.pickup = 'off';
+    document.querySelectorAll('.nav-item.focused').forEach(function (el) { el.classList.remove('focused'); });
+    renderAppsShelf();
+    eq('pick-up off focuses the first tile', document.querySelector('.nav-item.focused').dataset.id, state.favorites[0]);
+    eq('pick-up off: no recent tiles', document.querySelectorAll('#appsGrid .tile-recent').length, 0);
+    eq('pick-up off: plain caption', document.querySelector('.app-tile.focused .app-label').textContent, document.querySelector('.app-tile.focused').dataset.title);
+    // recent tiles for apps that are not on the shelf
+    state.pickup = 'on';
+    var off = state.catalog.filter(function (c) { return state.favorites.indexOf(c.id) === -1; }).slice(0, 2);
+    hist = {};
+    hist[off[0].id] = { t: T - 1000, n: 1 }; hist[off[1].id] = { t: T - 2000, n: 1 }; hist[id] = { t: T - 5000, n: 1 };
+    localStorage.setItem('fmtv_launch_hist', JSON.stringify(hist));
+    document.querySelectorAll('.nav-item.focused').forEach(function (el) { el.classList.remove('focused'); });
+    renderAppsShelf();
+    var kids = toArray(document.getElementById('appsGrid').children);
+    eq('recent tiles come first', kids.slice(0, 2).map(function (el) { return el.classList.contains('tile-recent'); }).join(), 'true,true');
+    eq('a thin divider follows', kids[2].classList.contains('tile-divider') && kids[2].offsetWidth === 2 && kids[2].offsetHeight === 160, true);
+    eq('recent order is newest first', kids[0].dataset.id + ',' + kids[1].dataset.id, off[0].id + ',' + off[1].id);
+    eq('recent tiles are nav items', mainNavItems.indexOf(kids[0]) !== -1, true);
+    eq('recent caption has the time', kids[0].querySelector('.app-label').textContent.indexOf(pad2(new Date(T - 1000).getHours())) !== -1, true);
+    eq('recent tiles stay off the shelf', state.favorites.join(','), keepFav.join(','));
+    eq('focus still lands on the last opened shelf tile', document.querySelector('.nav-item.focused').dataset.id, id);
+    // dim lower rows
+    var scenes = document.getElementById('scenesRow'), picks = document.querySelector('.picks-section');
+    state.scenes = 'on'; state.showTrending = 'on'; applyTrendingClass(); renderScenes();
+    setMainFocus(document.querySelector('#appsGrid .app-tile:not(.tile-recent)'));
+    eq('scenes dim while focus is on the shelf', scenes.classList.contains('row-dim'), true);
+    eq('trending dims too', picks.classList.contains('row-dim'), true);
+    scenes.style.transition = 'none';
+    eq('dim is 55 percent', getComputedStyle(scenes).opacity, '0.55');
+    setMainFocus(scenes.querySelector('.scene-chip'));
+    eq('scenes full while a chip has focus', scenes.classList.contains('row-dim'), false);
+    eq('trending still dim', picks.classList.contains('row-dim'), true);
+    eq('full opacity', getComputedStyle(scenes).opacity, '1');
+    setMainFocus(document.getElementById('tabMovies'));
+    eq('trending full while a tab has focus', picks.classList.contains('row-dim'), false);
+    // the old pick-up row stays empty and hidden; its function stays callable
     renderPickup();
-    var cards = document.querySelectorAll('#pickupRow .pickup-card');
-    eq('pickup cards', cards.length, 2);
-    eq('pickup first is newest', cards[0].dataset.id, 'youtube.leanback.v4');
-    eq('pickup in nav', mainNavItems.indexOf(cards[0]) !== -1, true);
-    state.pickup = 'off'; renderPickup();
-    eq('pickup off hidden', document.getElementById('pickupSection').hidden, true);
-    localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on'; renderPickup();
+    eq('pickup row empty', document.querySelectorAll('#pickupRow .pickup-card').length, 0);
+    localStorage.removeItem('fmtv_launch_hist'); state.pickup = keepPickup; renderAppsShelf();
     done();
   });
-  steps.push(function (done) { // an app added to the catalog later (discovered on the TV) shows in the pick-up row
+  steps.push(function (done) { // an app added to the catalog later (discovered on the TV) shows as a recent tile
     localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on';
     var fake = { id: 'fake.app', title: 'Fake', tag: 'Streaming', desc: 'Watch 4K videos, live streams, music, and coding radio.', color: '#ff0000', badge: 'F', bg: '#000' };
     state.catalog.push(fake);
     recordLaunch('fake.app', Date.now());
     renderAppsShelf();
-    eq('pickup follows catalog', !!document.querySelector('#pickupRow .pickup-card[data-id="fake.app"]'), true);
+    eq('recent tile follows catalog', !!document.querySelector('#appsGrid .tile-recent[data-id="fake.app"]'), true);
     state.catalog.pop();
     localStorage.removeItem('fmtv_launch_hist');
     renderAppsShelf();
-    eq('pickup cleared again', document.getElementById('pickupSection').hidden, true);
+    eq('recent tile cleared again', document.querySelectorAll('#appsGrid .tile-recent').length, 0);
     done();
   });
   steps.push(function (done) { // D-pad focus draws a white ring on every kind of focusable element
-    var ids = ['customizeBtn', 'tvSettingsBtn', 'weatherWidget', 'tabMovies'];
+    var ids = ['customizeBtn', 'tabMovies'];
     var els = ids.map(function (id) { return document.getElementById(id); });
-    var tile = document.querySelector('.app-tile'), card = document.querySelector('.pick-card');
+    localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on';
+    recordLaunch('com.webos.app.mediadiscovery', Date.now()); renderAppsShelf();
+    var tile = document.querySelector('.app-tile:not(.tile-recent)'), card = document.querySelector('.pick-card');
     if (tile) els.push(tile);
     if (card) els.push(card);
-    localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on';
-    recordLaunch('netflix', Date.now()); renderPickup();
-    var pc = document.querySelector('#pickupRow .pickup-card');
+    var pc = document.querySelector('#appsGrid .tile-recent');
     if (pc) els.push(pc);
     els.forEach(function (el, i) {
       el.classList.add('focused');
@@ -1378,7 +1457,7 @@ setTimeout(function () {
       eq('ring width ' + i, cs.outlineWidth, '3px');
       el.classList.remove('focused');
     });
-    localStorage.removeItem('fmtv_launch_hist'); renderPickup();
+    localStorage.removeItem('fmtv_launch_hist'); renderAppsShelf();
     done();
   });
   steps.push(function (done) { // an HDMI row changes its device with Right and saves at once
@@ -1668,11 +1747,13 @@ setTimeout(function () {
 
   steps.push(function (done) { // scenes + pick-up row + shelf + Trending all fit on a 1080p screen
     localStorage.setItem('fmtv_launch_hist', JSON.stringify({ netflix: { t: 3, n: 1 }, 'youtube.leanback.v4': { t: 2, n: 1 }, amazon: { t: 1, n: 1 } }));
-    state.pickup = 'on'; state.scenes = 'on'; state.showTrending = 'on'; applyTrendingClass(); renderScenes(); renderPickup();
+    state.pickup = 'on'; state.scenes = 'on'; state.showTrending = 'on'; applyTrendingClass(); renderScenes(); renderAppsShelf();
     var pk = document.querySelector('.picks-section').getBoundingClientRect();
     eq('trending visible', pk.height > 0, true);
     eq('trending bottom inside screen (' + Math.round(pk.bottom) + ')', pk.bottom <= window.innerHeight, true);
-    localStorage.removeItem('fmtv_launch_hist'); renderPickup();
+    var sh = document.getElementById('appsGrid').getBoundingClientRect();
+    eq('shelf row fits the width (' + Math.round(sh.right) + ')', sh.right <= window.innerWidth, true);
+    localStorage.removeItem('fmtv_launch_hist'); renderAppsShelf();
     done();
   });
 
@@ -1860,11 +1941,10 @@ setTimeout(function () {
     eq('profile switched name', state.userName, 'Kid');
     eq('profile switched shelf', state.favorites.join(','), 'youtube.leanback.v4');
     eq('locked hides Customize', document.getElementById('customizeBtn').offsetParent, null);
-    eq('locked hides TV Settings', document.getElementById('tvSettingsBtn').offsetParent, null);
     eq('locked leaves nav', mainNavItems.indexOf(document.getElementById('customizeBtn')), -1);
     eq('pill shows for two people', document.getElementById('profileBtn').offsetParent !== null, true);
     eq('pill is in the nav even when locked', mainNavItems.indexOf(document.getElementById('profileBtn')) !== -1, true);
-    eq('pill names the active person', document.getElementById('profileBtn').textContent.indexOf('Kid') !== -1, true);
+    eq('pill names the active person', document.getElementById('profileBtn').getAttribute('aria-label') === 'Kid' && document.getElementById('profileBtn').textContent.replace(/\s+/g, '') === 'K', true);
     eq('active profile saved', localStorage.getItem('fmtv_active_profile'), 'p2');
     switchProfile('p1');
     eq('profile switched back', state.userName, base.userName);
@@ -1956,7 +2036,6 @@ setTimeout(function () {
     eq('kids profile kept', readProfiles().length, 2);
     eq('kids profile named', readProfiles()[1].name, 'Kid');
     eq('kids profile saved locked', readProfiles()[1].data.locked, true);
-    eq('kids profile hides TV Settings', document.getElementById('tvSettingsBtn').offsetParent, null);
     eq('kids profile has no remove row', settingsRowsFor(2).some(function (d) { return d.id === 'removePerson'; }), false);
     eq('kids profile can still switch', settingsRowsFor(2).some(function (d) { return d.id === 'switchPerson'; }), true);
     // the picker: keys route to it, Right/Enter pick, Back keeps the person
@@ -2188,7 +2267,7 @@ def main():
             if result["errors"]:
                 failures.append(f"{lang}: uncaught JS errors: {result['errors'][:3]}")
             if result["text"] != expected:
-                failures.append(f"{lang}: expected Customize button '{expected}', got '{result['text']}'")
+                failures.append(f"{lang}: expected Settings gear label '{expected}', got '{result['text']}'")
             if lang == "en":  # dictionary checks are language independent; report once
                 if result["keyDiff"]:
                     failures.append(f"translation keys differ in: {result['keyDiff']}")
