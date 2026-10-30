@@ -186,9 +186,10 @@ See the full [ROADMAP.md](ROADMAP.md) for detailed technical specifications.
 | ipapi.co | Approximate location from your public IP | **Only if enabled** in Customize → *Auto-locate by IP* |
 | TVMaze (`api.tvmaze.com`) | Zero-key trending shows | Shows tab without a TMDB key |
 | TMDB (`api.themoviedb.org`) | Trending movies/shows | Only with your key. v3 keys only work as a URL query parameter; prefer the v4 token (sent as a header). The key is stored in plain text in the TV's `localStorage` |
-| Unsplash (`api.unsplash.com`) | Screensaver and home photos | Only with your key (Customize → photos) |
+| Unsplash (`api.unsplash.com`) | Screensaver and home photos | Only with your key (Customize → Accounts & Keys) |
+| Poster and photo images (`image.tmdb.org`, TVMaze image hosts, Unsplash's image CDN) | The posters and photos you see | Only while those rows or photos are displayed (the bundled curated movie picks load their posters from `image.tmdb.org`, no key needed) |
 
-In short: weather (Open-Meteo), trending titles (TMDB with your key; otherwise TVMaze for shows and bundled curated picks for movies), photos (Unsplash, only with your key) and an optional IP-based city lookup (ipapi.co, off by default) are the only outbound requests; your settings never leave the TV, which is what the home screen's "No ads. No account. Your settings stay on this TV." line means.
+In short: the only services contacted are Open-Meteo (weather), TMDB (trending titles, with your key; otherwise TVMaze for shows and bundled curated picks for movies), Unsplash (photos, only with your key), their image hosts, and ipapi.co (optional IP-based city lookup, off by default). Only the city or coordinates, your own API keys and, if you turn it on, your IP address are sent, each to its own service; nothing else is shared and there is no account. That is what the home screen's "No ads. No account. Your settings stay on this TV." line means.
 
 No telemetry, no ads, no other destinations.
 
@@ -388,12 +389,13 @@ Veja o [ROADMAP.md](ROADMAP.md) completo para as especificações técnicas deta
 | Serviço | Para quê | Quando |
 |---|---|---|
 | Open-Meteo (`api.open-meteo.com`, `geocoding-api.open-meteo.com`) | Clima, nascer/pôr do sol e busca da cidade | Sempre (usa sua cidade ou São Paulo por padrão) |
-| ipapi.co | Localização aproximada pelo seu IP público | **Só se ativado** em Personalizar → *Auto-locate by IP* |
+| ipapi.co | Localização aproximada pelo seu IP público | **Só se ativado** em Personalizar → *Localizar por IP* |
 | TVMaze (`api.tvmaze.com`) | Séries em alta sem chave | Aba Shows sem chave TMDB |
 | TMDB (`api.themoviedb.org`) | Filmes/séries em alta | Só com a sua chave. Chaves v3 só funcionam na query string da URL; prefira o token v4 (enviado em cabeçalho). A chave fica em texto simples no `localStorage` da TV |
-| Unsplash (`api.unsplash.com`) | Fotos do protetor de tela e da tela inicial | Só com a sua chave (Personalizar → fotos) |
+| Unsplash (`api.unsplash.com`) | Fotos do protetor de tela e da tela inicial | Só com a sua chave (Personalizar → Contas e Chaves) |
+| Imagens de pôsteres e fotos (`image.tmdb.org`, servidores de imagem do TVMaze, CDN de imagens do Unsplash) | Os pôsteres e fotos que você vê | Só enquanto essas fileiras ou fotos aparecem (as sugestões embutidas de filmes carregam os pôsteres de `image.tmdb.org`, sem chave) |
 
-Resumindo: clima (Open-Meteo), títulos em alta (TMDB com a sua chave; senão TVMaze para séries e sugestões embutidas para filmes), fotos (Unsplash, só com a sua chave) e a busca opcional da cidade pelo IP (ipapi.co, desativada por padrão) são as únicas requisições externas; suas configurações nunca saem da TV.
+Resumindo: os únicos serviços contatados são Open-Meteo (clima), TMDB (títulos em alta, com a sua chave; senão TVMaze para séries e sugestões embutidas para filmes), Unsplash (fotos, só com a sua chave), seus servidores de imagem e ipapi.co (busca opcional da cidade pelo IP, desativada por padrão). Só são enviados a cidade ou as coordenadas, suas próprias chaves de API e, se você ativar, seu endereço IP, cada um ao seu próprio serviço; nada mais é compartilhado e não há conta.
 
 Sem telemetria, sem anúncios, sem outros destinos.
 
