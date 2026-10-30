@@ -347,7 +347,7 @@ setTimeout(function () {
       done();
     }, 400);
   });
-  steps.push(function (done) { // Ken Burns zooms and drifts within 4%
+  steps.push(function (done) { // Ken Burns zooms and keeps drifting in legs within 8%
     seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'kenburns';
     window.fetch = fakeFetch(200, '49', []);
     enterScreensaver();
@@ -356,9 +356,10 @@ setTimeout(function () {
       var m = /translate\((-?[\d.]+)%, (-?[\d.]+)%\) scale\(([\d.]+)\)/.exec(shown.style.transform);
       eq('kb parsed', !!m, true);
       if (m) {
-        eq('kb dx', Math.abs(parseFloat(m[1])) <= 4, true);
-        eq('kb dy', Math.abs(parseFloat(m[2])) <= 4, true);
+        eq('kb dx', Math.abs(parseFloat(m[1])) <= 8, true);
+        eq('kb dy', Math.abs(parseFloat(m[2])) <= 8, true);
         eq('kb scale', m[3], '1.2');
+        eq('kb leg timer', !!shown._moveTimer, true);
       }
       exitScreensaver();
       done();
