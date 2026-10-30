@@ -139,3 +139,61 @@ deferred stale-preload finding).
 photos on and off, takeover by the screensaver and resume, no key, refresh for home photos only; keep-awake video
 starts and stops with the screensaver, respects Off, and survives a missing `captureStream`. State defaults, new
 controls and the new translations are probed.
+
+## Addendum 2: Customize screen redesign (remote-friendly settings)
+
+Why: on the real TV, pressing Down in the old Customize screen looked stuck. The modal treated Down and Right as "next
+item" in one flat list of about 45 controls, so Down in the 4-column app grid moved one tile right, it took about 24
+presses to leave the app grid, dropdowns and text boxes showed no focus mark, and nothing was saved until Save & Apply.
+Mockups: https://claude.ai/artifact/6u5pzPR8CkQ42uPkQSYBia (boards 1-3).
+
+### Layout
+- Two panes inside the existing `#settingsModal`: a category list (left) and the settings of the current category
+  (right), a footer line of key hints, and a short "Saved" confirmation in the header.
+- Categories, in order: Shelf & Inputs, Look & Feel, Weather & Location, Photos & Screensaver, Accounts & Keys, plus a
+  "Close" item at the end of the list.
+- Every setting is one row: label (and an optional one-line hint) on the left, value on the right. A clearly visible
+  focus ring (class `sf`) marks the focused item; the right pane scrolls to keep the focused row in view.
+- Row types: `choice` (value cycles through options, with ◀ ▶ arrows shown), `text` (value shown; OK opens an inline
+  input and the TV keyboard), `link` (OK opens a sub-page), `action` (OK runs it).
+- Secret fields (Unsplash Access Key, TMDB API key) show only a fixed run of dots and never the value, in the row and
+  in the inline input (`type="password"`).
+
+### Settings by category
+1. Shelf & Inputs: Shelf apps (link to the apps page, value "N of 8 selected"), then one choice row per HDMI input
+   (device preset: HDMI, PS5, PS4, Xbox, Nintendo Switch, Gaming PC).
+2. Look & Feel: Theme Mode, Clock Format, Text Size, Performance Mode, Language.
+3. Weather & Location: City Name, Auto-locate by IP.
+4. Photos & Screensaver: Photos on Home Screen, Ambient Photo Screensaver, Screensaver Starts After, Photo Duration,
+   Photo Motion, Keep LG Screensaver Away.
+5. Accounts & Keys: Unsplash Access Key, TMDB API Key, then "Reset to defaults" (needs a second OK to confirm).
+
+### Remote keys
+- Category list: Up and Down move (no wrap), Right or OK enters the category (focus lands on its first setting),
+  Left does nothing; on "Close", OK closes.
+- Settings list: the first item of every category is a "Categories" row (OK returns to the category list). Up and Down
+  move (no wrap). On a `choice` row Left and Right change the value (they wrap through the options) and OK cycles
+  forward; on a `text` row OK edits; on a `link` row OK opens the page.
+- Editing text: OK shows an inline input with the value; Enter commits, Escape or Back cancels; leaving the input
+  (blur) commits.
+- Apps page: a 5-column grid of every catalog app, then a Done button below it. Up and Down move by row (the Done
+  button after the last row), Left and Right by tile, OK adds or removes the app (maximum 8, minimum 1, with an inline
+  message when refused), Back or Done returns to the Shelf & Inputs list.
+- Back or Escape steps outward: apps page, then settings list, then category list, then closes the whole screen.
+- Pointer (Magic Remote): hovering an item focuses it and clicking acts like OK; the arrows on a choice row act as
+  Left and Right.
+- Every change is applied and saved to `localStorage` immediately; there is no Save or Cancel. The same side effects
+  run that the old Save & Apply ran, but only the ones that setting needs (for example a theme change re-applies the
+  theme; a city change refetches the weather; an Unsplash key change clears the photo cache and pause marker and
+  refreshes).
+
+### Settings schema
+A single `SETTINGS` array in `app/index.html` drives both the screen and the persistence. Each entry has `id`, `cat`,
+`type`, `label`, optional `hint`, and for stored settings `field` (the `state` field), `store` (the `localStorage` key),
+`def` (default), `options` (`[value, label]` pairs, for choices), `secret`, and `apply`. HDMI rows are generated from
+the catalog. Defaults must equal the current state defaults.
+
+### Strings and tests
+All new UI strings are translated into pt, es, de and fr (key sets stay identical). The old controls (`cfg*` ids,
+Save & Apply, Cancel, Reset Defaults, the flat focus list) are removed; the browser test is rewritten to probe the
+schema, drive the screen with synthetic key events, and check persistence, masking, scroll-follow and the apps page.
