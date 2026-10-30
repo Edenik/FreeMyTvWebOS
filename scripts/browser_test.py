@@ -1633,7 +1633,7 @@ setTimeout(function () {
       });
       eq('home shows no "' + word + '"', hits.map(function (el) { return el.id || el.className; }).join(','), '');
     });
-    ['heroTag', 'heroTitle', 'heroDesc', 'themeBadge', 'greetingSub', 'shelfCountHint', 'picksSourceBadge'].forEach(function (id) {
+    ['heroTag', 'heroTitle', 'heroDesc', 'themeBadge', 'greetingSub', 'picksSourceBadge'].forEach(function (id) {
       eq(id + ' hidden', vis(document.getElementById(id)), false);
     });
     var tvBtn = document.getElementById('tvSettingsBtn');
@@ -1645,6 +1645,7 @@ setTimeout(function () {
     wx.style.transition = 'none';
     eq('weather has a white ring when focused', getComputedStyle(wx).outlineStyle + getComputedStyle(wx).outlineWidth, 'solid3px');
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true, cancelable: true }));
     eq('Enter on the weather opens the forecast drawer', drawerOpen, true);
     closeDrawer();
     eq('drawer closes', drawerOpen, false);
@@ -1766,6 +1767,188 @@ setTimeout(function () {
     renderAppsShelf();
     eq('recent tile cleared again', document.querySelectorAll('#appsGrid .tile-recent').length, 0);
     done();
+  });
+  steps.push(function (done) { // arranging apps on Home: hold OK or Settings > Apps on Home; Left/Right move, Down removes, OK/Back save
+    var keepFav = state.favorites.slice(), keepStore = localStorage.getItem('fmtv_favorites'), keepPickup = state.pickup, oldWeb = window.webOS;
+    var launched = [], lastReq = null;
+    window.webOS = { service: { request: function (uri, o) { lastReq = o; launched.push(o.parameters.id); } } };
+    function settle() { if (lastReq && lastReq.onSuccess) lastReq.onSuccess({ returnValue: true }); lastReq = null; pendingLaunch = null; }
+    function kd(k, repeat) { var ev = new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, repeat: !!repeat }); document.dispatchEvent(ev); return ev; }
+    function ku(k) { document.dispatchEvent(new KeyboardEvent('keyup', { key: k, bubbles: true, cancelable: true })); }
+    function order() { return toArray(document.querySelectorAll('#appsGrid .app-tile[data-id]')).map(function (el) { return el.dataset.id; }); }
+    function stored() { return JSON.parse(localStorage.getItem('fmtv_favorites')); }
+    function vis(el) { return el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden'; }
+    function setFav(list) { state.favorites = list.slice(); localStorage.setItem('fmtv_favorites', JSON.stringify(list)); renderAppsShelf(); }
+    function tileOf(id) { return document.querySelector('#appsGrid .app-tile[data-id="' + id + '"]'); }
+    var ids = keepFav.slice(0, 5), off = state.catalog.filter(function (c) { return keepFav.indexOf(c.id) === -1; }).slice(0, 2);
+    var names = {};
+    state.catalog.forEach(function (c) { names[c.id] = c.title; });
+    state.pickup = 'off'; localStorage.removeItem('fmtv_launch_hist');
+    setFav(ids);
+    eq('old Reorder button is gone', !document.getElementById('reorderShelfBtn') && !document.getElementById('saveShelfOrder') && !document.getElementById('cancelShelfOrder'), true);
+    eq('Home shows no Add app tile when apps exist', document.querySelectorAll('#appsGrid .tile-add').length, 0);
+    // short press launches on release, not on press; a repeated keydown neither relaunches nor restarts the timer
+    setMainFocus(tileOf(ids[1]));
+    kd('Enter');
+    eq('keydown alone does not launch', launched.length, 0);
+    kd('Enter', true); kd('Enter', true);
+    ku('Enter');
+    eq('short press launches the tile once', launched.join(), ids[1]);
+    settle();
+    eq('short press does not arrange', !shelfEdit && !document.body.classList.contains('arranging'), true);
+    // long press: 700 ms virtual wait, then keyup
+    setMainFocus(tileOf(ids[2]));
+    kd('Enter');
+    setTimeout(function () {
+      eq('long press enters arranging', !!shelfEdit && document.body.classList.contains('arranging'), true);
+      eq('long press lifts the pressed tile', movingTileId, ids[2]);
+      eq('long press does not launch', launched.length, 1);
+      kd('Enter', true);
+      eq('repeated keydown while held does not finish', !!shelfEdit, true);
+      ku('Enter');
+      eq('the keyup after a long press is swallowed', !!shelfEdit && launched.length === 1, true);
+      var lifted = tileOf(ids[2]), other = tileOf(ids[0]);
+      lifted.style.transition = 'none'; other.style.transition = 'none';
+      var M = window.DOMMatrix || window.WebKitCSSMatrix, m = new M(getComputedStyle(lifted).transform);
+      eq('lifted tile scales 1.08', Math.round(m.m11 * 100), 108);
+      eq('lifted tile is raised 21px', Math.round(m.m42), -21);
+      eq('lifted tile has a white ring', getComputedStyle(lifted).outlineStyle + ' ' + getComputedStyle(lifted).outlineColor, 'solid rgb(255, 255, 255)');
+      eq('other tiles are 70 percent', getComputedStyle(other).opacity, '0.7');
+      eq('lifted tile is fully opaque', getComputedStyle(lifted).opacity, '1');
+      eq('lifted caption', lifted.querySelector('.app-label').textContent, '‹ ' + t('Moving') + ' ›');
+      eq('lifted caption visible', vis(lifted.querySelector('.app-label')), true);
+      var title = document.getElementById('arrangeTitle'), sub = document.getElementById('arrangeSub');
+      eq('arrange title text', title.textContent, t('Arrange your apps'));
+      eq('arrange title 60px', getComputedStyle(title).fontSize, '60px');
+      eq('arrange sub text', sub.textContent, t('Hold OK on any app on Home to get here.'));
+      eq('arrange sub 27px', getComputedStyle(sub).fontSize, '27px');
+      eq('greeting hidden while arranging', vis(document.getElementById('greetingTitle')), false);
+      eq('hint bar text', document.getElementById('arrangeHint').textContent, t('Left / Right move · Down remove · OK done'));
+      eq('hint bar visible', vis(document.getElementById('arrangeHint')), true);
+      eq('Add app tile after the last app', document.querySelector('#appsGrid .app-tile:last-child').classList.contains('tile-add'), true);
+      eq('Add app tile text', document.querySelector('#appsGrid .tile-add').textContent.indexOf(t('Add app')) !== -1, true);
+      eq('Add app tile dashed', getComputedStyle(document.querySelector('#appsGrid .tile-add')).borderTopStyle, 'dashed');
+      eq('only shelf items are reachable while arranging', mainNavItems.every(function (el) { return !!el.closest('.shelf-wrapper'); }), true);
+      kd('ArrowRight');
+      eq('Right moves the lifted app', order().join(), [ids[0], ids[1], ids[3], ids[2], ids[4]].join());
+      eq('the move is saved', stored().join(), order().join());
+      eq('state follows', state.favorites.join(), order().join());
+      kd('ArrowLeft'); kd('ArrowLeft'); kd('ArrowLeft'); kd('ArrowLeft');
+      eq('Left moves to the front and stops there', order().join(), [ids[2], ids[0], ids[1], ids[3], ids[4]].join());
+      eq('Left persisted', stored().join(), order().join());
+      eq('the lifted tile keeps the focus', document.querySelector('.nav-item.focused').dataset.id, ids[2]);
+      kd('ArrowDown');
+      eq('Down removes the lifted app', order().join(), [ids[0], ids[1], ids[3], ids[4]].join());
+      eq('removal persisted', stored().join(), order().join());
+      eq('removal toast', document.getElementById('toastMsg').textContent, t('Removed %s from Home', names[ids[2]]));
+      eq('the next app is lifted', movingTileId, ids[0]);
+      eq('state has no removed app', state.favorites.indexOf(ids[2]), -1);
+      // Right past the last app focuses Add app; OK opens the shelf apps picker
+      kd('ArrowRight'); kd('ArrowRight'); kd('ArrowRight'); kd('ArrowRight');
+      eq('Right at the end reaches the Add app tile', document.querySelector('.nav-item.focused').classList.contains('tile-add'), true);
+      eq('nothing is lifted on the Add app tile', document.querySelectorAll('#appsGrid .app-tile.moving').length, 0);
+      kd('Enter'); ku('Enter');
+      eq('Add app opens the shelf apps picker', modalOpen && settingsUi.zone === 'apps', true);
+      eq('arranging paused while the picker is open', !shelfEdit, true);
+      var arrRow = document.getElementById('arrangeRow');
+      eq('picker has the Arrange on Home row', !!arrRow && arrRow.textContent === t('Arrange on Home'), true);
+      eq('and it comes before the apps', !!(arrRow.compareDocumentPosition(document.getElementById('settingsAppsGrid')) & 4), true);
+      kd('Escape');
+      eq('Back from the picker closes Settings', modalOpen, false);
+      eq('and resumes arranging', !!shelfEdit && document.body.classList.contains('arranging'), true);
+      eq('with an app lifted', !!movingTileId && !!tileOf(movingTileId), true);
+      // OK finishes and saves
+      kd('Enter'); ku('Enter');
+      eq('OK finishes', !shelfEdit && !document.body.classList.contains('arranging'), true);
+      eq('Home is back', vis(document.getElementById('greetingTitle')), true);
+      eq('no Add app tile on Home', document.querySelectorAll('#appsGrid .tile-add').length, 0);
+      eq('OK kept the order', stored().join(), state.favorites.join());
+      eq('saved toast', document.getElementById('toastMsg').textContent, t('Tile order saved'));
+      // Back also finishes and saves
+      setFav(ids);
+      setMainFocus(tileOf(ids[3]));
+      kd('Enter');
+      setTimeout(function () {
+        eq('second long press arranges', movingTileId, ids[3]);
+        ku('Enter');
+        kd('ArrowLeft');
+        kd('Escape');
+        eq('Back finishes', !shelfEdit && !document.body.classList.contains('arranging'), true);
+        eq('Back saved the move', stored().join(), [ids[0], ids[1], ids[3], ids[2], ids[4]].join());
+        eq('Home again after Back', order().join(), stored().join());
+        eq('focus stays on the moved tile', document.querySelector('.nav-item.focused').dataset.id, ids[3]);
+        // recent tiles and the divider are not part of arranging
+        state.pickup = 'on';
+        var hist = {}; hist[off[0].id] = { t: Date.now() - 1000, n: 1 }; hist[off[1].id] = { t: Date.now() - 2000, n: 1 };
+        localStorage.setItem('fmtv_launch_hist', JSON.stringify(hist));
+        setFav(ids);
+        eq('recent tiles show on Home', document.querySelectorAll('#appsGrid .tile-recent').length, 2);
+        var recent = document.querySelector('#appsGrid .tile-recent');
+        setMainFocus(recent);
+        launched.length = 0;
+        kd('Enter');
+        setTimeout(function () {
+          eq('holding OK on a recent tile does not arrange', !shelfEdit, true);
+          ku('Enter');
+          eq('releasing OK on a recent tile launches it', launched.join(), recent.dataset.id);
+          settle();
+          setMainFocus(tileOf(ids[0]));
+          kd('Enter');
+          setTimeout(function () {
+            eq('long press with recent tiles arranges', !!shelfEdit, true);
+            ku('Enter');
+            eq('recent tiles are hidden while arranging', document.querySelectorAll('#appsGrid .tile-recent, #appsGrid .tile-divider').length, 0);
+            eq('arranging works on shelf apps only', JSON.stringify(shelfEdit), JSON.stringify(ids));
+            kd('Enter'); ku('Enter');
+            eq('shelf unchanged after arranging with recents', stored().join(), ids.join());
+            eq('recent tiles are back on Home', document.querySelectorAll('#appsGrid .tile-recent').length, 2);
+            state.pickup = 'off'; localStorage.removeItem('fmtv_launch_hist'); renderAppsShelf();
+            // entry from Settings > Home > Apps on Home > Arrange on Home
+            openSettingsModal();
+            settingsUi.cat = 0; settingsUi.catFocus = 0; renderSettings();
+            kd('Enter'); kd('Enter');
+            eq('Apps on Home page is open', settingsUi.zone, 'apps');
+            kd('ArrowUp');
+            eq('Up reaches the Arrange on Home row', settingsUi.appIdx, -1);
+            eq('Arrange on Home row has the focus ring', document.getElementById('arrangeRow').classList.contains('sf'), true);
+            kd('ArrowDown');
+            eq('Down returns to the first app', settingsUi.appIdx, 0);
+            kd('ArrowUp'); kd('Enter');
+            eq('Arrange on Home closes Settings', modalOpen, false);
+            eq('Arrange on Home starts arranging', !!shelfEdit && document.body.classList.contains('arranging'), true);
+            eq('the first shelf tile is lifted', movingTileId, ids[0]);
+            // an empty shelf: Down on the last app leaves arranging and shows the Add app tile
+            kd('Enter'); ku('Enter');
+            setFav([ids[0]]);
+            startArranging(ids[0]);
+            kd('ArrowDown');
+            eq('removing the last app leaves arranging', !shelfEdit && !document.body.classList.contains('arranging'), true);
+            eq('the shelf is empty and saved', JSON.stringify(stored()) + JSON.stringify(state.favorites), '[][]');
+            eq('Home shows the Add app tile', document.querySelectorAll('#appsGrid .tile-add').length, 1);
+            eq('and no app tiles', document.querySelectorAll('#appsGrid .app-tile[data-id]').length, 0);
+            eq('Add app tile has the focus', document.querySelector('.nav-item.focused').classList.contains('tile-add'), true);
+            kd('Enter'); ku('Enter');
+            eq('OK on the empty-state Add app tile opens the picker', modalOpen && settingsUi.zone === 'apps', true);
+            kd('Escape'); kd('Escape'); kd('Escape');
+            eq('Back closes Settings to Home', modalOpen, false);
+            eq('Home, not arranging', !shelfEdit, true);
+            // pointer: clicking the Add app tile while arranging opens the picker too
+            setFav(ids);
+            startArranging(ids[0]);
+            document.querySelector('#appsGrid .tile-add').click();
+            eq('clicking Add app opens the picker', modalOpen && settingsUi.zone === 'apps', true);
+            closeSettingsModal();
+            finishShelfEdit();
+            eq('left clean', !shelfEdit && !document.body.classList.contains('arranging'), true);
+            window.webOS = oldWeb; settle();
+            state.favorites = keepFav; state.pickup = keepPickup;
+            if (keepStore === null) localStorage.removeItem('fmtv_favorites'); else localStorage.setItem('fmtv_favorites', keepStore);
+            localStorage.removeItem('fmtv_launch_hist'); renderAppsShelf();
+            done();
+          }, 700);
+        }, 700);
+      }, 700);
+    }, 700);
   });
   steps.push(function (done) { // D-pad focus draws a white ring on every kind of focusable element
     var ids = ['customizeBtn', 'tabMovies'];
