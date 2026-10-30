@@ -55,7 +55,7 @@ Modern LG webOS (especially webOS 6, 22, 23, and 24) replaced the classic, snapp
 - **🎬 Movies & Shows Trending Tabs.** Separate tabs for trending movies and TV shows—TMDB-ranked with your optional key, or our built-in zero-key live feed (TVMaze for Shows, curated picks for Movies).
 - **🌤️ Weather & Sun Drawer.** Click the weather widget for an hourly forecast and exact sunrise/sunset times, powered by Open-Meteo.
 - **🌍 Multi-Language.** English, Português (Brasil), Español, Deutsch and Français, following your TV's language or picked in Customize → Language.
-- **🌑 OLED-Safe Idle Screensaver.** A pure-black floating clock kicks in after a few minutes idle and gently shifts position to avoid burn-in—dismissed by any key or remote movement.
+- **🌑 OLED-Safe Idle Screensaver.** After the idle time you choose (1 to 30 minutes), a dimmed, slowly moving [Unsplash](https://unsplash.com) night-sky, aurora and landscape photo fades in behind a floating clock that shifts position to avoid burn-in. Without an Unsplash key it is a pure-black floating clock. Dismissed by any key or remote movement.
 - **🎮 Full Magic Remote & D-Pad Support.** Point and click with the LG Magic Remote cursor, or fly across tiles with the directional arrow keys and scroll wheel.
 - **💻 100% Onboard & Independent.** Installed as a native `.ipk` package on your TV. Your computer does **not** need to stay on.
 - **🛡️ Safe & Reversible.** Works on stock unrooted TVs via official LG Developer Mode (or Homebrew Channel). Your factory home screen is untouched.
@@ -135,20 +135,33 @@ Choose **Reorder** on the main shelf. Select a tile and press OK to pick it up, 
 
 Launch messages use the app or console name and report unavailable apps, failures, or no response after eight seconds. Repeated presses are ignored while a launch is pending; browser previews explain that launching requires an LG TV.
 
-Under **HDMI Devices**, press a port to cycle through HDMI, PS5, PS4, Xbox, Nintendo Switch, and Gaming PC, then choose **Save & Apply**. These are manual, per-port choices; connected consoles are not automatically detected. The tile keeps launching the same HDMI input. Cancel discards pending changes, and Reset Defaults clears device choices when saved.
+Each HDMI input is a row under **Shelf & Inputs**, right after **Shelf apps**: Left/Right (or OK) cycles the port through HDMI, PS5, PS4, Xbox, Nintendo Switch, and Gaming PC, and every change is saved at once. These are manual, per-port choices; connected consoles are not automatically detected. The tile keeps launching the same HDMI input. There is no Save, Cancel or Reset Defaults button: **Reset to defaults** is a row under **Accounts & Keys** that needs a second OK to confirm, and it also clears the device choices.
 
 The shelf displays larger artwork with bundled brand logos for PS5, PS4, Xbox, Nintendo Switch, and the streaming apps in the default catalog (including Netflix). These logos work offline. Other installed apps use icons supplied by webOS when accessible; missing or unreadable icons fall back to a readable app name.
 
 Some newer webOS releases block Developer Mode apps from listing installed apps. On those TVs, a one-time on-screen prompt asks to allow Free My TV; accept it so your installed apps appear in Customize.
 
+**Using the Customize screen with the remote:** pick a category on the left (Up/Down, then Right or OK), then move through its settings with Up/Down. On a setting, Left/Right changes its value (or OK cycles it); OK on a text setting opens the keyboard. **Shelf apps** opens a page where Up/Down move a whole row of apps and OK adds or removes one (up to 8). Every change is saved the moment you make it, so there is no Save button; Back steps out one level at a time. Keys (Unsplash, TMDB) are never shown on screen, only dots.
+
 | Setting | What It Does |
 |---|---|
+| **TV Settings button** | Next to Customize in the header: opens LG's built-in Settings app (picture, sound, network) without leaving the remote's D-pad. |
 | **App Shelf Selector** | Auto-discovers apps installed on your TV (`listLaunchPoints`) so you can pick up to 8 favorites for your glass dock. |
 | **City Name** | Type any city (e.g., `São Paulo`, `Lisbon`, `New York`) for live Open-Meteo weather and accurate local sunset times, or leave blank for automatic IP geolocation. |
 | **Theme Mode** | Choose `Auto (Follows Sunset)`, `Deep Midnight`, `Pure OLED Black`, or `Daylight Blue`. |
 | **Clock Format** | Toggle between `24-Hour (20:30)` and `12-Hour (8:30 PM)` display. |
+| **Trending This Week** | `On` (default) or `Off`. Hides the movies and shows row on the home screen; the row is skipped by the remote and stops fetching. |
 | **Performance Mode** | Choose between `Standard (Glass & Glow)` and `High Performance (60 FPS Boost)` to disable heavy backdrop filters on resource-constrained TVs. |
 | **TMDB API Key** | Paste a free [TMDB API Key](https://www.themoviedb.org/settings/api) for live weekly trending movies & shows, or leave empty to use the built-in zero-key live popular feed. |
+| **Screensaver Starts After** | Idle time before the screensaver starts: 1, 3, 5, 10 or 30 minutes. Applies to the photo and the black-clock screensaver. |
+| **Ambient Photo Screensaver** | `On` or `Off`. Photos need an Unsplash key and a TV with `fetch` support (webOS 4 or newer); otherwise the black clock is used. |
+| **Photo Duration / Photo Motion** | 30 seconds, 90 seconds or 5 minutes per photo. Motion: `Continuous drift` (default: the photo keeps gliding to a new spot), `Ken Burns` (one slow zoom and pan per photo), `Sliding panels` (the photo is cut into six strips that slide up to reveal the next one) or `None`. High Performance mode does not freeze the motion, only `None` does. |
+| **Unsplash Access Key** | Paste the Access Key of a free [Unsplash developer app](https://unsplash.com/developers) (50 requests per hour). The app makes about 5 calls per refresh, at most every 12 hours, and shows "Photo by NAME on Unsplash". It also sends one ping per photo shown, at most 30 per hour. |
+| **Photos on Home Screen** | `Off` (default) or `On`. Shows the same Unsplash photos, slowly moving and dimmed, behind the home screen, with a small "Photo by NAME on Unsplash" credit in the bottom-left corner. Needs the Unsplash key; it pauses while the screensaver is showing. Needs a TV with `fetch` support (webOS 4 or newer). With Motion set to `None`, or in High Performance mode, the photo stays still. |
+| **Drift Speed** | `Slow`, `Normal` (default) or `Fast`: how often `Continuous drift` glides to a new spot (every 40, 22 or 12 seconds). |
+| **Photo Brightness** | `Soft`, `Normal` (default) or `Bright`: how strongly the photos show behind the clock. |
+| **Clock Position** | `Bottom Left` (default), `Bottom Right`, `Top Left`, `Top Right` or `Center (drifts slowly)`. In the corners the clock moves only a few pixels (OLED care); in the center it drifts further. |
+| **Keep LG Screensaver Away** | `On` (default) or `Off`. While the app is open, a tiny hidden muted video plays so LG's own screensaver does not cover it (LG's timer can fire before ours). It may also stop the TV's own auto-sleep while Free My TV is open, so turn it `Off` if you prefer the TV to sleep normally. Older webOS versions without this video feature skip it. |
 
 ---
 
@@ -259,7 +272,7 @@ O webOS moderno da LG (especialmente webOS 6, 22, 23 e 24) substituiu a clássic
 - **🎬 Abas de Filmes e Séries em Alta.** Abas separadas para filmes e séries em alta — ranqueadas pelo TMDB com sua chave opcional, ou nosso feed ao vivo sem chave (TVMaze para séries, curadoria para filmes).
 - **🌤️ Gaveta de Clima e Sol.** Clique no widget de clima para ver a previsão hora a hora e os horários exatos de nascer/pôr do sol, via Open-Meteo.
 - **🌍 Multi-idioma.** English, Português (Brasil), Español, Deutsch e Français, seguindo o idioma da TV ou escolhido em Personalizar → Language.
-- **🌑 Screensaver Seguro para OLED.** Um relógio flutuante em tela totalmente preta aparece após alguns minutos parado e muda de posição aos poucos para evitar marcação de imagem — some com qualquer tecla ou movimento do controle.
+- **🌑 Screensaver Seguro para OLED.** Após o tempo parado que você escolher (1 a 30 minutos), uma foto escura e em movimento lento do [Unsplash](https://unsplash.com) aparece atrás de um relógio flutuante que muda de posição para evitar marcação de imagem. Sem chave do Unsplash, é só o relógio em tela preta. Some com qualquer tecla ou movimento do controle.
 - **🎮 Suporte Completo ao Magic Remote e D-Pad.** Aponte e clique com o cursor do Magic Remote da LG, ou navegue pelos cards com as setas direcionais e a roda de rolagem.
 - **💻 100% Independente na TV.** Instalado como um pacote `.ipk` nativo na sua TV. Seu computador **não** precisa ficar ligado.
 - **🛡️ Seguro e Reversível.** Funciona em TVs de fábrica sem root via o Developer Mode oficial da LG (ou Homebrew Channel). Sua home screen de fábrica fica intocada.
@@ -335,6 +348,10 @@ python scripts/install.py
 
 Clique no botão **⚙️ Customize** no canto superior direito do painel usando o controle remoto:
 
+**Usando a tela Personalizar com o controle remoto:** escolha uma categoria à esquerda (Cima/Baixo, depois Direita ou OK) e percorra os ajustes com Cima/Baixo. Em um ajuste, Esquerda/Direita muda o valor (ou OK avança); OK em um ajuste de texto abre o teclado. **Apps da prateleira** abre uma página em que Cima/Baixo movem uma linha inteira de apps e OK adiciona ou remove um (até 8). Cada mudança é salva na hora, por isso não há botão Salvar; Voltar sai um nível por vez. As chaves (Unsplash, TMDB) nunca aparecem na tela, só pontos.
+
+Cada entrada HDMI é uma linha em **Prateleira e Entradas**, logo depois de **Apps da prateleira**: Esquerda/Direita (ou OK) alterna a porta entre HDMI, PS5, PS4, Xbox, Nintendo Switch e Gaming PC, e cada mudança é salva na hora. São escolhas manuais, por porta; consoles conectados não são detectados automaticamente. O bloco continua abrindo a mesma entrada HDMI. Não há botões Salvar, Cancelar ou Restaurar Padrões: **Restaurar padrões** é uma linha em **Contas e Chaves** que pede um segundo OK para confirmar, e também limpa as escolhas de dispositivo.
+
 | Configuração | O Que Faz |
 |---|---|
 | **Seletor de Prateleira de Apps** | Descobre automaticamente os apps instalados na sua TV (`listLaunchPoints`) para você escolher até 8 favoritos para sua prateleira de vidro. |
@@ -343,6 +360,10 @@ Clique no botão **⚙️ Customize** no canto superior direito do painel usando
 | **Formato do Relógio** | Alterne entre exibição em `24 Horas (20:30)` ou `12 Horas (8:30 PM)`. |
 | **Modo de Performance** | Escolha entre `Padrão (Vidro & Brilho)` ou `Alta Performance (60 FPS Boost)` para desativar filtros pesados de desfoque em TVs mais modestas. |
 | **Chave da API do TMDB** | Cole uma [chave gratuita da API do TMDB](https://www.themoviedb.org/settings/api) para ver filmes e séries em alta da semana ao vivo, ou deixe em branco para usar o feed ao vivo popular embutido (sem necessidade de chave). |
+| **Protetor de Tela Inicia Após** | Tempo parado antes do protetor de tela: 1, 3, 5, 10 ou 30 minutos. |
+| **Protetor de Tela com Fotos** | `Ligado` ou `Desligado`, com duração (30 s, 90 s ou 5 min) e movimento (Ken Burns, só deslize ou nenhum). Precisa de uma chave de acesso do [Unsplash](https://unsplash.com/developers) (50 requisições por hora). |
+| **Fotos na Tela Inicial** | `Desligado` (padrão) ou `Ligado`. Mostra as mesmas fotos do Unsplash, em movimento lento e escurecidas, atrás da tela inicial, com o crédito "Foto de NOME no Unsplash" no canto inferior esquerdo. Precisa da chave do Unsplash e pausa enquanto o protetor de tela aparece. Precisa de uma TV com suporte a `fetch` (webOS 4 ou mais novo). Com Movimento em `Nenhum`, ou no modo de Alta Performance, a foto fica parada. |
+| **Evitar o Protetor de Tela da LG** | `Ligado` (padrão) ou `Desligado`. Enquanto o protetor de tela do Free My TV aparece, um vídeo minúsculo, mudo e invisível toca para que o protetor da própria LG não o cubra. Pode impedir também o desligamento automático da TV nesse período; desligue se preferir o comportamento normal. Versões antigas do webOS sem esse recurso de vídeo o ignoram. |
 
 ---
 

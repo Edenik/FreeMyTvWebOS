@@ -432,23 +432,13 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .hdmi-options {
-            /* Flexbox fallback for engines without CSS Grid; display: grid
-               below overrides it on any engine that understands grid. */
-            display: flex;
-            flex-wrap: wrap;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .hdmi-options .app-toggle-item {
-            flex: 0 0 calc((100% - 12px) / 2);
-        }
-
         /* Trending Picks Row */
         .picks-section {
             margin-top: 6px;
+        }
+
+        .picks-section.picks-off {
+            display: none;
         }
 
         .picks-top-bar {
@@ -601,19 +591,211 @@
             display: flex;
         }
 
-        .modal-box {
-            width: 960px;
-            max-height: 86vh;
-            background: rgba(22, 27, 40, 0.92);
+        /* Customize screen */
+        .settings-panel {
+            width: 1500px;
+            max-width: 94vw;
+            height: 880px;
+            max-height: 90vh;
+            box-sizing: border-box;
+            background: rgba(22, 27, 40, 0.94);
             border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 28px;
-            padding: 32px 38px;
+            padding: 30px 38px 22px;
             display: flex;
             flex-direction: column;
-            gap: 22px;
+            gap: 18px;
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
-            overflow-y: auto;
         }
+
+        .settings-head {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 14px;
+        }
+
+        .settings-title {
+            font-size: 34px;
+            font-weight: 700;
+            flex: 1;
+        }
+
+        .settings-saved {
+            font-size: 22px;
+            color: var(--text-secondary);
+            min-width: 120px;
+            text-align: right;
+        }
+
+        .settings-body {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            gap: 30px;
+        }
+
+        .settings-cats {
+            flex: 0 0 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 6px;
+        }
+
+        .settings-main {
+            flex: 1;
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .settings-cat {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 72px;
+            padding: 0 22px;
+            border: 1px solid transparent;
+            border-radius: 16px;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 28px;
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .settings-cat .sc-name { flex: 1; }
+        .settings-cat .sc-count { font-size: 20px; color: var(--text-secondary); }
+        .settings-cat.selected { background: rgba(10, 132, 255, 0.22); }
+        .settings-close { margin-top: auto; justify-content: center; background: rgba(255, 255, 255, 0.08); }
+
+        .settings-rows {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-height: 88px;
+            flex: 0 0 auto;
+            padding: 0 22px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .sr-main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px 0;
+            background: transparent;
+            border: 0;
+            color: var(--text-primary);
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .sr-label { font-size: 28px; }
+        .sr-hint { font-size: 20px; color: var(--text-secondary); }
+        .sr-value { min-width: 300px; text-align: center; font-size: 28px; font-weight: 600; }
+        .sr-edit { flex: 0 0 auto; font-size: 20px; padding: 6px 14px; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); }
+
+        .sr-arrow {
+            width: 52px;
+            height: 52px;
+            flex: 0 0 52px;
+            border-radius: 26px;
+            border: 0;
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .sr-input {
+            min-width: 300px;
+            font-family: inherit;
+            font-size: 28px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 2px solid var(--accent);
+            background: rgba(0, 0, 0, 0.45);
+            color: #ffffff;
+        }
+
+        .settings-cat.sf,
+        .settings-row.sf,
+        .apps-tile.sf,
+        .apps-done.sf {
+            box-shadow: 0 0 0 4px #0a84ff;
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .apps-done.sf { background: var(--accent); box-shadow: 0 0 0 4px #ffffff; }
+
+        .apps-page { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+        .apps-head { display: flex; align-items: center; gap: 16px; }
+        .apps-title { font-size: 30px; font-weight: 700; flex: 1; }
+        .apps-count { font-size: 24px; padding: 8px 18px; border-radius: 999px; background: rgba(10, 132, 255, 0.22); }
+        .apps-message { min-height: 28px; font-size: 22px; color: var(--text-secondary); }
+
+        .apps-grid {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px;
+            align-content: start;
+        }
+
+        .apps-tile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 84px;
+            /* Flex fallback width (Grid ignores flex-basis); no margin fallback, a margin would change the Grid spacing. */
+            flex: 0 0 calc((100% - 48px) / 5);
+            min-width: 0;
+            box-sizing: border-box;
+            padding: 0 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
+            font-size: 24px;
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .apps-tile .at-name { flex: 1; min-width: 0; }
+        .at-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .apps-tile.on { background: rgba(10, 132, 255, 0.28); border-color: #0a84ff; }
+        .apps-tile.on.sf { box-shadow: 0 0 0 4px #ffffff; }
+        .apps-done { align-self: flex-start; padding: 16px 40px; border-radius: 16px; border: 0; background: rgba(255, 255, 255, 0.12); color: #ffffff; font-size: 24px; font-weight: 600; font-family: inherit; cursor: pointer; }
+
+        .settings-foot { font-size: 20px; color: var(--text-secondary); min-height: 28px; }
 
         .modal-header {
             display: flex;
@@ -637,50 +819,6 @@
             margin-bottom: 10px;
         }
 
-        .app-selector-grid {
-            /* Flexbox fallback for engines without CSS Grid; display: grid
-               below overrides it on any engine that understands grid. */
-            display: flex;
-            flex-wrap: wrap;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            max-height: 240px;
-            overflow-y: auto;
-            padding: 4px;
-        }
-
-        .app-selector-grid .app-toggle-item {
-            flex: 0 0 calc((100% - 12px * 3) / 4);
-        }
-
-        .app-toggle-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1.5px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            padding: 10px 14px;
-            cursor: pointer;
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 500;
-            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-        }
-
-        .app-toggle-item.selected {
-            background: rgba(10, 132, 255, 0.22);
-            border-color: #0a84ff;
-        }
-
-        .app-toggle-item:hover,
-        .app-toggle-item.focused {
-            transform: scale(1.03);
-            border-color: #ffffff;
-            background: rgba(255, 255, 255, 0.16);
-        }
-
         .shelf-edit-actions { display: flex; align-items: center; gap: 10px; }
         .shelf-edit-actions[hidden], #reorderShelfBtn[hidden] { display: none; }
         .shelf-edit-actions button, #reorderShelfBtn { padding: 7px 14px; font-size: 14px; }
@@ -688,61 +826,12 @@
 
         .app-tile[aria-busy="true"] { border-color: var(--accent); }
 
-        .settings-row {
-            /* Flexbox fallback for engines without CSS Grid; display: grid
-               below overrides it on any engine that understands grid. */
-            display: flex;
-            flex-wrap: wrap;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .field-group {
-            flex: 0 0 calc((100% - 16px * 2) / 3);
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .field-group label {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .field-input {
-            background: rgba(0, 0, 0, 0.35);
-            border: 1.5px solid rgba(255, 255, 255, 0.16);
-            border-radius: 12px;
-            padding: 10px 14px;
-            color: #ffffff;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .field-input:focus,
-        .field-input.focused {
-            border-color: var(--accent);
-            background: rgba(0, 0, 0, 0.55);
-        }
-
         .modal-actions {
             display: flex;
             justify-content: flex-end;
             gap: 14px;
             padding-top: 10px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #ffffff;
-            border: 2px solid transparent;
-            padding: 10px 24px;
-            border-radius: 14px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
         }
 
         .btn-secondary {
@@ -756,7 +845,6 @@
             cursor: pointer;
         }
 
-        .btn-primary:hover, .btn-primary.focused,
         .btn-secondary:hover, .btn-secondary.focused {
             border-color: #ffffff;
             transform: scale(1.05);
@@ -913,6 +1001,16 @@
             transition: transform 1.4s ease-in-out;
         }
 
+        /* Clock position: centred by default, or pinned to a corner (the clock still shifts a few pixels). */
+        .screensaver.pos-tl, .screensaver.pos-tr { align-items: flex-start; }
+        .screensaver.pos-bl, .screensaver.pos-br { align-items: flex-end; }
+        .screensaver.pos-tl, .screensaver.pos-bl { justify-content: flex-start; }
+        .screensaver.pos-tr, .screensaver.pos-br { justify-content: flex-end; }
+        .screensaver.pos-tl .screensaver-clock-wrap, .screensaver.pos-bl .screensaver-clock-wrap { text-align: left; }
+        .screensaver.pos-tr .screensaver-clock-wrap, .screensaver.pos-br .screensaver-clock-wrap { text-align: right; }
+        .screensaver.pos-tl .screensaver-clock-wrap, .screensaver.pos-tr .screensaver-clock-wrap,
+        .screensaver.pos-bl .screensaver-clock-wrap, .screensaver.pos-br .screensaver-clock-wrap { padding: 56px 80px; }
+
         .screensaver-clock {
             font-size: 132px;
             font-weight: 200;
@@ -928,6 +1026,124 @@
             color: rgba(255, 255, 255, 0.4);
             margin-top: 6px;
         }
+
+        /* Ambient photo layer: dimmed photos behind the clock; only opacity and transform animate. */
+        .screensaver .screensaver-clock-wrap {
+            position: relative;
+            z-index: 1;
+        }
+
+        .screensaver-photos {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            background: #000000;
+        }
+
+        .screensaver.ambient .screensaver-photos {
+            display: block;
+        }
+
+        .screensaver-photos:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.45) 100%);
+        }
+
+        .ss-photo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            will-change: opacity, transform;
+        }
+
+        /* Sliding panels: six strips, each showing its slice of the photo, slide up to reveal the next one. */
+        .pn-strips {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .pn-strip {
+            position: relative;
+            flex: 1 1 0;
+            overflow: hidden;
+            will-change: transform;
+        }
+
+        .pn-strip img {
+            position: absolute;
+            top: 0;
+            width: 600%;
+            max-width: none;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .screensaver-credit {
+            font-size: 16px;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.35);
+            margin-top: 14px;
+        }
+
+        .screensaver-credit:empty { display: none; }
+
+        /* Home-screen photos: a dimmed full-screen layer under the dashboard (.container is z-index 10). */
+        .home-photos {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .home-photos.active {
+            display: block;
+        }
+
+        .home-photos:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%);
+        }
+
+        .home-photo-credit {
+            position: fixed;
+            left: 54px;
+            bottom: 10px;
+            z-index: 11;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.35);
+            pointer-events: none;
+        }
+
+        .home-photo-credit:empty { display: none; }
     </style>
     <script>
         (function() {
@@ -943,6 +1159,11 @@
 </head>
 <body>
     <div class="ambient-glow" id="ambientGlow"></div>
+    <div class="home-photos" id="homePhotos" aria-hidden="true">
+        <img class="ss-photo" id="hpPhotoA" alt="">
+        <img class="ss-photo" id="hpPhotoB" alt="">
+    </div>
+    <div class="home-photo-credit" id="homePhotoCredit"></div>
     <div class="toast-msg" id="toastMsg" role="status" aria-live="polite">Launching...</div>
 
     <div class="container">
@@ -958,6 +1179,9 @@
             <div class="header-info">
                 <button class="header-btn nav-item" id="customizeBtn" data-tag="Personalize" data-title="Customize Shelf & Settings" data-desc="Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.">
                     <span>⚙️ Customize</span>
+                </button>
+                <button class="header-btn nav-item" id="tvSettingsBtn" data-tag="Personalize" data-title="TV Settings" data-desc="Open the built-in LG TV settings (picture, sound, network and more).">
+                    <span>🔧 TV Settings</span>
                 </button>
                 <div class="weather-widget nav-item" id="weatherWidget" data-tag="Live Forecast" data-title="Local Weather & Sunset" data-desc="Live temperature and sky conditions powered by Open-Meteo.">
                     <span id="weatherIcon">☀️</span>
@@ -1008,97 +1232,19 @@
         </div>
     </div>
 
-    <!-- Customize Shelf & Settings Modal -->
+    <!-- Customize Free My TV: categories, one row per setting, an apps page; every change applies at once -->
     <div class="modal-backdrop" id="settingsModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title">Customize Free My TV</div>
-                <div style="font-size: 13px; color: var(--text-secondary);">Press BACK or ESC to close</div>
-            </div>
-
-            <div>
-                <div class="modal-section-title">1. Select Apps for Glass Shelf (Click to Toggle)</div>
-                <div class="app-selector-grid" id="appSelectorGrid"></div>
-
-            </div>
-
-            <div>
-                <div class="modal-section-title">2. HDMI Devices</div>
-                <p style="color: var(--text-secondary); margin: 0 0 12px;">Press a port to cycle its device. Save &amp; Apply to keep your choices.</p>
-                <div class="hdmi-options" id="hdmiOptions"></div>
-            </div>
-
-            <div>
-                <div class="modal-section-title">3. Preferences & Display</div>
-                <div class="settings-row">
-                    <div class="field-group">
-                        <label>City Name (or leave Auto)</label>
-                        <input type="text" class="field-input modal-nav" id="cfgCity" placeholder="e.g. Sao Paulo, Lisbon, NYC">
-                    </div>
-                    <div class="field-group">
-                        <label>Theme Mode</label>
-                        <select class="field-input modal-nav" id="cfgTheme">
-                            <option value="auto">Auto (Follows Sunset)</option>
-                            <option value="night">Deep Midnight (Default)</option>
-                            <option value="oled">Pure OLED Black</option>
-                            <option value="day">Daylight Blue</option>
-                        </select>
-                    </div>
-                    <div class="field-group">
-                        <label>Clock Format</label>
-                        <select class="field-input modal-nav" id="cfgClockFormat">
-                            <option value="24h">24-Hour (20:30)</option>
-                            <option value="12h">12-Hour (8:30 PM)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="settings-row" style="margin-top: 14px;">
-                    <div class="field-group">
-                        <label>Performance Mode</label>
-                        <select class="field-input modal-nav" id="cfgPerfMode">
-                            <option value="standard">Standard (Glass & Glow)</option>
-                            <option value="high">High Performance (60 FPS Boost)</option>
-                        </select>
-                    </div>
-                    <div class="field-group">
-                        <label>Language</label>
-                        <select class="field-input modal-nav" id="cfgLang">
-                            <option value="auto">Auto (TV language)</option>
-                            <option value="en">English</option>
-                            <option value="pt">Português (Brasil)</option>
-                            <option value="es">Español</option>
-                            <option value="de">Deutsch</option>
-                            <option value="fr">Français</option>
-                        </select>
-                    </div>
-                    <div class="field-group">
-                        <label>Text Size (weather & clock)</label>
-                        <select class="field-input modal-nav" id="cfgTextSize">
-                            <option value="normal">Normal</option>
-                            <option value="large">Large</option>
-                            <option value="xlarge">Extra large</option>
-                        </select>
-                    </div>
-                    <div class="field-group">
-                        <label>Auto-locate by IP (sends your IP to ipapi.co)</label>
-                        <select class="field-input modal-nav" id="cfgIpLocate">
-                            <option value="off">Off (use the city above)</option>
-                            <option value="on">On</option>
-                        </select>
-                    </div>
-                    <div class="field-group" style="grid-column: span 2;">
-                        <label>TMDB API Key (Optional)</label>
-                        <input type="text" class="field-input modal-nav" id="cfgTmdbKey" placeholder="Optional for TMDB Trending">
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-actions">
+        <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="settings-head">
+                <div class="settings-title" id="settingsTitle">Customize Free My TV</div>
                 <span class="modal-version" id="appVersion"></span>
-                <button class="btn-secondary modal-nav" id="resetDefaultBtn">Reset Defaults</button>
-                <button class="btn-secondary modal-nav" id="closeModalBtn">Cancel</button>
-                <button class="btn-primary modal-nav" id="saveModalBtn">Save & Apply</button>
+                <div class="settings-saved" id="settingsSaved" role="status" aria-live="polite"></div>
             </div>
+            <div class="settings-body">
+                <div class="settings-cats" id="settingsCats"></div>
+                <div class="settings-main" id="settingsMain"></div>
+            </div>
+            <div class="settings-foot" id="settingsHints"></div>
         </div>
     </div>
 
@@ -1147,10 +1293,17 @@
     </div>
 
     <!-- OLED-Safe Idle Screensaver -->
+    <canvas id="keepAwakeCanvas" width="64" height="36" hidden></canvas>
+    <video id="keepAwakeVideo" muted loop playsinline aria-hidden="true" style="position: fixed; right: 0; bottom: 0; width: 4px; height: 4px; opacity: 0.02; pointer-events: none;"></video>
     <div class="screensaver" id="screensaverOverlay">
+        <div class="screensaver-photos" id="screensaverPhotos">
+            <img class="ss-photo" id="ssPhotoA" alt="">
+            <img class="ss-photo" id="ssPhotoB" alt="">
+        </div>
         <div class="screensaver-clock-wrap" id="screensaverClockWrap">
             <div class="screensaver-clock" id="screensaverClock">20:30</div>
             <div class="screensaver-date" id="screensaverDate">Mon, Oct 19</div>
+            <div class="screensaver-credit" id="screensaverCredit"></div>
         </div>
     </div>
 
@@ -1273,7 +1426,18 @@
             ipLocate: localStorage.getItem('fmtv_ip_locate') || 'off',
             lang: localStorage.getItem('fmtv_lang') || 'auto',
             textSize: localStorage.getItem('fmtv_text_size') || 'normal',
+            idleMins: localStorage.getItem('fmtv_idle_mins') || '3',
+            unsplashKey: localStorage.getItem('fmtv_unsplash_key') || '',
+            ambient: localStorage.getItem('fmtv_ambient') || 'on',
+            ambientSecs: localStorage.getItem('fmtv_ambient_secs') || '90',
+            ambientMotion: localStorage.getItem('fmtv_ambient_motion') || 'drift',
+            homePhotos: localStorage.getItem('fmtv_home_photos') || 'off',
+            keepAwake: localStorage.getItem('fmtv_keep_awake') || 'on',
+            ambientBright: localStorage.getItem('fmtv_ambient_bright') || 'normal',
+            ambientSpeed: localStorage.getItem('fmtv_ambient_speed') || 'normal',
+            clockPos: localStorage.getItem('fmtv_clock_pos') || 'bl',
             catalog: DEFAULT_CATALOG.slice(),
+            showTrending: localStorage.getItem('fmtv_show_trending') || 'on',
             picksTab: 'movies',
             hourlyForecast: [],
             sunrise: '',
@@ -1290,7 +1454,7 @@
 
         var I18N = {
             pt: {
-                '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritos', 'Reorder': 'Reordenar', 'Done': 'Concluir', 'Cancel': 'Cancelar',
+                '🔧 TV Settings': '🔧 Config. da TV', 'TV Settings': 'Config. da TV', 'Open the built-in LG TV settings (picture, sound, network and more).': 'Abrir as configurações internas da TV LG (imagem, som, rede e mais).', '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritos', 'Reorder': 'Reordenar', 'Done': 'Concluir', 'Cancel': 'Cancelar',
                 'Trending This Week': 'Em Alta na Semana', 'Movies': 'Filmes', 'Shows': 'Séries',
                 'Customize Free My TV': 'Personalizar o Free My TV', 'Press BACK or ESC to close': 'Pressione VOLTAR ou ESC para fechar',
                 '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Escolha os Apps da Prateleira (Clique para Alternar)',
@@ -1302,7 +1466,11 @@
                 'Clock Format': 'Formato do Relógio', '24-Hour (20:30)': '24 Horas (20:30)', '12-Hour (8:30 PM)': '12 Horas (8:30 PM)',
                 'Performance Mode': 'Modo de Desempenho', 'Standard (Glass & Glow)': 'Padrão (Vidro e Brilho)', 'High Performance (60 FPS Boost)': 'Alto Desempenho (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Localizar por IP (envia seu IP ao ipapi.co)', 'Off (use the city above)': 'Desligado (usar a cidade acima)', 'On': 'Ligado',
-                'TMDB API Key (Optional)': 'Chave da API TMDB (Opcional)', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma da TV)',
+                'TMDB API Key (Optional)': 'Chave da API TMDB (Opcional)',
+                'Screensaver Starts After': 'Protetor de Tela Inicia Após', '1 minute': '1 minuto', '3 minutes': '3 minutos', '5 minutes': '5 minutos', '10 minutes': '10 minutos', '30 minutes': '30 minutos',
+                'Ambient Photo Screensaver': 'Protetor de Tela com Fotos', 'Off': 'Desligado', 'Photo Duration': 'Duração da Foto', '30 seconds': '30 segundos', '90 seconds': '90 segundos',
+                'Photo Motion': 'Movimento da Foto', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom e deslize)', 'Drift only': 'Só deslize', 'None': 'Nenhum',
+                'Unsplash Access Key (Optional)': 'Chave de Acesso Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para o protetor de fotos', 'Photo by %s on Unsplash': 'Foto de %s no Unsplash', 'Photos on Home Screen': 'Fotos na Tela Inicial', 'Keep LG Screensaver Away': 'Evitar o Protetor de Tela da LG', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma da TV)',
                 'Text Size (weather & clock)': 'Tamanho do texto (clima e relógio)', 'Normal': 'Normal', 'Large': 'Grande', 'Extra large': 'Extra grande',
                 'Reset Defaults': 'Restaurar Padrões', 'Save & Apply': 'Salvar e Aplicar',
                 'Weather & Sun': 'Clima e Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Nascer do Sol', 'Sunset': 'Pôr do Sol', 'Close': 'Fechar',
@@ -1347,10 +1515,22 @@
                 '%s Apps • Instant Launch': '%s Apps • Abertura Instantânea',
                 'Select a tile first': 'Escolha um bloco primeiro', 'Could not save the order. Please try again.': 'Não foi possível salvar a ordem. Tente novamente.',
                 'Tile order saved': 'Ordem salva', 'Reordering cancelled': 'Reordenação cancelada', 'Max 8 apps on shelf': 'Máximo de 8 apps na prateleira',
-                'Defaults restored': 'Padrões restaurados', 'Saved & Applied!': 'Salvo e aplicado!'
+                'Defaults restored': 'Padrões restaurados', 'Saved & Applied!': 'Salvo e aplicado!',
+                'Shelf & Inputs': 'Prateleira e Entradas', 'Look & Feel': 'Visual', 'Weather & Location': 'Clima e Local',
+                'Photos & Screensaver': 'Fotos e Protetor de Tela', 'Accounts & Keys': 'Contas e Chaves', 'Categories': 'Categorias',
+                'Shelf apps': 'Apps da prateleira', 'OK to edit': 'OK para editar', 'OK to open': 'OK para abrir',
+                'Not set': 'Não definido', 'Saved': 'Salvo', 'Reset to defaults': 'Restaurar padrões',
+                'Press OK again to confirm': 'Pressione OK de novo para confirmar', 'Up / Down: move': 'Cima / Baixo: mover', 'Left / Right: change value': 'Esquerda / Direita: mudar valor',
+                'OK: select or edit': 'OK: selecionar ou editar', 'Back: close': 'Voltar: fechar', 'Changes apply instantly': 'As mudanças são aplicadas na hora',
+                'Up / Down: move one row': 'Cima / Baixo: mover uma linha', 'OK: add or remove': 'OK: adicionar ou remover', 'Back: return': 'Voltar: retornar',
+                'Enter: save': 'Enter: salvar', 'Back: cancel': 'Voltar: cancelar', '%s of 8 selected': '%s de 8 selecionados',
+                'Keep at least one app on the shelf.': 'Mantenha pelo menos um app na prateleira.', 'Previous value': 'Valor anterior', 'Next value': 'Próximo valor',
+                'Show the movies and shows row on the home screen': 'Mostrar a linha de filmes e séries na tela inicial', 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posição do Relógio', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Photo Brightness': 'Brilho das Fotos', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Photos behind the clock when the TV is idle': 'Fotos atrás do relógio quando a TV está ociosa', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
+                'For the photos. Stored on this TV only': 'Para as fotos. Guardada só nesta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para filmes e séries em alta da semana', 'Back: categories': 'Voltar: categorias',
+                'OK or Right: open': 'OK ou Direita: abrir'
             },
             es: {
-                '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritas', 'Reorder': 'Reordenar', 'Done': 'Listo', 'Cancel': 'Cancelar',
+                '🔧 TV Settings': '🔧 Ajustes del TV', 'TV Settings': 'Ajustes del TV', 'Open the built-in LG TV settings (picture, sound, network and more).': 'Abrir los ajustes integrados del TV LG (imagen, sonido, red y más).', '⚙️ Customize': '⚙️ Personalizar', 'Favorite Apps': 'Apps Favoritas', 'Reorder': 'Reordenar', 'Done': 'Listo', 'Cancel': 'Cancelar',
                 'Trending This Week': 'Tendencias de la Semana', 'Movies': 'Películas', 'Shows': 'Series',
                 'Customize Free My TV': 'Personalizar Free My TV', 'Press BACK or ESC to close': 'Pulsa ATRÁS o ESC para cerrar',
                 '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Elige las Apps del Estante (Clic para Alternar)',
@@ -1362,7 +1542,11 @@
                 'Clock Format': 'Formato del Reloj', '24-Hour (20:30)': '24 Horas (20:30)', '12-Hour (8:30 PM)': '12 Horas (8:30 PM)',
                 'Performance Mode': 'Modo de Rendimiento', 'Standard (Glass & Glow)': 'Estándar (Cristal y Brillo)', 'High Performance (60 FPS Boost)': 'Alto Rendimiento (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Ubicar por IP (envía tu IP a ipapi.co)', 'Off (use the city above)': 'Desactivado (usar la ciudad de arriba)', 'On': 'Activado',
-                'TMDB API Key (Optional)': 'Clave API de TMDB (Opcional)', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma del TV)',
+                'TMDB API Key (Optional)': 'Clave API de TMDB (Opcional)',
+                'Screensaver Starts After': 'El Protector de Pantalla Inicia Tras', '1 minute': '1 minuto', '3 minutes': '3 minutos', '5 minutes': '5 minutos', '10 minutes': '10 minutos', '30 minutes': '30 minutos',
+                'Ambient Photo Screensaver': 'Protector de Pantalla con Fotos', 'Off': 'Desactivado', 'Photo Duration': 'Duración de la Foto', '30 seconds': '30 segundos', '90 seconds': '90 segundos',
+                'Photo Motion': 'Movimiento de la Foto', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom y desplazamiento)', 'Drift only': 'Solo desplazamiento', 'None': 'Ninguno',
+                'Unsplash Access Key (Optional)': 'Clave de acceso de Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para el protector con fotos', 'Photo by %s on Unsplash': 'Foto de %s en Unsplash', 'Photos on Home Screen': 'Fotos en la Pantalla de Inicio', 'Keep LG Screensaver Away': 'Evitar el Protector de Pantalla de LG', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma del TV)',
                 'Text Size (weather & clock)': 'Tamaño del texto (clima y reloj)', 'Normal': 'Normal', 'Large': 'Grande', 'Extra large': 'Extra grande',
                 'Reset Defaults': 'Restablecer', 'Save & Apply': 'Guardar y Aplicar',
                 'Weather & Sun': 'Clima y Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Amanecer', 'Sunset': 'Atardecer', 'Close': 'Cerrar',
@@ -1407,10 +1591,22 @@
                 '%s Apps • Instant Launch': '%s Apps • Apertura Instantánea',
                 'Select a tile first': 'Elige un mosaico primero', 'Could not save the order. Please try again.': 'No se pudo guardar el orden. Inténtalo de nuevo.',
                 'Tile order saved': 'Orden guardado', 'Reordering cancelled': 'Reordenación cancelada', 'Max 8 apps on shelf': 'Máximo 8 apps en el estante',
-                'Defaults restored': 'Valores restablecidos', 'Saved & Applied!': '¡Guardado y aplicado!'
+                'Defaults restored': 'Valores restablecidos', 'Saved & Applied!': '¡Guardado y aplicado!',
+                'Shelf & Inputs': 'Estante y Entradas', 'Look & Feel': 'Aspecto', 'Weather & Location': 'Clima y Ubicación',
+                'Photos & Screensaver': 'Fotos y Salvapantallas', 'Accounts & Keys': 'Cuentas y Claves', 'Categories': 'Categorías',
+                'Shelf apps': 'Apps del estante', 'OK to edit': 'OK para editar', 'OK to open': 'OK para abrir',
+                'Not set': 'Sin definir', 'Saved': 'Guardado', 'Reset to defaults': 'Restablecer valores',
+                'Press OK again to confirm': 'Pulsa OK otra vez para confirmar', 'Up / Down: move': 'Arriba / Abajo: mover', 'Left / Right: change value': 'Izquierda / Derecha: cambiar valor',
+                'OK: select or edit': 'OK: elegir o editar', 'Back: close': 'Atrás: cerrar', 'Changes apply instantly': 'Los cambios se aplican al instante',
+                'Up / Down: move one row': 'Arriba / Abajo: mover una fila', 'OK: add or remove': 'OK: añadir o quitar', 'Back: return': 'Atrás: volver',
+                'Enter: save': 'Enter: guardar', 'Back: cancel': 'Atrás: cancelar', '%s of 8 selected': '%s de 8 seleccionadas',
+                'Keep at least one app on the shelf.': 'Deja al menos una app en el estante.', 'Previous value': 'Valor anterior', 'Next value': 'Valor siguiente',
+                'Show the movies and shows row on the home screen': 'Mostrar la fila de películas y series en la pantalla de inicio', 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posición del Reloj', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Photo Brightness': 'Brillo de las Fotos', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Photos behind the clock when the TV is idle': 'Fotos tras el reloj cuando la TV está inactiva', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
+                'For the photos. Stored on this TV only': 'Para las fotos. Se guarda solo en esta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para las películas y series en tendencia de la semana', 'Back: categories': 'Atrás: categorías',
+                'OK or Right: open': 'OK o Derecha: abrir'
             },
             de: {
-                '⚙️ Customize': '⚙️ Anpassen', 'Favorite Apps': 'Lieblings-Apps', 'Reorder': 'Sortieren', 'Done': 'Fertig', 'Cancel': 'Abbrechen',
+                '🔧 TV Settings': '🔧 TV-Einstellungen', 'TV Settings': 'TV-Einstellungen', 'Open the built-in LG TV settings (picture, sound, network and more).': 'Die integrierten LG-TV-Einstellungen öffnen (Bild, Ton, Netzwerk und mehr).', '⚙️ Customize': '⚙️ Anpassen', 'Favorite Apps': 'Lieblings-Apps', 'Reorder': 'Sortieren', 'Done': 'Fertig', 'Cancel': 'Abbrechen',
                 'Trending This Week': 'Trends der Woche', 'Movies': 'Filme', 'Shows': 'Serien',
                 'Customize Free My TV': 'Free My TV anpassen', 'Press BACK or ESC to close': 'Zum Schließen ZURÜCK oder ESC drücken',
                 '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Apps für die Leiste wählen (Klicken zum Umschalten)',
@@ -1422,7 +1618,11 @@
                 'Clock Format': 'Uhrzeitformat', '24-Hour (20:30)': '24 Stunden (20:30)', '12-Hour (8:30 PM)': '12 Stunden (8:30 PM)',
                 'Performance Mode': 'Leistungsmodus', 'Standard (Glass & Glow)': 'Standard (Glas & Glanz)', 'High Performance (60 FPS Boost)': 'Hohe Leistung (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Standort per IP (sendet Ihre IP an ipapi.co)', 'Off (use the city above)': 'Aus (Stadt oben verwenden)', 'On': 'An',
-                'TMDB API Key (Optional)': 'TMDB-API-Schlüssel (optional)', 'Language': 'Sprache', 'Auto (TV language)': 'Auto (TV-Sprache)',
+                'TMDB API Key (Optional)': 'TMDB-API-Schlüssel (optional)',
+                'Screensaver Starts After': 'Bildschirmschoner startet nach', '1 minute': '1 Minute', '3 minutes': '3 Minuten', '5 minutes': '5 Minuten', '10 minutes': '10 Minuten', '30 minutes': '30 Minuten',
+                'Ambient Photo Screensaver': 'Foto-Bildschirmschoner', 'Off': 'Aus', 'Photo Duration': 'Fotodauer', '30 seconds': '30 Sekunden', '90 seconds': '90 Sekunden',
+                'Photo Motion': 'Fotobewegung', 'Ken Burns (zoom & drift)': 'Ken Burns (Zoom & Drift)', 'Drift only': 'Nur Drift', 'None': 'Keine',
+                'Unsplash Access Key (Optional)': 'Unsplash-Zugriffsschlüssel (optional)', 'Optional for photo screensaver': 'Optional für den Foto-Bildschirmschoner', 'Photo by %s on Unsplash': 'Foto von %s auf Unsplash', 'Photos on Home Screen': 'Fotos auf dem Startbildschirm', 'Keep LG Screensaver Away': 'LG-Bildschirmschoner verhindern', 'Language': 'Sprache', 'Auto (TV language)': 'Auto (TV-Sprache)',
                 'Text Size (weather & clock)': 'Textgröße (Wetter & Uhr)', 'Normal': 'Normal', 'Large': 'Groß', 'Extra large': 'Sehr groß',
                 'Reset Defaults': 'Zurücksetzen', 'Save & Apply': 'Speichern & Anwenden',
                 'Weather & Sun': 'Wetter & Sonne', 'Next Hours': 'Nächste Stunden', 'Sunrise': 'Sonnenaufgang', 'Sunset': 'Sonnenuntergang', 'Close': 'Schließen',
@@ -1467,10 +1667,22 @@
                 '%s Apps • Instant Launch': '%s Apps • Sofortstart',
                 'Select a tile first': 'Zuerst eine Kachel wählen', 'Could not save the order. Please try again.': 'Reihenfolge konnte nicht gespeichert werden. Bitte erneut versuchen.',
                 'Tile order saved': 'Reihenfolge gespeichert', 'Reordering cancelled': 'Sortieren abgebrochen', 'Max 8 apps on shelf': 'Maximal 8 Apps in der Leiste',
-                'Defaults restored': 'Standardwerte wiederhergestellt', 'Saved & Applied!': 'Gespeichert & angewendet!'
+                'Defaults restored': 'Standardwerte wiederhergestellt', 'Saved & Applied!': 'Gespeichert & angewendet!',
+                'Shelf & Inputs': 'Leiste & Eingänge', 'Look & Feel': 'Aussehen', 'Weather & Location': 'Wetter & Standort',
+                'Photos & Screensaver': 'Fotos & Bildschirmschoner', 'Accounts & Keys': 'Konten & Schlüssel', 'Categories': 'Kategorien',
+                'Shelf apps': 'Apps in der Leiste', 'OK to edit': 'OK zum Bearbeiten', 'OK to open': 'OK zum Öffnen',
+                'Not set': 'Nicht festgelegt', 'Saved': 'Gespeichert', 'Reset to defaults': 'Auf Standard zurücksetzen',
+                'Press OK again to confirm': 'Zum Bestätigen erneut OK drücken', 'Up / Down: move': 'Auf / Ab: bewegen', 'Left / Right: change value': 'Links / Rechts: Wert ändern',
+                'OK: select or edit': 'OK: auswählen oder bearbeiten', 'Back: close': 'Zurück: schließen', 'Changes apply instantly': 'Änderungen gelten sofort',
+                'Up / Down: move one row': 'Auf / Ab: eine Zeile bewegen', 'OK: add or remove': 'OK: hinzufügen oder entfernen', 'Back: return': 'Zurück: zurückkehren',
+                'Enter: save': 'Enter: speichern', 'Back: cancel': 'Zurück: abbrechen', '%s of 8 selected': '%s von 8 ausgewählt',
+                'Keep at least one app on the shelf.': 'Mindestens eine App in der Leiste behalten.', 'Previous value': 'Vorheriger Wert', 'Next value': 'Nächster Wert',
+                'Show the movies and shows row on the home screen': 'Die Zeile mit Filmen und Serien auf dem Startbildschirm zeigen', 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Clock Position': 'Uhrposition', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Photo Brightness': 'Fotohelligkeit', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Photos behind the clock when the TV is idle': 'Fotos hinter der Uhr, wenn der Fernseher ruht', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
+                'For the photos. Stored on this TV only': 'Für die Fotos. Nur auf diesem Fernseher gespeichert', 'Optional, for weekly trending movies and shows': 'Optional, für wöchentlich angesagte Filme und Serien', 'Back: categories': 'Zurück: Kategorien',
+                'OK or Right: open': 'OK oder Rechts: öffnen'
             },
             fr: {
-                '⚙️ Customize': '⚙️ Personnaliser', 'Favorite Apps': 'Applis Favorites', 'Reorder': 'Réorganiser', 'Done': 'Terminé', 'Cancel': 'Annuler',
+                '🔧 TV Settings': '🔧 Réglages TV', 'TV Settings': 'Réglages TV', 'Open the built-in LG TV settings (picture, sound, network and more).': 'Ouvrir les réglages intégrés de la TV LG (image, son, réseau et plus).', '⚙️ Customize': '⚙️ Personnaliser', 'Favorite Apps': 'Applis Favorites', 'Reorder': 'Réorganiser', 'Done': 'Terminé', 'Cancel': 'Annuler',
                 'Trending This Week': 'Tendances de la Semaine', 'Movies': 'Films', 'Shows': 'Séries',
                 'Customize Free My TV': 'Personnaliser Free My TV', 'Press BACK or ESC to close': 'Appuyez sur RETOUR ou ÉCHAP pour fermer',
                 '1. Select Apps for Glass Shelf (Click to Toggle)': '1. Choisissez les Applis de l’Étagère (Cliquez pour Basculer)',
@@ -1482,7 +1694,11 @@
                 'Clock Format': 'Format de l’Horloge', '24-Hour (20:30)': '24 Heures (20:30)', '12-Hour (8:30 PM)': '12 Heures (8:30 PM)',
                 'Performance Mode': 'Mode Performance', 'Standard (Glass & Glow)': 'Standard (Verre et Lueur)', 'High Performance (60 FPS Boost)': 'Haute Performance (60 FPS)',
                 'Auto-locate by IP (sends your IP to ipapi.co)': 'Localiser par IP (envoie votre IP à ipapi.co)', 'Off (use the city above)': 'Désactivé (utiliser la ville ci-dessus)', 'On': 'Activé',
-                'TMDB API Key (Optional)': 'Clé API TMDB (Facultatif)', 'Language': 'Langue', 'Auto (TV language)': 'Auto (langue de la TV)',
+                'TMDB API Key (Optional)': 'Clé API TMDB (Facultatif)',
+                'Screensaver Starts After': 'Écran de veille après', '1 minute': '1 minute', '3 minutes': '3 minutes', '5 minutes': '5 minutes', '10 minutes': '10 minutes', '30 minutes': '30 minutes',
+                'Ambient Photo Screensaver': 'Écran de veille photo', 'Off': 'Désactivé', 'Photo Duration': 'Durée de la photo', '30 seconds': '30 secondes', '90 seconds': '90 secondes',
+                'Photo Motion': 'Mouvement de la photo', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom et dérive)', 'Drift only': 'Dérive seule', 'None': 'Aucun',
+                'Unsplash Access Key (Optional)': 'Clé d’accès Unsplash (Facultatif)', 'Optional for photo screensaver': 'Facultatif pour l’écran de veille photo', 'Photo by %s on Unsplash': 'Photo de %s sur Unsplash', 'Photos on Home Screen': 'Photos sur l’écran d’accueil', 'Keep LG Screensaver Away': 'Éviter l’écran de veille LG', 'Language': 'Langue', 'Auto (TV language)': 'Auto (langue de la TV)',
                 'Text Size (weather & clock)': 'Taille du texte (météo et horloge)', 'Normal': 'Normal', 'Large': 'Grand', 'Extra large': 'Très grand',
                 'Reset Defaults': 'Réinitialiser', 'Save & Apply': 'Enregistrer et Appliquer',
                 'Weather & Sun': 'Météo et Soleil', 'Next Hours': 'Prochaines Heures', 'Sunrise': 'Lever du Soleil', 'Sunset': 'Coucher du Soleil', 'Close': 'Fermer',
@@ -1527,7 +1743,19 @@
                 '%s Apps • Instant Launch': '%s Applis • Lancement Instantané',
                 'Select a tile first': 'Choisissez d’abord une tuile', 'Could not save the order. Please try again.': 'Impossible d’enregistrer l’ordre. Veuillez réessayer.',
                 'Tile order saved': 'Ordre enregistré', 'Reordering cancelled': 'Réorganisation annulée', 'Max 8 apps on shelf': '8 applis maximum sur l’étagère',
-                'Defaults restored': 'Valeurs par défaut rétablies', 'Saved & Applied!': 'Enregistré et appliqué !'
+                'Defaults restored': 'Valeurs par défaut rétablies', 'Saved & Applied!': 'Enregistré et appliqué !',
+                'Shelf & Inputs': 'Étagère et Entrées', 'Look & Feel': 'Apparence', 'Weather & Location': 'Météo et Lieu',
+                'Photos & Screensaver': 'Photos et Économiseur d’écran', 'Accounts & Keys': 'Comptes et Clés', 'Categories': 'Catégories',
+                'Shelf apps': 'Applis de l’étagère', 'OK to edit': 'OK pour modifier', 'OK to open': 'OK pour ouvrir',
+                'Not set': 'Non défini', 'Saved': 'Enregistré', 'Reset to defaults': 'Rétablir les valeurs par défaut',
+                'Press OK again to confirm': 'Appuyez de nouveau sur OK pour confirmer', 'Up / Down: move': 'Haut / Bas : déplacer', 'Left / Right: change value': 'Gauche / Droite : changer la valeur',
+                'OK: select or edit': 'OK : sélectionner ou modifier', 'Back: close': 'Retour : fermer', 'Changes apply instantly': 'Les changements s’appliquent immédiatement',
+                'Up / Down: move one row': 'Haut / Bas : déplacer d’une ligne', 'OK: add or remove': 'OK : ajouter ou retirer', 'Back: return': 'Retour : revenir',
+                'Enter: save': 'Entrée : enregistrer', 'Back: cancel': 'Retour : annuler', '%s of 8 selected': '%s sur 8 sélectionnées',
+                'Keep at least one app on the shelf.': 'Gardez au moins une appli sur l’étagère.', 'Previous value': 'Valeur précédente', 'Next value': 'Valeur suivante',
+                'Show the movies and shows row on the home screen': 'Afficher la rangée de films et séries sur l’écran d’accueil', 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Clock Position': 'Position de l’horloge', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Photo Brightness': 'Luminosité des photos', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Photos behind the clock when the TV is idle': 'Photos derrière l’horloge quand la TV est inactive', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
+                'For the photos. Stored on this TV only': 'Pour les photos. Stockée uniquement sur cette TV', 'Optional, for weekly trending movies and shows': 'Facultatif, pour les films et séries tendance de la semaine', 'Back: categories': 'Retour : catégories',
+                'OK or Right: open': 'OK ou Droite : ouvrir'
             }
         };
         // Names shown in the Language setting (never translated, so they stay findable).
@@ -1810,7 +2038,12 @@
         }
 
         // --- Live Trending Picks (TMDB + Live TVMaze Zero-Key Feed), split by Movies/Shows tab ---
+        function applyTrendingClass() {
+            document.querySelector('.picks-section').classList.toggle('picks-off', state.showTrending === 'off');
+        }
+
         function fetchTrendingPicks() {
+            if (state.showTrending === 'off') return;
             var badge = document.getElementById('picksSourceBadge');
             var tab = state.picksTab;
             var tmdbMediaPath = tab === 'shows' ? 'tv' : 'movie';
@@ -1941,6 +2174,7 @@
 
         // --- Discover Installed Apps from LG webOS ---
         function addLaunchPoints(launchPoints) {
+            var oldLength = state.catalog.length;
             launchPoints.forEach(function(lp) {
                 var appId = lp.appId || lp.id;
                 if (!appId) return;
@@ -1962,6 +2196,14 @@
                 }
             });
             renderAppsShelf();
+            catalogGrew(oldLength);
+        }
+
+        // New apps arrived: an open apps page shows them, and focus on Done stays on Done.
+        function catalogGrew(oldLength) {
+            if (!modalOpen || settingsUi.zone !== 'apps' || state.catalog.length === oldLength) return;
+            if (settingsUi.appIdx >= oldLength) settingsUi.appIdx = state.catalog.length;
+            renderSettings();
         }
 
         function discoverTVApps() {
@@ -2048,13 +2290,16 @@
         // legacy fallback below also interpolates them into a shell command).
         var CONTENT_TARGET_RE = /^https:\/\/www\.youtube\.com\/tv\?v=[A-Za-z0-9_-]{6,15}$/;
 
-        function launchApp(appId, contentTarget) {
+        var LG_SETTINGS_APP = 'com.palm.app.settings';
+
+        // titleOverride names apps that are not in the shelf catalog (the LG Settings app) in the toasts.
+        function launchApp(appId, contentTarget, titleOverride) {
             var launchParams = { id: appId };
             if (contentTarget && CONTENT_TARGET_RE.test(contentTarget)) launchParams.params = { contentTarget: contentTarget };
             else contentTarget = '';
             if (shelfEdit || pendingLaunch) return; // Ignore repeated remote presses while a request is pending.
             var app = arrFind(state.catalog, function(item) { return item.id === appId; });
-            var title = app ? (devicePreset(app, state.hdmiDevices).title || app.title) : appId;
+            var title = app ? (devicePreset(app, state.hdmiDevices).title || app.title) : (titleOverride || appId);
             if (!window.webOS || !window.webOS.service || typeof window.webOS.service.request !== 'function') {
                 showToast(t('Open %s on your LG TV. Launching is unavailable in this preview.', title), 5000);
                 return;
@@ -2278,8 +2523,6 @@
         var mainNavItems = [];
         var curIndex = 0;
         var modalOpen = false;
-        var modalNavItems = [];
-        var modalIndex = 0;
 
         var heroTag = document.getElementById('heroTag');
         var heroTitle = document.getElementById('heroTitle');
@@ -2303,7 +2546,9 @@
             if (!item || (shelfEdit && !item.closest('.shelf-wrapper'))) return;
             document.querySelectorAll('.nav-item.focused').forEach(function(i) { i.classList.remove('focused'); });
             item.classList.add('focused');
-            item.focus({ preventScroll: true });
+            // While the Customize screen is open, background renders (shelf, picks, new apps) only move the class:
+            // a DOM focus() would blur its inline editor and commit half-typed text.
+            if (!modalOpen) item.focus({ preventScroll: true });
             curIndex = mainNavItems.indexOf(item);
 
             heroTag.textContent = t(item.dataset.tag || 'Selection');
@@ -2355,108 +2600,579 @@
             setMainFocus(mainNavItems[curIndex]);
         }
 
+        // --- Settings schema: one entry per setting; the Customize screen and the persistence both use it ---
+        var SETTING_CATEGORIES = ['Shelf & Inputs', 'Look & Feel', 'Weather & Location', 'Photos & Screensaver', 'Accounts & Keys'];
+        var ON_OFF = [['on', 'On'], ['off', 'Off']];
+        var SECRET_DOTS = '••••••••';
+
+        // type: 'choice' (options cycle), 'text' (opens the keyboard), 'link' (opens a page), 'action'.
+        // field = the state field, store = its localStorage key, def = default, apply(previous) = side effects.
+        var SETTINGS = [
+            { id: 'shelf', cat: 0, type: 'link', label: 'Shelf apps' },
+            { id: 'theme', cat: 1, type: 'choice', field: 'theme', store: 'fmtv_theme', def: 'auto', label: 'Theme Mode',
+              options: [['auto', 'Auto (Follows Sunset)'], ['night', 'Deep Midnight (Default)'], ['oled', 'Pure OLED Black'], ['day', 'Daylight Blue']],
+              apply: function() { applyTheme(); } },
+            { id: 'clockFormat', cat: 1, type: 'choice', field: 'clockFormat', store: 'fmtv_clock_format', def: '24h', label: 'Clock Format',
+              options: [['24h', '24-Hour (20:30)'], ['12h', '12-Hour (8:30 PM)']],
+              apply: function() { updateClock(); } },
+            { id: 'showTrending', cat: 1, type: 'choice', field: 'showTrending', store: 'fmtv_show_trending', def: 'on', label: 'Trending This Week',
+              hint: 'Show the movies and shows row on the home screen',
+              options: ON_OFF,
+              apply: function() { applyTrendingClass(); refreshMainNavList(); fetchTrendingPicks(); } },
+            { id: 'textSize', cat: 1, type: 'choice', field: 'textSize', store: 'fmtv_text_size', def: 'normal', label: 'Text Size (weather & clock)',
+              options: [['normal', 'Normal'], ['large', 'Large'], ['xlarge', 'Extra large']],
+              apply: function() { applyTextSize(); } },
+            { id: 'perfMode', cat: 1, type: 'choice', field: 'perfMode', store: 'fmtv_perf_mode', def: 'standard', label: 'Performance Mode',
+              options: [['standard', 'Standard (Glass & Glow)'], ['high', 'High Performance (60 FPS Boost)']],
+              apply: function() { applyPerfMode(); applyHomePhotosSettings(); applyTheme(); } },
+            { id: 'lang', cat: 1, type: 'choice', field: 'lang', store: 'fmtv_lang', def: 'auto', label: 'Language',
+              options: [['auto', 'Auto (TV language)'], ['en', 'English'], ['pt', 'Português (Brasil)'], ['es', 'Español'], ['de', 'Deutsch'], ['fr', 'Français']],
+              apply: function() { applyStaticTranslations(); renderAppsShelf(); updateClock(); applyTheme(); scheduleSettingsNetwork(true, true); } },
+            { id: 'city', cat: 2, type: 'text', field: 'city', store: 'fmtv_city', def: '', label: 'City Name (or leave Auto)',
+              placeholder: 'e.g. Sao Paulo, Lisbon, NYC',
+              apply: function() { scheduleSettingsNetwork(true, false); } },
+            { id: 'ipLocate', cat: 2, type: 'choice', field: 'ipLocate', store: 'fmtv_ip_locate', def: 'off', label: 'Auto-locate by IP (sends your IP to ipapi.co)',
+              options: [['off', 'Off (use the city above)'], ['on', 'On']],
+              apply: function() { scheduleSettingsNetwork(true, false); } },
+            { id: 'homePhotos', cat: 3, type: 'choice', field: 'homePhotos', store: 'fmtv_home_photos', def: 'off', label: 'Photos on Home Screen',
+              hint: 'Dimmed, slowly moving photos behind the dashboard',
+              options: [['off', 'Off'], ['on', 'On']],
+              apply: function() { ambientRefresh(false); applyHomePhotosSettings(); } },
+            { id: 'ambient', cat: 3, type: 'choice', field: 'ambient', store: 'fmtv_ambient', def: 'on', label: 'Ambient Photo Screensaver',
+              hint: 'Photos behind the clock when the TV is idle',
+              options: ON_OFF,
+              apply: function() { ambientRefresh(false); } },
+            { id: 'idleMins', cat: 3, type: 'choice', field: 'idleMins', store: 'fmtv_idle_mins', def: '3', label: 'Screensaver Starts After',
+              options: [['1', '1 minute'], ['3', '3 minutes'], ['5', '5 minutes'], ['10', '10 minutes'], ['30', '30 minutes']] },
+            { id: 'ambientSecs', cat: 3, type: 'choice', field: 'ambientSecs', store: 'fmtv_ambient_secs', def: '90', label: 'Photo Duration',
+              options: [['30', '30 seconds'], ['90', '90 seconds'], ['300', '5 minutes']],
+              apply: function() { applyHomePhotosSettings(); } },
+            { id: 'ambientMotion', cat: 3, type: 'choice', field: 'ambientMotion', store: 'fmtv_ambient_motion', def: 'drift', label: 'Photo Motion',
+              options: [['drift', 'Continuous drift'], ['kenburns', 'Ken Burns'], ['panels', 'Sliding panels'], ['none', 'None']],
+              apply: function() { applyHomePhotosSettings(); } },
+            { id: 'ambientSpeed', cat: 3, type: 'choice', field: 'ambientSpeed', store: 'fmtv_ambient_speed', def: 'normal', label: 'Drift Speed',
+              options: [['slow', 'Slow'], ['normal', 'Normal'], ['fast', 'Fast']],
+              apply: function() { applyHomePhotosSettings(); } },
+            { id: 'ambientBright', cat: 3, type: 'choice', field: 'ambientBright', store: 'fmtv_ambient_bright', def: 'normal', label: 'Photo Brightness',
+              hint: 'How strongly the photos show behind the clock',
+              options: [['soft', 'Soft'], ['normal', 'Normal'], ['bright', 'Bright']] },
+            { id: 'clockPos', cat: 3, type: 'choice', field: 'clockPos', store: 'fmtv_clock_pos', def: 'bl', label: 'Clock Position',
+              hint: 'Where the clock and date sit; in the corners they move only a few pixels',
+              options: [['bl', 'Bottom Left'], ['br', 'Bottom Right'], ['tl', 'Top Left'], ['tr', 'Top Right'], ['center', 'Center (drifts slowly)']],
+              apply: function() { applyClockPosition(); } },
+            { id: 'keepAwake', cat: 3, type: 'choice', field: 'keepAwake', store: 'fmtv_keep_awake', def: 'on', label: 'Keep LG Screensaver Away',
+              hint: 'Plays a hidden video so LG does not cover ours',
+              options: ON_OFF,
+              apply: function() { keepAwakeSync(); } },
+            { id: 'unsplashKey', cat: 4, type: 'text', secret: true, field: 'unsplashKey', store: 'fmtv_unsplash_key', def: '', label: 'Unsplash Access Key (Optional)',
+              hint: 'For the photos. Stored on this TV only',
+              apply: function(previous) {
+                  if (previous !== state.unsplashKey) {
+                      try { localStorage.removeItem('fmtv_ambient_cache'); localStorage.removeItem('fmtv_ambient_pause'); } catch (e) {}
+                  }
+                  ambientRefresh(false);
+                  applyHomePhotosSettings();
+              } },
+            { id: 'tmdbKey', cat: 4, type: 'text', secret: true, field: 'tmdbKey', store: 'fmtv_tmdb_key', def: '', label: 'TMDB API Key (Optional)',
+              hint: 'Optional, for weekly trending movies and shows',
+              apply: function() { scheduleSettingsNetwork(false, true); } },
+            { id: 'reset', cat: 4, type: 'action', label: 'Reset to defaults' }
+        ];
+
+        // Settings that hit the network wait 700 ms after the last change, so holding Right on Language
+        // runs the weather and trending fetches once instead of once per step.
+        var settingsNetTimer = null;
+        var settingsNetPending = { weather: false, picks: false };
+
+        function scheduleSettingsNetwork(weather, picks) {
+            if (weather) settingsNetPending.weather = true;
+            if (picks) settingsNetPending.picks = true;
+            clearTimeout(settingsNetTimer);
+            settingsNetTimer = setTimeout(flushSettingsNetwork, 700);
+        }
+
+        // Run any pending network work now (also used by the tests).
+        function flushSettingsNetwork() {
+            clearTimeout(settingsNetTimer);
+            settingsNetTimer = null;
+            var weather = settingsNetPending.weather, picks = settingsNetPending.picks;
+            settingsNetPending.weather = false;
+            settingsNetPending.picks = false;
+            if (weather) fetchWeather();
+            if (picks) fetchTrendingPicks();
+        }
+
+        function findSetting(id) {
+            return arrFind(SETTINGS, function(def) { return def.id === id; });
+        }
+
+        // One choice row per HDMI input of the catalog (device preset: HDMI, PS5, PS4, Xbox, Switch, Gaming PC).
+        function hdmiSettings() {
+            return state.catalog.filter(isHDMI).map(function(app) {
+                return {
+                    id: 'hdmi:' + app.id, cat: 0, type: 'choice', label: app.title, hdmi: app,
+                    options: DEVICE_PRESETS.map(function(p) { return [p.key, p.title || 'HDMI']; })
+                };
+            });
+        }
+
+        // A category's entries in order; the HDMI rows follow the "Shelf apps" row.
+        function settingsForCategory(cat) {
+            var list = [];
+            SETTINGS.forEach(function(def) {
+                if (def.cat !== cat) return;
+                list.push(def);
+                if (def.id === 'shelf') hdmiSettings().forEach(function(h) { list.push(h); });
+            });
+            return list;
+        }
+
+        function settingValue(def) {
+            if (def.hdmi) return devicePreset(def.hdmi, state.hdmiDevices).key;
+            return state[def.field];
+        }
+
+        // Change a setting: update state, save it, run its side effects. Nothing is "pending".
+        function setSettingValue(def, value) {
+            var previous = settingValue(def);
+            if (def.type === 'text' && typeof value === 'string') value = value.trim();
+            if (def.hdmi) {
+                state.hdmiDevices[def.hdmi.id] = value;
+                try { localStorage.setItem('fmtv_hdmi_devices', JSON.stringify(state.hdmiDevices)); } catch (e) {}
+                renderAppsShelf();
+                return;
+            }
+            state[def.field] = value;
+            try { localStorage.setItem(def.store, value); } catch (e) {}
+            if (def.apply) def.apply(previous);
+        }
+
+        function cycleSetting(def, step) {
+            var current = settingValue(def);
+            var index = arrFindIndex(def.options, function(o) { return o[0] === current; });
+            if (index < 0) index = 0;
+            var next = (index + step + def.options.length) % def.options.length;
+            setSettingValue(def, def.options[next][0]);
+        }
+
+        // The text shown for a setting's current value. Secrets are never shown.
+        function settingValueText(def) {
+            var value = settingValue(def);
+            if (def.type === 'choice') {
+                var option = arrFind(def.options, function(o) { return o[0] === value; });
+                return t(option ? option[1] : def.options[0][1]);
+            }
+            if (def.type === 'text') {
+                if (!value) return t('Not set');
+                return def.secret ? SECRET_DOTS : value;
+            }
+            return '';
+        }
+
+        // Add or remove a shelf app (at most 8, at least 1); returns 'added', 'removed', 'full' or 'last'.
+        function toggleFavorite(id) {
+            var index = state.favorites.indexOf(id);
+            if (index !== -1) {
+                if (state.favorites.length <= 1) return 'last';
+                state.favorites.splice(index, 1);
+            } else if (state.favorites.length >= 8) {
+                return 'full';
+            } else {
+                state.favorites.push(id);
+            }
+            try { localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites)); } catch (e) {}
+            renderAppsShelf();
+            return index !== -1 ? 'removed' : 'added';
+        }
+
+        // Put every setting, the shelf and the HDMI device names back to their defaults, then re-apply once.
+        function resetAllSettings() {
+            // Drop any debounced fetch: the reset fetches once itself below.
+            clearTimeout(settingsNetTimer);
+            settingsNetTimer = null;
+            settingsNetPending.weather = false;
+            settingsNetPending.picks = false;
+            SETTINGS.forEach(function(def) {
+                if (!def.field) return;
+                state[def.field] = def.def;
+                try { localStorage.setItem(def.store, def.def); } catch (e) {}
+            });
+            state.favorites = DEFAULT_FAVORITES.slice();
+            state.hdmiDevices = {};
+            try {
+                localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
+                localStorage.setItem('fmtv_hdmi_devices', '{}');
+                localStorage.removeItem('fmtv_ambient_cache');
+                localStorage.removeItem('fmtv_ambient_pause');
+            } catch (e) {}
+            applyStaticTranslations();
+            applyPerfMode();
+            applyTextSize();
+            renderAppsShelf();
+            applyTheme();
+            updateClock();
+            fetchWeather();
+            fetchTrendingPicks();
+            ambientRefresh(false);
+            applyHomePhotosSettings();
+            showToast(t('Defaults restored'));
+        }
+
         // --- Customize Shelf & Settings Modal ---
         var settingsModal = document.getElementById('settingsModal');
-        var tempFavorites = [];
-        var tempDevices = {};
+        var settingsUi = { zone: 'cats', cat: 0, catFocus: 0, row: 1, appIdx: 0, confirmReset: false, message: '' };
+        var settingsSavedTimer = null;
+        // Hover moves focus only while the pointer really moves; a key press hands control back to the remote.
+        // (Browsers fire synthetic mouseover when content under a resting cursor scrolls or is replaced.)
+        var settingsPointerLive = false;
+        var settingsPointerX = null, settingsPointerY = null;
+        document.addEventListener('mousemove', function(e) {
+            if (e.clientX === settingsPointerX && e.clientY === settingsPointerY) return;
+            settingsPointerX = e.clientX;
+            settingsPointerY = e.clientY;
+            settingsPointerLive = true;
+        });
+
+        function sEl(tag, className, text) {
+            var node = document.createElement(tag);
+            if (className) node.className = className;
+            if (text !== undefined) node.textContent = text;
+            if (tag === 'button') node.setAttribute('type', 'button');
+            return node;
+        }
+
+        // The "Categories" row comes first, then the category's settings (HDMI rows follow "Shelf apps").
+        function settingsRowsFor(cat) {
+            return [{ id: 'back', type: 'back', label: 'Categories' }].concat(settingsForCategory(cat));
+        }
+
+        function flashSaved() {
+            var saved = document.getElementById('settingsSaved');
+            saved.textContent = t('Saved');
+            clearTimeout(settingsSavedTimer);
+            settingsSavedTimer = setTimeout(function() { saved.textContent = ''; }, 1800);
+        }
+
+        function settingsHintsFor(zone) {
+            if (zone === 'apps') return t('Up / Down: move one row') + '   ' + t('OK: add or remove') + '   ' + t('Back: return');
+            if (zone === 'edit') return t('Enter: save') + '   ' + t('Back: cancel');
+            if (zone === 'cats') return t('Up / Down: move') + '   ' + t('OK or Right: open') + '   ' + t('Back: close');
+            return t('Up / Down: move') + '   ' + t('Left / Right: change value') + '   ' + t('OK: select or edit') + '   ' + t('Back: categories') + '   ' + t('Changes apply instantly');
+        }
 
         function openSettingsModal() {
             if (shelfEdit) return;
             modalOpen = true;
-            tempFavorites = state.favorites.slice();
-            tempDevices = shallowClone(state.hdmiDevices);
-            renderHDMIOptions();
-            document.getElementById('cfgCity').value = state.city;
-            document.getElementById('cfgTheme').value = state.theme;
-            document.getElementById('cfgClockFormat').value = state.clockFormat;
-            document.getElementById('cfgPerfMode').value = state.perfMode;
-            document.getElementById('cfgIpLocate').value = state.ipLocate;
-            document.getElementById('cfgLang').value = state.lang;
-            document.getElementById('cfgTextSize').value = state.textSize;
-            document.getElementById('cfgTmdbKey').value = state.tmdbKey;
-
-            renderAppSelectorGrid();
+            settingsPointerLive = false;
+            settingsUi.zone = 'cats';
+            settingsUi.cat = 0;
+            settingsUi.catFocus = 0;
+            settingsUi.row = 1;
+            settingsUi.appIdx = 0;
+            settingsUi.confirmReset = false;
+            settingsUi.message = '';
+            document.getElementById('settingsSaved').textContent = '';
             settingsModal.classList.add('active');
-            refreshModalNavList();
-        }
-
-        function renderHDMIOptions() {
-            var container = document.getElementById('hdmiOptions');
-            container.innerHTML = '';
-            state.catalog.filter(isHDMI).forEach(function(app) {
-                var button = document.createElement('button');
-                button.className = 'app-toggle-item modal-nav';
-                function updateLabel() {
-                    button.textContent = app.title + ': ' + (devicePreset(app, tempDevices).title || 'HDMI');
-                    button.setAttribute('aria-label', button.textContent + '. Press to change device');
-                }
-                updateLabel();
-                button.addEventListener('click', function() {
-                    var current = DEVICE_PRESETS.indexOf(devicePreset(app, tempDevices));
-                    tempDevices[app.id] = DEVICE_PRESETS[(current + 1) % DEVICE_PRESETS.length].key;
-                    updateLabel();
-                    refreshModalNavList();
-                    setModalFocus(button);
-                });
-                container.appendChild(button);
-            });
+            renderSettings();
         }
 
         function closeSettingsModal() {
+            cancelEdit();
             modalOpen = false;
             settingsModal.classList.remove('active');
             setMainFocus(mainNavItems[curIndex]);
         }
 
-        function renderAppSelectorGrid() {
-            var container = document.getElementById('appSelectorGrid');
-            container.innerHTML = '';
+        function renderSettings() {
+            var cats = document.getElementById('settingsCats');
+            var main = document.getElementById('settingsMain');
+            // A rebuild of the same category's list keeps its scroll position (no jump when a value changes).
+            var oldRows = document.getElementById('settingsRows');
+            var keepScroll = oldRows && oldRows.getAttribute('data-cat') === String(settingsUi.cat) ? oldRows.scrollTop : 0;
+            var newRows;
+            cats.innerHTML = '';
+            main.innerHTML = '';
+            SETTING_CATEGORIES.forEach(function(name, i) {
+                var button = sEl('button', 'settings-cat' + (i === settingsUi.cat ? ' selected' : ''));
+                button.setAttribute('data-i', String(i));
+                button.appendChild(sEl('span', 'sc-name', t(name)));
+                button.appendChild(sEl('span', 'sc-count', String(settingsRowsFor(i).length - 1)));
+                button.onmouseover = function() {
+                    if (!settingsPointerLive || (settingsUi.zone !== 'cats' && settingsUi.zone !== 'rows')) return;
+                    if (settingsUi.zone === 'cats' && settingsUi.catFocus === i) return; // child spans re-fire mouseover
+                    settingsUi.zone = 'cats'; settingsUi.catFocus = i; settingsUi.cat = i; settingsUi.confirmReset = false;
+                    renderRowsOnly(); paintFocus();
+                };
+                button.onclick = function() { settingsUi.cat = i; settingsUi.catFocus = i; enterRows(); };
+                cats.appendChild(button);
+            });
+            var close = sEl('button', 'settings-cat settings-close', t('Close'));
+            close.setAttribute('data-i', String(SETTING_CATEGORIES.length));
+            close.onmouseover = function() {
+                if (!settingsPointerLive || (settingsUi.zone !== 'cats' && settingsUi.zone !== 'rows')) return;
+                settingsUi.zone = 'cats'; settingsUi.catFocus = SETTING_CATEGORIES.length; paintFocus();
+            };
+            close.onclick = closeSettingsModal;
+            cats.appendChild(close);
+            if (settingsUi.zone === 'apps') renderApps(main); else renderRows(main);
+            newRows = document.getElementById('settingsRows');
+            if (newRows) newRows.scrollTop = keepScroll;
+            paintFocus();
+        }
 
-            state.catalog.forEach(function(app) {
-                var isSelected = tempFavorites.indexOf(app.id) !== -1;
-                var item = document.createElement('div');
-                item.className = 'app-toggle-item modal-nav' + (isSelected ? ' selected' : '');
-                // Installed app titles come from listLaunchPoints, so they are set as text.
-                var titleSpan = document.createElement('span');
-                titleSpan.textContent = app.title;
-                var markSpan = document.createElement('span');
-                markSpan.textContent = isSelected ? '✓' : '+';
-                item.appendChild(titleSpan);
-                item.appendChild(markSpan);
-
-                item.addEventListener('click', function() {
-                    var idx = tempFavorites.indexOf(app.id);
-                    if (idx !== -1) {
-                        if (tempFavorites.length > 1) tempFavorites.splice(idx, 1);
-                    } else if (tempFavorites.length < 8) {
-                        tempFavorites.push(app.id);
-                    } else {
-                        showToast(t('Max 8 apps on shelf'));
-                    }
-                    renderAppSelectorGrid();
-                    refreshModalNavList();
-                });
-                container.appendChild(item);
+        // Only the right-hand list (used when hovering a category so the category buttons are not rebuilt).
+        function renderRowsOnly() {
+            var main = document.getElementById('settingsMain');
+            main.innerHTML = '';
+            renderRows(main);
+            Array.prototype.forEach.call(document.querySelectorAll('#settingsCats .settings-cat'), function(b) {
+                var i = parseInt(b.getAttribute('data-i'), 10);
+                if (i < SETTING_CATEGORIES.length) b.className = 'settings-cat' + (i === settingsUi.cat ? ' selected' : '');
             });
         }
 
-        function refreshModalNavList() {
-            modalNavItems = toArray(settingsModal.querySelectorAll('.modal-nav:not(:disabled)'));
-            modalIndex = Math.min(modalIndex, modalNavItems.length - 1);
-            setModalFocus(modalNavItems[modalIndex]);
+        function renderRows(main) {
+            var list = sEl('div', 'settings-rows');
+            list.id = 'settingsRows';
+            list.setAttribute('data-cat', String(settingsUi.cat));
+            settingsRowsFor(settingsUi.cat).forEach(function(def, i) {
+                var row = sEl('div', 'settings-row');
+                row.setAttribute('data-i', String(i));
+                row.setAttribute('data-id', def.id);
+                var label = def.type === 'back' ? '‹ ' + t(def.label) : t(def.label);
+                var mainButton = sEl('button', 'sr-main');
+                mainButton.appendChild(sEl('span', 'sr-label', label));
+                if (def.hint) mainButton.appendChild(sEl('span', 'sr-hint', t(def.hint)));
+                // A click anywhere on the row acts like OK (the arrow buttons stop the click and change the value instead).
+                row.onclick = function() { if (settingsUi.zone === 'edit') return; settingsUi.zone = 'rows'; settingsUi.row = i; activateRow(def); };
+                row.onmouseover = function() {
+                    if (!settingsPointerLive || (settingsUi.zone !== 'rows' && settingsUi.zone !== 'cats')) return;
+                    if (settingsUi.zone === 'rows' && settingsUi.row === i) return;
+                    settingsUi.zone = 'rows'; settingsUi.row = i;
+                    if (settingsUi.confirmReset) { settingsUi.confirmReset = false; renderSettings(); } else paintFocus();
+                };
+                row.appendChild(mainButton);
+                if (def.type === 'choice') {
+                    var prev = sEl('button', 'sr-arrow', '◀');
+                    prev.setAttribute('data-dir', '-1');
+                    prev.setAttribute('aria-label', t('Previous value'));
+                    prev.onclick = function(ev) { ev.stopPropagation(); settingsUi.zone = 'rows'; settingsUi.row = i; cycleSetting(def, -1); flashSaved(); renderSettings(); };
+                    var next = sEl('button', 'sr-arrow', '▶');
+                    next.setAttribute('data-dir', '1');
+                    next.setAttribute('aria-label', t('Next value'));
+                    next.onclick = function(ev) { ev.stopPropagation(); settingsUi.zone = 'rows'; settingsUi.row = i; cycleSetting(def, 1); flashSaved(); renderSettings(); };
+                    row.appendChild(prev);
+                    row.appendChild(sEl('span', 'sr-value', settingValueText(def)));
+                    row.appendChild(next);
+                } else if (def.type === 'text') {
+                    row.appendChild(sEl('span', 'sr-value', settingValueText(def)));
+                    row.appendChild(sEl('span', 'sr-edit', t('OK to edit')));
+                } else if (def.type === 'link') {
+                    row.appendChild(sEl('span', 'sr-value', t('%s of 8 selected', String(state.favorites.length))));
+                    row.appendChild(sEl('span', 'sr-edit', t('OK to open')));
+                } else if (def.type === 'action' && settingsUi.confirmReset) {
+                    row.appendChild(sEl('span', 'sr-value', t('Press OK again to confirm')));
+                }
+                list.appendChild(row);
+            });
+            main.appendChild(list);
         }
 
-        function setModalFocus(el) {
-            if (!el) return;
-            modalNavItems.forEach(function(i) { i.classList.remove('focused'); });
-            el.classList.add('focused');
-            el.focus();
-            modalIndex = modalNavItems.indexOf(el);
+        function renderApps(main) {
+            var page = sEl('div', 'apps-page');
+            page.id = 'appsPage';
+            var head = sEl('div', 'apps-head');
+            head.appendChild(sEl('div', 'apps-title', t('Shelf apps')));
+            head.appendChild(sEl('div', 'apps-count', t('%s of 8 selected', String(state.favorites.length))));
+            page.appendChild(head);
+            var message = sEl('div', 'apps-message', settingsUi.message);
+            message.id = 'appsMessage';
+            page.appendChild(message);
+            var grid = sEl('div', 'apps-grid');
+            grid.id = 'settingsAppsGrid'; // the home shelf already uses #appsGrid
+            state.catalog.forEach(function(app, i) {
+                var on = state.favorites.indexOf(app.id) !== -1;
+                var tile = sEl('button', 'apps-tile' + (on ? ' on' : ''));
+                tile.setAttribute('data-i', String(i));
+                tile.appendChild(sEl('span', 'at-name', app.title));
+                if (on) tile.appendChild(sEl('span', 'at-check', '✓'));
+                tile.onmouseover = function() { if (settingsPointerLive && settingsUi.appIdx !== i) { settingsUi.appIdx = i; paintFocus(); } };
+                tile.onclick = function() { settingsUi.appIdx = i; appsActivate(); };
+                grid.appendChild(tile);
+            });
+            page.appendChild(grid);
+            var done = sEl('button', 'apps-done', t('Done'));
+            done.id = 'appsDone';
+            done.onmouseover = function() { if (settingsPointerLive && settingsUi.appIdx !== state.catalog.length) { settingsUi.appIdx = state.catalog.length; paintFocus(); } };
+            done.onclick = function() { settingsUi.zone = 'rows'; renderSettings(); };
+            page.appendChild(done);
+            main.appendChild(page);
+        }
+
+        // Keep the item that is in view in a scrolling list.
+        function ensureVisible(container, node) {
+            if (!container || !node) return;
+            var top = node.offsetTop;
+            var bottom = top + node.offsetHeight;
+            if (top < container.scrollTop) container.scrollTop = Math.max(0, top - 8);
+            else if (bottom > container.scrollTop + container.clientHeight) container.scrollTop = bottom - container.clientHeight + 8;
+        }
+
+        // Move the visible focus ring (class "sf") without rebuilding anything.
+        function paintFocus() {
+            Array.prototype.forEach.call(settingsModal.querySelectorAll('.sf'), function(n) { n.classList.remove('sf'); });
+            var node = null;
+            if (settingsUi.zone === 'cats') {
+                node = settingsModal.querySelector('#settingsCats .settings-cat[data-i="' + settingsUi.catFocus + '"]');
+            } else if (settingsUi.zone === 'rows' || settingsUi.zone === 'edit') {
+                node = settingsModal.querySelector('#settingsRows .settings-row[data-i="' + settingsUi.row + '"]');
+                ensureVisible(document.getElementById('settingsRows'), node);
+            } else if (settingsUi.zone === 'apps') {
+                node = settingsUi.appIdx >= state.catalog.length ? document.getElementById('appsDone')
+                    : settingsModal.querySelector('#settingsAppsGrid .apps-tile[data-i="' + settingsUi.appIdx + '"]');
+                if (settingsUi.appIdx < state.catalog.length) ensureVisible(document.getElementById('settingsAppsGrid'), node);
+            }
+            if (node) node.classList.add('sf');
+            document.getElementById('settingsHints').textContent = settingsHintsFor(settingsUi.zone);
+        }
+
+        function enterRows() {
+            settingsUi.zone = 'rows';
+            settingsUi.row = 1;
+            settingsUi.confirmReset = false;
+            renderSettings();
+        }
+
+        function activateRow(def) {
+            if (def.type === 'back') { settingsUi.zone = 'cats'; settingsUi.catFocus = settingsUi.cat; settingsUi.confirmReset = false; }
+            else if (def.type === 'choice') { cycleSetting(def, 1); flashSaved(); }
+            else if (def.type === 'text') { settingsUi.confirmReset = false; renderSettings(); startEdit(def); return; }
+            else if (def.type === 'link') { settingsUi.zone = 'apps'; settingsUi.appIdx = 0; settingsUi.message = ''; }
+            else if (def.type === 'action') {
+                if (settingsUi.confirmReset) { settingsUi.confirmReset = false; resetAllSettings(); flashSaved(); }
+                else settingsUi.confirmReset = true;
+            }
+            renderSettings();
+        }
+
+        function startEdit(def) {
+            var row = settingsModal.querySelector('#settingsRows .settings-row[data-i="' + settingsUi.row + '"]');
+            if (!row) return;
+            var value = row.querySelector('.sr-value');
+            var input = sEl('input', 'sr-input');
+            input.id = 'settingsEditInput';
+            input.type = def.secret ? 'password' : 'text';
+            input.value = state[def.field] || '';
+            input.setAttribute('autocomplete', 'off');
+            if (def.placeholder) input.setAttribute('placeholder', t(def.placeholder));
+            settingsUi.zone = 'edit';
+            settingsUi.editDef = def;
+            row.replaceChild(input, value);
+            document.getElementById('settingsHints').textContent = settingsHintsFor('edit');
+            input.onblur = function() { if (settingsUi.zone === 'edit') commitEdit(); };
+            input.focus();
+        }
+
+        function commitEdit() {
+            var input = document.getElementById('settingsEditInput');
+            var def = settingsUi.editDef;
+            if (settingsUi.zone !== 'edit' || !input || !def) return;
+            settingsUi.zone = 'rows';
+            var value = input.value.trim();
+            if (value !== (state[def.field] || '')) { setSettingValue(def, value); flashSaved(); }
+            renderSettings();
+        }
+
+        function cancelEdit() {
+            if (settingsUi.zone !== 'edit') return;
+            settingsUi.zone = 'rows';
+            renderSettings();
+        }
+
+        function appsActivate() {
+            if (settingsUi.appIdx >= state.catalog.length) { settingsUi.zone = 'rows'; renderSettings(); return; }
+            var result = toggleFavorite(state.catalog[settingsUi.appIdx].id);
+            settingsUi.message = result === 'full' ? t('Max 8 apps on shelf') : result === 'last' ? t('Keep at least one app on the shelf.') : '';
+            if (result === 'added' || result === 'removed') flashSaved();
+            renderSettings();
+        }
+
+        function isBackKey(e) {
+            return e.keyCode === 461 || e.key === 'Escape' || e.key === 'GoBack';
+        }
+
+        // Back steps outward: apps page, settings list, category list, then closes the screen.
+        function settingsBack() {
+            if (settingsUi.zone === 'apps') { settingsUi.zone = 'rows'; renderSettings(); }
+            else if (settingsUi.zone === 'rows') { settingsUi.zone = 'cats'; settingsUi.catFocus = settingsUi.cat; settingsUi.confirmReset = false; renderSettings(); }
+            else closeSettingsModal();
+        }
+
+        function handleSettingsKey(e) {
+            var ui = settingsUi, key = e.key, rows, def, count, asked, idx;
+            settingsPointerLive = false; // the remote is driving now
+            if (ui.zone === 'edit') {
+                if (key === 'Enter') { commitEdit(); e.preventDefault(); }
+                else if (isBackKey(e)) { cancelEdit(); e.preventDefault(); }
+                return;
+            }
+            if (isBackKey(e)) { settingsBack(); e.preventDefault(); return; }
+            if (ui.zone === 'cats') {
+                if (key === 'ArrowDown') ui.catFocus = Math.min(ui.catFocus + 1, SETTING_CATEGORIES.length);
+                else if (key === 'ArrowUp') ui.catFocus = Math.max(ui.catFocus - 1, 0);
+                else if (key === 'ArrowRight' || key === 'Enter') {
+                    if (ui.catFocus === SETTING_CATEGORIES.length) { if (key === 'Enter') closeSettingsModal(); e.preventDefault(); return; }
+                    enterRows();
+                    e.preventDefault();
+                    return;
+                } else return;
+                if (ui.catFocus < SETTING_CATEGORIES.length) ui.cat = ui.catFocus;
+                e.preventDefault();
+                renderRowsOnly(); // the category buttons (maybe under the pointer) are not rebuilt
+                paintFocus();
+                return;
+            }
+            if (ui.zone === 'rows') {
+                rows = settingsRowsFor(ui.cat);
+                def = rows[ui.row];
+                if (key === 'ArrowDown' || key === 'ArrowUp') {
+                    // Moving only repaints the ring, so the list keeps its scroll; a pending reset question is dropped.
+                    asked = ui.confirmReset;
+                    ui.row = key === 'ArrowDown' ? Math.min(ui.row + 1, rows.length - 1) : Math.max(ui.row - 1, 0);
+                    ui.confirmReset = false;
+                    e.preventDefault();
+                    if (asked) renderSettings(); else paintFocus();
+                    return;
+                }
+                if ((key === 'ArrowLeft' || key === 'ArrowRight') && def.type === 'choice') { cycleSetting(def, key === 'ArrowRight' ? 1 : -1); flashSaved(); }
+                else if (key === 'Enter') { activateRow(def); e.preventDefault(); return; }
+                else return;
+                e.preventDefault();
+                renderSettings();
+                return;
+            }
+            if (ui.zone === 'apps') {
+                count = state.catalog.length;
+                idx = ui.appIdx;
+                // Down reaches a shorter last row before Done; Up/Left from Done never go below 0 (empty catalog).
+                if (key === 'ArrowDown') ui.appIdx = idx >= count ? count : (Math.floor(idx / 5) < Math.floor((count - 1) / 5) ? Math.min(idx + 5, count - 1) : count);
+                else if (key === 'ArrowUp') ui.appIdx = idx >= count ? Math.max(0, count - 1) : (idx - 5 >= 0 ? idx - 5 : idx);
+                else if (key === 'ArrowLeft') ui.appIdx = idx >= count ? Math.max(0, count - 1) : Math.max(idx - 1, 0);
+                else if (key === 'ArrowRight') ui.appIdx = ui.appIdx >= count ? count : Math.min(ui.appIdx + 1, count - 1);
+                else if (key === 'Enter') { appsActivate(); e.preventDefault(); return; }
+                else return;
+                e.preventDefault();
+                paintFocus();
+            }
         }
 
         document.getElementById('customizeBtn').addEventListener('click', openSettingsModal);
         document.getElementById('customizeBtn').addEventListener('mouseenter', function() {
             setMainFocus(document.getElementById('customizeBtn'));
+        });
+        document.getElementById('tvSettingsBtn').addEventListener('click', function() { launchApp(LG_SETTINGS_APP, '', t('TV Settings')); });
+        document.getElementById('tvSettingsBtn').addEventListener('mouseenter', function() {
+            setMainFocus(document.getElementById('tvSettingsBtn'));
         });
         document.getElementById('weatherWidget').addEventListener('click', function() {
             openDrawer();
@@ -2526,8 +3242,414 @@
 
         closeDrawerBtn.addEventListener('click', closeDrawer);
 
+        // --- Ambient (Unsplash) screensaver: pure helpers ---
+        var AMBIENT_THEMES = ['night sky stars', 'aurora', 'dark mountains night', 'aerial earth', 'forest fog'];
+        var AMBIENT_HOUR_MS = 3600000;
+        var AMBIENT_MAX_CALLS = 40; // our own cap inside Unsplash's 50 requests per hour
+        var AMBIENT_PING_CAP = 30;  // download pings stop here, keeping 10 calls for refreshes
+
+        // Opacity for a photo from its average colour: dark photos 0.85, white 0.5.
+        function ambientDim(color) {
+            var lum = 0.5;
+            var m = /^#?([0-9a-f]{6})$/i.exec(color || '');
+            if (m) {
+                var n = parseInt(m[1], 16);
+                lum = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+            }
+            return Math.max(0.5, Math.min(0.85, Math.round((0.85 - lum * 0.35) * 100) / 100));
+        }
+
+        // The Photo Brightness setting scales ambientDim(); the result never goes above full opacity.
+        function ambientBrightness() {
+            return state.ambientBright === 'soft' ? 0.75 : (state.ambientBright === 'bright' ? 1.25 : 1);
+        }
+
+        // log = timestamps (ms) of earlier calls; true while fewer than `limit` happened in the last hour.
+        function ambientBudgetAllows(log, now, limit) {
+            var recent = 0;
+            for (var i = 0; i < log.length; i++) {
+                if (log[i] > now - AMBIENT_HOUR_MS) recent++;
+            }
+            return recent < limit;
+        }
+
+        function ambientPhotoUrl(raw, screenWidth) {
+            return raw + (raw.indexOf('?') === -1 ? '?' : '&') + 'w=' + (screenWidth >= 3840 ? 3840 : 1920) + '&q=70&fm=jpg';
+        }
+
+        // The few fields we keep from an Unsplash photo, or null when one is missing.
+        function ambientShape(p) {
+            if (!p || !p.id || !p.urls || !p.urls.raw || !p.user || !p.user.name || !p.links || !p.links.download_location) return null;
+            return { id: p.id, raw: p.urls.raw, color: p.color || '', name: p.user.name, dl: p.links.download_location };
+        }
+
+        // --- Ambient (Unsplash) screensaver: fetching, cache and call budget ---
+        var AMBIENT_REFRESH_MS = 12 * AMBIENT_HOUR_MS;
+        var AMBIENT_MIN_CACHED = 20;
+        var AMBIENT_MIN_REMAINING = 5;
+        var ambientRefreshing = false;
+
+        function ambientRead(key, fallback) {
+            try {
+                var raw = localStorage.getItem(key);
+                var val = raw ? JSON.parse(raw) : fallback;
+                if (Object.prototype.toString.call(fallback) === '[object Array]' && Object.prototype.toString.call(val) !== '[object Array]') return fallback;
+                return val;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        // Timestamps of API calls made in the last hour.
+        function ambientCalls() {
+            var now = Date.now(), log = ambientRead('fmtv_ambient_calls', []), recent = [];
+            for (var i = 0; i < log.length; i++) {
+                if (log[i] > now - AMBIENT_HOUR_MS) recent.push(log[i]);
+            }
+            return recent;
+        }
+
+        function ambientPaused() {
+            try {
+                return Date.now() < (parseInt(localStorage.getItem('fmtv_ambient_pause'), 10) || 0);
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // GET an Unsplash API path (or a full URL); done(err, json). Every call is logged against the hourly cap.
+        function ambientApi(pathOrUrl, cap, done) {
+            var now = Date.now(), log = ambientCalls();
+            if (typeof fetch !== 'function' || !state.unsplashKey || ambientPaused() || !ambientBudgetAllows(log, now, cap)) {
+                done(new Error('blocked'));
+                return;
+            }
+            var url = pathOrUrl.indexOf('http') === 0 ? pathOrUrl : 'https://api.unsplash.com' + pathOrUrl;
+            if (url.indexOf('https://api.unsplash.com/') !== 0) {
+                done(new Error('blocked'));
+                return;
+            }
+            try {
+                log.push(now);
+                localStorage.setItem('fmtv_ambient_calls', JSON.stringify(log));
+            } catch (e) {
+                done(e);
+                return;
+            }
+            fetch(url, { headers: { 'Authorization': 'Client-ID ' + state.unsplashKey, 'Accept-Version': 'v1' } }).then(function(res) {
+                var remaining = parseInt(res.headers.get('X-Ratelimit-Remaining'), 10);
+                if (res.status === 403 || res.status === 429 || remaining < AMBIENT_MIN_REMAINING) {
+                    try { localStorage.setItem('fmtv_ambient_pause', String(Date.now() + AMBIENT_HOUR_MS)); } catch (e) {}
+                }
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
+            }).then(function(data) { done(null, data); }, function(err) { done(err); });
+        }
+
+        // One random-30 call per theme (about 150 photos). Keeps the old cache unless at least 20 photos came back.
+        function ambientRefresh(force) {
+            if (ambientRefreshing || (state.ambient !== 'on' && state.homePhotos !== 'on') || !state.unsplashKey || typeof fetch !== 'function') return;
+            var cache = ambientRead('fmtv_ambient_cache', null);
+            if (!force && cache && cache.photos && cache.photos.length >= AMBIENT_MIN_CACHED && Date.now() - cache.at < AMBIENT_REFRESH_MS) return;
+            ambientRefreshing = true;
+            var photos = [], seen = {}, step = 0;
+
+            function finish() {
+                ambientRefreshing = false;
+                if (photos.length >= AMBIENT_MIN_CACHED) {
+                    try { localStorage.setItem('fmtv_ambient_cache', JSON.stringify({ photos: photos, at: Date.now() })); } catch (e) {}
+                    syncHomePhotos();
+                }
+            }
+
+            function next() {
+                try {
+                    if (step >= AMBIENT_THEMES.length) { finish(); return; }
+                    var theme = AMBIENT_THEMES[step++];
+                    ambientApi('/photos/random?count=30&orientation=landscape&content_filter=high&query=' + encodeURIComponent(theme), AMBIENT_MAX_CALLS, function(err, list) {
+                        if (err || !list || !list.length) { finish(); return; }
+                        for (var i = 0; i < list.length; i++) {
+                            var s = ambientShape(list[i]);
+                            if (s && !seen[s.id]) { seen[s.id] = 1; photos.push(s); }
+                        }
+                        next();
+                    });
+                } catch (e) {
+                    finish();
+                }
+            }
+            next();
+        }
+
+        // --- Ambient (Unsplash) screensaver: photo layer ---
+        // Photos can be shown: the engine has fetch, a key is set and the cache has photos.
+        function ambientCacheReady() {
+            var cache = ambientRead('fmtv_ambient_cache', null);
+            return typeof fetch === 'function' && !!state.unsplashKey && !!cache && !!cache.photos && cache.photos.length > 0;
+        }
+
+        function ambientReady() {
+            return state.ambient === 'on' && ambientCacheReady();
+        }
+
+        // Seconds per drift leg for the Motion Speed setting.
+        function ambientLegSecs() {
+            return state.ambientSpeed === 'slow' ? 40 : (state.ambientSpeed === 'fast' ? 12 : 22);
+        }
+
+        function ambientMoveStop(img) {
+            clearTimeout(img._moveTimer);
+            img._moveTimer = null;
+        }
+
+        // Photo Motion: 'drift' glides to a new random spot every leg for as long as the photo shows; 'kenburns' makes
+        // one slow zoom-and-pan per photo (secs long); 'panels' and 'none' leave the photo still (panels animate the
+        // change between photos instead). Only transform and opacity animate.
+        function ambientMove(img, secs) {
+            ambientMoveStop(img);
+            var mode = state.ambientMotion;
+            var still = mode === 'none' || mode === 'panels';
+            img.style.transition = 'none';
+            img.style.transform = mode === 'panels' ? 'none' : 'translate(0%, 0%) scale(1.06)';
+            void img.offsetWidth;
+            img.style.transition = 'opacity 4s linear';
+            if (still) return;
+            if (mode === 'kenburns') {
+                var sx = Math.round((Math.random() * 2 - 1) * 40) / 10, sy = Math.round((Math.random() * 2 - 1) * 30) / 10;
+                img.style.transform = 'translate(' + sx + '%, ' + sy + '%) scale(1.02)';
+                void img.offsetWidth;
+                img.style.transition = 'opacity 4s linear, transform ' + ((secs || 90) + 4) + 's linear';
+                img.style.transform = 'translate(' + (-sx) + '%, ' + (-sy) + '%) scale(1.22)';
+                return;
+            }
+            var scale = 1.2;
+            var maxPan = (scale - 1) * 40; // % of the photo size; stays inside the zoom margin so no edge shows
+            var cx = 0, cy = 0;
+            function leg() {
+                var secs = ambientLegSecs(), dx, dy, tries = 0;
+                do {
+                    dx = Math.round((Math.random() * 2 - 1) * maxPan * 10) / 10;
+                    dy = Math.round((Math.random() * 2 - 1) * maxPan * 10) / 10;
+                    tries++;
+                } while (tries < 8 && Math.abs(dx - cx) + Math.abs(dy - cy) < maxPan);
+                cx = dx; cy = dy;
+                img.style.transition = 'opacity 4s linear, transform ' + secs + 's linear';
+                img.style.transform = 'translate(' + dx + '%, ' + dy + '%) scale(' + scale + ')';
+                img._moveTimer = setTimeout(leg, secs * 1000);
+            }
+            leg();
+        }
+
+        // Tell Unsplash once per photo; pings stop while 30+ calls were made in the last hour.
+        function ambientPing(p) {
+            var pinged = ambientRead('fmtv_ambient_pinged', []);
+            if (pinged.indexOf(p.id) !== -1) return;
+            if (ambientPaused() || !ambientBudgetAllows(ambientCalls(), Date.now(), AMBIENT_PING_CAP)) return;
+            pinged.push(p.id);
+            try { localStorage.setItem('fmtv_ambient_pinged', JSON.stringify(pinged.slice(-300))); } catch (e) {}
+            ambientApi(p.dl, AMBIENT_PING_CAP, function() {});
+        }
+
+        // Sliding panels: the visible photo is cut into six vertical strips that slide up one after another and
+        // reveal the next photo, which `next` already shows underneath. `done` runs when the strips are gone.
+        var PANEL_COUNT = 6;
+        var PANEL_SECS = 1.3;
+        var PANEL_STAGGER = 0.18;
+
+        function ambientPanels(container, cur, next, opacity, done) {
+            var box = document.createElement('div');
+            box.className = 'pn-strips';
+            box.style.opacity = opacity;
+            var strips = [];
+            for (var i = 0; i < PANEL_COUNT; i++) {
+                var strip = document.createElement('div');
+                strip.className = 'pn-strip';
+                var img = document.createElement('img');
+                img.alt = '';
+                img.src = cur.src;
+                img.style.left = (-i * 100) + '%';
+                strip.appendChild(img);
+                box.appendChild(strip);
+                strips.push(strip);
+            }
+            container.appendChild(box);
+            void box.offsetWidth;
+            strips.forEach(function(strip, i) {
+                strip.style.transition = 'transform ' + PANEL_SECS + 's cubic-bezier(0.65, 0, 0.35, 1) ' + (i * PANEL_STAGGER) + 's';
+                strip.style.transform = 'translateY(-101%)';
+            });
+            return setTimeout(function() {
+                if (box.parentNode) box.parentNode.removeChild(box);
+                done();
+            }, (PANEL_SECS + (PANEL_COUNT - 1) * PANEL_STAGGER) * 1000 + 150);
+        }
+
+        // One photo layer: two stacked images that crossfade, a rotation timer and a run counter so a late image
+        // load from an earlier start/stop cycle is ignored. cfg: a, b = ids of the two <img>; credit = id of the
+        // credit element; dimScale multiplies ambientDim(); secs() = seconds per photo; onStart/onStop optional.
+        function ambientPlayer(cfg) {
+            var player = { on: false, timer: null, pos: 0, failures: 0, front: cfg.a, run: 0 };
+
+            function el(id) { return document.getElementById(id); }
+
+            function removePanels() {
+                var boxes = el(cfg.a).parentNode.querySelectorAll('.pn-strips');
+                for (var i = 0; i < boxes.length; i++) boxes[i].parentNode.removeChild(boxes[i]);
+            }
+
+            player.show = function() {
+                var cache = ambientRead('fmtv_ambient_cache', null);
+                if (!player.on || !cache || !cache.photos || !cache.photos.length) return;
+                var photo = cache.photos[player.pos % cache.photos.length];
+                player.pos++;
+                var run = player.run;
+                var cur = el(player.front);
+                var next = el(player.front === cfg.a ? cfg.b : cfg.a);
+                var pre = new Image();
+                pre.onload = function() {
+                    if (!player.on || run !== player.run) return;
+                    player.failures = 0;
+                    var opacity = String(Math.min(1, Math.round(ambientDim(photo.color) * cfg.dimScale * ambientBrightness() * 100) / 100));
+                    clearTimeout(player.panelTimer);
+                    removePanels();
+                    next.src = pre.src;
+                    ambientMove(next, cfg.secs());
+                    if (state.ambientMotion === 'panels' && cur.getAttribute('src') && cur.style.opacity !== '0') {
+                        next.style.transition = 'none'; // sits fully shown under the strips
+                        next.style.opacity = opacity;
+                        var shown = cur.style.opacity;
+                        cur.style.transition = 'none';
+                        cur.style.opacity = '0';
+                        player.panelTimer = ambientPanels(cur.parentNode, cur, next, shown, function() { player.panelTimer = null; });
+                    } else {
+                        setTimeout(function() { if (cur.style.opacity === '0') ambientMoveStop(cur); }, 4500);
+                        next.style.opacity = opacity;
+                        cur.style.opacity = '0';
+                    }
+                    player.front = next.id;
+                    el(cfg.credit).textContent = t('Photo by %s on Unsplash', photo.name);
+                    ambientPing(photo);
+                };
+                pre.onerror = function() {
+                    if (!player.on || run !== player.run) return;
+                    player.failures++;
+                    if (player.failures < 5) player.show();
+                };
+                pre.src = ambientPhotoUrl(photo.raw, window.screen.width * (window.devicePixelRatio || 1));
+            };
+
+            player.start = function() {
+                player.run++;
+                player.on = true;
+                player.failures = 0;
+                player.front = cfg.a; // the first photo of every run fades in on the second image
+                player.pos = Math.floor(Math.random() * 1000);
+                if (cfg.onStart) cfg.onStart();
+                player.show();
+                player.timer = setInterval(player.show, cfg.secs() * 1000);
+            };
+
+            player.stop = function() {
+                player.run++;
+                player.on = false;
+                clearInterval(player.timer);
+                clearTimeout(player.panelTimer);
+                removePanels();
+                if (cfg.onStop) cfg.onStop();
+                [cfg.a, cfg.b].forEach(function(id) {
+                    var img = el(id);
+                    ambientMoveStop(img);
+                    img.style.transition = 'none';
+                    img.style.opacity = '0';
+                    img.removeAttribute('src');
+                });
+                el(cfg.credit).textContent = '';
+            };
+
+            return player;
+        }
+
+        function ambientSecs() {
+            return parseInt(state.ambientSecs, 10) || 90;
+        }
+
+        var screensaverPhotos = ambientPlayer({
+            a: 'ssPhotoA', b: 'ssPhotoB', credit: 'screensaverCredit', dimScale: 1, secs: ambientSecs,
+            onStart: function() { document.getElementById('screensaverOverlay').classList.add('ambient'); },
+            onStop: function() { document.getElementById('screensaverOverlay').classList.remove('ambient'); }
+        });
+
+        function ambientShow() { screensaverPhotos.show(); }
+        function ambientStart() { screensaverPhotos.start(); }
+        function ambientStop() { screensaverPhotos.stop(); }
+
+        // Photos behind the home screen dashboard: dimmer than the screensaver, paused while the screensaver shows.
+        var homePhotoPlayer = ambientPlayer({
+            a: 'hpPhotoA', b: 'hpPhotoB', credit: 'homePhotoCredit', dimScale: 0.55, secs: ambientSecs,
+            onStart: function() { document.getElementById('homePhotos').classList.add('active'); },
+            onStop: function() { document.getElementById('homePhotos').classList.remove('active'); }
+        });
+
+        function homePhotosWanted() {
+            return state.homePhotos === 'on' && ambientCacheReady() && !screensaverOn && !document.hidden;
+        }
+
+        // Start or stop the home photos so they match the settings and the screensaver state.
+        function syncHomePhotos() {
+            var wanted = homePhotosWanted();
+            if (wanted && !homePhotoPlayer.on) homePhotoPlayer.start();
+            else if (!wanted && homePhotoPlayer.on) homePhotoPlayer.stop();
+        }
+
+        // A changed duration or motion only applies on a fresh start, so restart a running player.
+        function applyHomePhotosSettings() { if (homePhotoPlayer.on) homePhotoPlayer.stop(); syncHomePhotos(); }
+
+        // --- Keep LG's own screensaver away while ours shows ---
+        // A playing video holds the TV's screensaver off (checked on an LG UR91, webOS 23). A 64x36 canvas stream
+        // shown in a 4x4 px muted <video> is enough; engines without canvas.captureStream just skip it.
+        var keepAwakeTimer = null;
+
+        function keepAwakeStart() {
+            if (state.keepAwake !== 'on' || keepAwakeTimer !== null) return;
+            var canvas = document.getElementById('keepAwakeCanvas');
+            var video = document.getElementById('keepAwakeVideo');
+            if (!canvas || !video || !canvas.captureStream) return;
+            try {
+                var ctx = canvas.getContext('2d');
+                keepAwakeTimer = setInterval(function() {
+                    ctx.fillStyle = 'hsl(' + (Date.now() / 20 % 360) + ',60%,35%)';
+                    ctx.fillRect(0, 0, 64, 36);
+                }, 200);
+                video.srcObject = canvas.captureStream(10);
+                var played = video.play();
+                if (played && played.catch) played.catch(function() {});
+            } catch (e) {
+                keepAwakeStop();
+            }
+        }
+
+        function keepAwakeStop() {
+            clearInterval(keepAwakeTimer);
+            keepAwakeTimer = null;
+            var video = document.getElementById('keepAwakeVideo');
+            if (video) {
+                try { video.pause(); } catch (e) {}
+                video.srcObject = null;
+            }
+        }
+
+        // LG's own timer can fire before ours, so the video runs whenever the app is in front, not only during our screensaver.
+        function keepAwakeSync() {
+            if (state.keepAwake === 'on' && !document.hidden) keepAwakeStart();
+            else keepAwakeStop();
+        }
+        keepAwakeSync();
+
         // --- OLED-Safe Idle Screensaver ---
-        var IDLE_TIMEOUT_MS = 3 * 60 * 1000;
+        function idleTimeoutMs() {
+            var mins = parseInt(state.idleMins, 10);
+            return (mins > 0 ? mins : 3) * 60 * 1000;
+        }
         var PIXEL_SHIFT_MS = 25 * 1000;
         var screensaverOverlay = document.getElementById('screensaverOverlay');
         var screensaverClockWrap = document.getElementById('screensaverClockWrap');
@@ -2536,25 +3658,45 @@
         var pixelShiftTimer = null;
 
         function shiftScreensaverClock() {
-            var maxX = Math.min(window.innerWidth * 0.28, 260);
-            var maxY = Math.min(window.innerHeight * 0.28, 160);
+            var corner = state.clockPos !== 'center';
+            var maxX = corner ? 6 : Math.min(window.innerWidth * 0.28, 260);
+            var maxY = corner ? 6 : Math.min(window.innerHeight * 0.28, 160);
             var x = Math.round((Math.random() - 0.5) * 2 * maxX);
             var y = Math.round((Math.random() - 0.5) * 2 * maxY);
             screensaverClockWrap.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
         }
 
+        function applyClockPosition() {
+            ['tl', 'tr', 'bl', 'br'].forEach(function(p) { screensaverOverlay.classList.remove('pos-' + p); });
+            if (state.clockPos !== 'center') screensaverOverlay.classList.add('pos-' + (['tl', 'tr', 'bl', 'br'].indexOf(state.clockPos) === -1 ? 'bl' : state.clockPos));
+            shiftScreensaverClock();
+        }
+        applyClockPosition();
+
         function enterScreensaver() {
             screensaverOn = true;
+            syncHomePhotos();
             screensaverOverlay.classList.add('active');
+            if (ambientReady()) ambientStart();
+            keepAwakeStart();
             shiftScreensaverClock();
             pixelShiftTimer = setInterval(shiftScreensaverClock, PIXEL_SHIFT_MS);
         }
 
         function exitScreensaver() {
             screensaverOn = false;
+            syncHomePhotos();
             screensaverOverlay.classList.remove('active');
             clearInterval(pixelShiftTimer);
+            ambientStop();
         }
+
+        // In the background (another app launched): stop downloading, pinging and holding the TV awake.
+        function onVisibilityChange() {
+            if (document.hidden) { if (screensaverOn) exitScreensaver(); syncHomePhotos(); keepAwakeStop(); }
+            else { lastActivity = Date.now(); syncHomePhotos(); keepAwakeSync(); }
+        }
+        document.addEventListener('visibilitychange', onVisibilityChange);
 
         function markActivity() {
             lastActivity = Date.now();
@@ -2564,63 +3706,17 @@
         document.addEventListener('mousedown', markActivity);
 
         setInterval(function() {
-            if (!screensaverOn && !modalOpen && !drawerOpen && Date.now() - lastActivity > IDLE_TIMEOUT_MS) {
+            if (!screensaverOn && !document.hidden && !drawerOpen && Date.now() - lastActivity > idleTimeoutMs()) {
+                // Settings save instantly, so closing Customize loses nothing; without this LG's own screensaver wins.
+                if (modalOpen) closeSettingsModal();
                 enterScreensaver();
             }
         }, 10000);
 
-        document.getElementById('closeModalBtn').addEventListener('click', closeSettingsModal);
-        document.getElementById('resetDefaultBtn').addEventListener('click', function() {
-            tempFavorites = DEFAULT_FAVORITES.slice();
-            tempDevices = {};
-            renderHDMIOptions();
-            document.getElementById('cfgCity').value = '';
-            document.getElementById('cfgTheme').value = 'auto';
-            document.getElementById('cfgClockFormat').value = '24h';
-            document.getElementById('cfgPerfMode').value = 'standard';
-            document.getElementById('cfgIpLocate').value = 'off';
-            document.getElementById('cfgLang').value = 'auto';
-            document.getElementById('cfgTextSize').value = 'normal';
-            document.getElementById('cfgTmdbKey').value = '';
-            renderAppSelectorGrid();
-            refreshModalNavList();
-            showToast(t('Defaults restored'));
-        });
-
-        document.getElementById('saveModalBtn').addEventListener('click', function() {
-            state.favorites = tempFavorites.slice();
-            state.hdmiDevices = shallowClone(tempDevices);
-            localStorage.setItem('fmtv_hdmi_devices', JSON.stringify(state.hdmiDevices));
-            state.city = document.getElementById('cfgCity').value.trim();
-            state.theme = document.getElementById('cfgTheme').value;
-            state.clockFormat = document.getElementById('cfgClockFormat').value;
-            state.perfMode = document.getElementById('cfgPerfMode').value;
-            state.ipLocate = document.getElementById('cfgIpLocate').value;
-            state.lang = document.getElementById('cfgLang').value;
-            state.textSize = document.getElementById('cfgTextSize').value;
-            state.tmdbKey = document.getElementById('cfgTmdbKey').value.trim();
-
-            localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
-            localStorage.setItem('fmtv_city', state.city);
-            localStorage.setItem('fmtv_theme', state.theme);
-            localStorage.setItem('fmtv_clock_format', state.clockFormat);
-            localStorage.setItem('fmtv_perf_mode', state.perfMode);
-            localStorage.setItem('fmtv_ip_locate', state.ipLocate);
-            localStorage.setItem('fmtv_lang', state.lang);
-            localStorage.setItem('fmtv_text_size', state.textSize);
-            localStorage.setItem('fmtv_tmdb_key', state.tmdbKey);
-
-            applyStaticTranslations();
-            applyPerfMode();
-            applyTextSize();
-            renderAppsShelf();
-            applyTheme();
-            updateClock();
-            fetchWeather();
-            fetchTrendingPicks();
-            closeSettingsModal();
-            showToast(t('Saved & Applied!'));
-        });
+        // Refresh the photo cache in the background (never from inside the screensaver).
+        setTimeout(function() { ambientRefresh(false); }, 20000);
+        setTimeout(syncHomePhotos, 2000);
+        setInterval(function() { if (!screensaverOn) ambientRefresh(false); }, 30 * 60 * 1000);
 
         // --- Remote Control Key Handler ---
         document.addEventListener('keydown', function(e) {
@@ -2649,14 +3745,20 @@
                 }
             }
 
+            if (modalOpen) {
+                handleSettingsKey(e);
+                return;
+            }
+
             // Back button on LG Magic Remote (461) or Escape
             if (e.keyCode === 461 || e.key === 'Escape' || e.key === 'GoBack') {
-                if (modalOpen) {
-                    closeSettingsModal();
-                    e.preventDefault();
-                } else if (drawerOpen) {
+                if (drawerOpen) {
                     closeDrawer();
                     e.preventDefault();
+                } else if (window.webOS && typeof window.webOS.platformBack === 'function') {
+                    // appinfo disableBackHistoryAPI hands Back to the app, so on the home screen it leaves the app.
+                    e.preventDefault();
+                    window.webOS.platformBack();
                 }
                 return;
             }
@@ -2665,25 +3767,6 @@
                 if (e.key === 'Enter') {
                     closeDrawer();
                     e.preventDefault();
-                }
-                return;
-            }
-
-            if (modalOpen) {
-                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                    modalIndex = (modalIndex + 1) % modalNavItems.length;
-                    setModalFocus(modalNavItems[modalIndex]);
-                    e.preventDefault();
-                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                    modalIndex = (modalIndex - 1 + modalNavItems.length) % modalNavItems.length;
-                    setModalFocus(modalNavItems[modalIndex]);
-                    e.preventDefault();
-                } else if (e.key === 'Enter') {
-                    var active = modalNavItems[modalIndex];
-                    if (active && active.tagName !== 'INPUT' && active.tagName !== 'SELECT') {
-                        active.click();
-                        e.preventDefault();
-                    }
                 }
                 return;
             }
@@ -2716,6 +3799,7 @@
         applyStaticTranslations();
         applyPerfMode();
         applyTextSize();
+        applyTrendingClass();
         renderAppsShelf();
         renderPicks(FALLBACK_MOVIES);
         applyTheme();
