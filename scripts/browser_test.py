@@ -1333,6 +1333,7 @@ setTimeout(function () {
     done();
   });
   steps.push(function (done) { // calm home: one headline, logo-only tiles, one caption, quiet corners
+    function gearBtn0() { return document.getElementById('customizeBtn'); }
     function vis(el) { return el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden'; }
     var keepFav = state.favorites.slice(), keepPickup = state.pickup;
     localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on'; renderAppsShelf();
@@ -1348,12 +1349,24 @@ setTimeout(function () {
     });
     var tvBtn = document.getElementById('tvSettingsBtn');
     eq('TV Settings button not in the top bar', !tvBtn || !vis(tvBtn), true);
-    eq('weather is not a nav item', mainNavItems.indexOf(document.getElementById('weatherWidget')), -1);
+    var wx = document.getElementById('weatherWidget');
+    setMainFocus(gearBtn0());
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    eq('Right from the gear focuses the weather', document.querySelector('.nav-item.focused'), wx);
+    wx.style.transition = 'none';
+    eq('weather has a white ring when focused', getComputedStyle(wx).outlineStyle + getComputedStyle(wx).outlineWidth, 'solid3px');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    eq('Enter on the weather opens the forecast drawer', drawerOpen, true);
+    closeDrawer();
+    eq('drawer closes', drawerOpen, false);
+    setMainFocus(document.querySelector('#appsGrid .app-tile'));
     var gear = document.getElementById('customizeBtn');
     eq('gear has aria-label', !!gear.getAttribute('aria-label'), true);
     eq('gear is 60px round', gear.getBoundingClientRect().width + 'x' + gear.getBoundingClientRect().height, '60x60');
     var tile = document.querySelector('#appsGrid .app-tile');
-    eq('tile is 216px', Math.round(tile.offsetWidth) + 'x' + Math.round(tile.offsetHeight), '216x216');
+    eq('tile is 204px', Math.round(tile.offsetWidth) + 'x' + Math.round(tile.offsetHeight), '204x204');
+    var t0 = document.querySelectorAll('#appsGrid .app-tile')[0].getBoundingClientRect(), t1 = document.querySelectorAll('#appsGrid .app-tile')[1].getBoundingClientRect();
+    eq('tiles keep 24px apart', Math.round(t1.left - t0.right), 24);
     eq('greeting title 78px', getComputedStyle(document.getElementById('greetingTitle')).fontSize, '78px');
     eq('clock 39px', getComputedStyle(document.getElementById('clockText')).fontSize, '39px');
     eq('greeting eyebrow is the weekday', document.getElementById('greetingEyebrow').textContent, new Date().toLocaleDateString(LANG_LOCALES[currentLang()], { weekday: 'long' }));

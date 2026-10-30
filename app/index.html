@@ -181,7 +181,7 @@
         }
 
         /* Weather: plain text beside the clock. The detail spans keep the full reading for the drawer and the screensaver. */
-        .weather-widget { font-size: 24px; color: #B7BFCC; white-space: nowrap; cursor: pointer; }
+        .weather-widget { font-size: 24px; color: #B7BFCC; white-space: nowrap; cursor: pointer; padding: 8px 14px; border-radius: 16px; outline: none; }
         .weather-widget .weather-detail { display: none; }
 
         /* Round 60px icon buttons: Settings gear and the person avatar. The gear's label shows only while focused. */
@@ -281,7 +281,7 @@
             display: flex;
             flex-wrap: nowrap;
             align-items: center;
-            margin: 0 -6px;
+            margin: 0 -12px;
             padding: 14px 0 54px; /* room for the scale-up and the caption below the focused tile */
         }
 
@@ -289,10 +289,10 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1.5px solid rgba(255, 255, 255, 0.1);
             border-radius: 27px;
-            width: 216px;
-            height: 216px;
-            flex: 0 0 216px;
-            margin: 0 6px;
+            width: 204px;
+            height: 204px;
+            flex: 0 0 204px;
+            margin: 0 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -308,7 +308,7 @@
         }
 
         /* More than eight tiles (shelf plus recent apps): shrink so the row still fits. */
-        .shelf-grid.dense .app-tile { width: 160px; height: 160px; flex-basis: 160px; border-radius: 20px; }
+        .shelf-grid.dense .app-tile { width: 150px; height: 150px; flex-basis: 150px; border-radius: 20px; }
         .tile-divider { flex: 0 0 2px; width: 2px; height: 160px; margin: 0 18px; border-radius: 1px; background: rgba(255, 255, 255, 0.28); }
 
         .app-tile:hover,
@@ -1202,7 +1202,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     <span class="rb-label">Settings</span>
                 </button>
-                <div class="weather-widget" id="weatherWidget">
+                <div class="weather-widget nav-item" id="weatherWidget" data-tag="Live Forecast" data-title="Local Weather & Sunset" data-desc="Live temperature and sky conditions powered by Open-Meteo.">
                     <span id="weatherCorner"></span>
                     <span class="weather-detail">
                         <span id="weatherIcon">☀️</span>
@@ -3624,10 +3624,13 @@
         });
         // The LG Settings app. The button left the top bar; Settings > You and this TV uses this function (Task 3).
         function openLgTvSettings() { launchApp(LG_SETTINGS_APP, '', t('TV Settings')); }
-        // The weather is plain text now (not a remote target); a pointer click still opens the forecast drawer.
+        // The weather is plain text (no pill) but stays a remote target: OK opens the forecast drawer.
         document.getElementById('weatherWidget').addEventListener('click', function() {
             openDrawer();
             fetchWeather();
+        });
+        document.getElementById('weatherWidget').addEventListener('mouseenter', function() {
+            setMainFocus(document.getElementById('weatherWidget'));
         });
 
         // --- Trending Tabs: Movies / Shows ---
