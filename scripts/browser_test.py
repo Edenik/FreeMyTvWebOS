@@ -376,6 +376,71 @@ setTimeout(function () {
     done();
   });
 
+  function photo(id, name, raw) {
+    return { id: id, raw: raw || 'assets/icon.png', color: '#000000', name: name, dl: 'https://api.unsplash.com/photos/' + id + '/download' };
+  }
+  function seedMany(list) {
+    reset();
+    localStorage.setItem('fmtv_ambient_cache', JSON.stringify({ at: Date.now(), photos: list }));
+  }
+  function creditText() { return document.getElementById('screensaverCredit').textContent; }
+
+  steps.push(function (done) { // a late image load from an earlier run must be ignored (stop then quick start)
+    seedMany([photo('s1', 'Ann'), photo('s2', 'Bob')]);
+    state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none'; state.perfMode = 'standard';
+    var calls = []; window.fetch = fakeFetch(200, '49', calls);
+    var realRandom = Math.random;
+    Math.random = function () { return 0; };      // first run starts at photo 0 (Ann)
+    enterScreensaver();
+    exitScreensaver();
+    Math.random = function () { return 0.001; };  // second run starts at photo 1 (Bob)
+    enterScreensaver();
+    Math.random = realRandom;
+    setTimeout(function () {
+      var pings = calls.filter(function (c) { return c.url.indexOf('/download') !== -1; });
+      eq('stale pings', pings.length, 1);
+      eq('stale ping id', !!pings[0] && pings[0].url.indexOf('/photos/s2/') !== -1, true);
+      eq('stale credit', creditText(), t('Photo by %s on Unsplash', 'Bob'));
+      exitScreensaver();
+      done();
+    }, 500);
+  });
+  steps.push(function (done) { // the A/B photos alternate on each rotation
+    seedMany([photo('t1', 'Ann'), photo('t2', 'Bob')]);
+    state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none';
+    window.fetch = fakeFetch(200, '49', []);
+    enterScreensaver();
+    setTimeout(function () {
+      var a = document.getElementById('ssPhotoA'), b = document.getElementById('ssPhotoB');
+      eq('swap first B', b.style.opacity, '0.55');
+      eq('swap first A hidden', a.style.opacity === '' || a.style.opacity === '0', true);
+      ambientShow();
+      setTimeout(function () {
+        eq('swap second A', a.style.opacity, '0.55');
+        eq('swap second B', b.style.opacity, '0');
+        exitScreensaver();
+        done();
+      }, 400);
+    }, 400);
+  });
+  steps.push(function (done) { // a photo that fails to load is skipped; src is cleared after exit
+    seedMany([photo('u1', 'Bad', 'assets/missing-image.png'), photo('u2', 'Good')]);
+    state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none';
+    window.fetch = fakeFetch(200, '49', []);
+    var realRandom = Math.random;
+    Math.random = function () { return 0; };      // starts at the bad photo
+    enterScreensaver();
+    Math.random = realRandom;
+    setTimeout(function () {
+      eq('skip credit', creditText(), t('Photo by %s on Unsplash', 'Good'));
+      exitScreensaver();
+      eq('src cleared A', document.getElementById('ssPhotoA').getAttribute('src'), null);
+      eq('src cleared B', document.getElementById('ssPhotoB').getAttribute('src'), null);
+      state.ambientMotion = 'kenburns';
+      done();
+    }, 600);
+  });
+
   (function run(i) {
     if (i >= steps.length) { write(); return; }
     steps[i](function () { setTimeout(function () { run(i + 1); }, 100); });

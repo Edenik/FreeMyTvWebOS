@@ -2781,12 +2781,6 @@
         }
 
         // --- Ambient (Unsplash) screensaver: photo layer ---
-        var ambientOn = false;
-        var ambientTimer = null;
-        var ambientPos = 0;
-        var ambientFailures = 0;
-        var ambientFront = 'ssPhotoA';
-
         function ambientReady() {
             var cache = ambientRead('fmtv_ambient_cache', null);
             return typeof fetch === 'function' && state.ambient === 'on' && !!state.unsplashKey && !!cache && !!cache.photos && cache.photos.length > 0;
@@ -2816,55 +2810,83 @@
             ambientApi(p.dl, AMBIENT_PING_CAP, function() {});
         }
 
-        function ambientShow() {
-            var cache = ambientRead('fmtv_ambient_cache', null);
-            if (!ambientOn || !cache || !cache.photos || !cache.photos.length) return;
-            var p = cache.photos[ambientPos % cache.photos.length];
-            ambientPos++;
-            var secs = parseInt(state.ambientSecs, 10) || 90;
-            var cur = document.getElementById(ambientFront);
-            var next = document.getElementById(ambientFront === 'ssPhotoA' ? 'ssPhotoB' : 'ssPhotoA');
-            var pre = new Image();
-            pre.onload = function() {
-                if (!ambientOn) return;
-                ambientFailures = 0;
-                next.src = pre.src;
-                ambientMove(next, secs);
-                next.style.opacity = String(ambientDim(p.color));
-                cur.style.opacity = '0';
-                ambientFront = next.id;
-                document.getElementById('screensaverCredit').textContent = t('Photo by %s on Unsplash', p.name);
-                ambientPing(p);
+        // One photo layer: two stacked images that crossfade, a rotation timer and a run counter so a late image
+        // load from an earlier start/stop cycle is ignored. cfg: a, b = ids of the two <img>; credit = id of the
+        // credit element; dimScale multiplies ambientDim(); secs() = seconds per photo; onStart/onStop optional.
+        function ambientPlayer(cfg) {
+            var player = { on: false, timer: null, pos: 0, failures: 0, front: cfg.a, run: 0 };
+
+            function el(id) { return document.getElementById(id); }
+
+            player.show = function() {
+                var cache = ambientRead('fmtv_ambient_cache', null);
+                if (!player.on || !cache || !cache.photos || !cache.photos.length) return;
+                var photo = cache.photos[player.pos % cache.photos.length];
+                player.pos++;
+                var run = player.run;
+                var cur = el(player.front);
+                var next = el(player.front === cfg.a ? cfg.b : cfg.a);
+                var pre = new Image();
+                pre.onload = function() {
+                    if (!player.on || run !== player.run) return;
+                    player.failures = 0;
+                    next.src = pre.src;
+                    ambientMove(next, cfg.secs());
+                    next.style.opacity = String(Math.round(ambientDim(photo.color) * cfg.dimScale * 100) / 100);
+                    cur.style.opacity = '0';
+                    player.front = next.id;
+                    el(cfg.credit).textContent = t('Photo by %s on Unsplash', photo.name);
+                    ambientPing(photo);
+                };
+                pre.onerror = function() {
+                    if (!player.on || run !== player.run) return;
+                    player.failures++;
+                    if (player.failures < 5) player.show();
+                };
+                pre.src = ambientPhotoUrl(photo.raw, window.screen.width * (window.devicePixelRatio || 1));
             };
-            pre.onerror = function() {
-                ambientFailures++;
-                if (ambientOn && ambientFailures < 5) ambientShow();
+
+            player.start = function() {
+                player.run++;
+                player.on = true;
+                player.failures = 0;
+                player.front = cfg.a; // the first photo of every run fades in on the second image
+                player.pos = Math.floor(Math.random() * 1000);
+                if (cfg.onStart) cfg.onStart();
+                player.show();
+                player.timer = setInterval(player.show, cfg.secs() * 1000);
             };
-            pre.src = ambientPhotoUrl(p.raw, window.screen.width * (window.devicePixelRatio || 1));
+
+            player.stop = function() {
+                player.run++;
+                player.on = false;
+                clearInterval(player.timer);
+                if (cfg.onStop) cfg.onStop();
+                [cfg.a, cfg.b].forEach(function(id) {
+                    var img = el(id);
+                    img.style.transition = 'none';
+                    img.style.opacity = '0';
+                    img.removeAttribute('src');
+                });
+                el(cfg.credit).textContent = '';
+            };
+
+            return player;
         }
 
-        function ambientStart() {
-            ambientOn = true;
-            ambientFailures = 0;
-            ambientFront = 'ssPhotoA'; // the first photo of every run fades in on ssPhotoB
-            ambientPos = Math.floor(Math.random() * 1000);
-            document.getElementById('screensaverOverlay').classList.add('ambient');
-            ambientShow();
-            ambientTimer = setInterval(ambientShow, (parseInt(state.ambientSecs, 10) || 90) * 1000);
+        function ambientSecs() {
+            return parseInt(state.ambientSecs, 10) || 90;
         }
 
-        function ambientStop() {
-            ambientOn = false;
-            clearInterval(ambientTimer);
-            document.getElementById('screensaverOverlay').classList.remove('ambient');
-            ['ssPhotoA', 'ssPhotoB'].forEach(function(id) {
-                var img = document.getElementById(id);
-                img.style.transition = 'none';
-                img.style.opacity = '0';
-                img.removeAttribute('src');
-            });
-            document.getElementById('screensaverCredit').textContent = '';
-        }
+        var screensaverPhotos = ambientPlayer({
+            a: 'ssPhotoA', b: 'ssPhotoB', credit: 'screensaverCredit', dimScale: 1, secs: ambientSecs,
+            onStart: function() { document.getElementById('screensaverOverlay').classList.add('ambient'); },
+            onStop: function() { document.getElementById('screensaverOverlay').classList.remove('ambient'); }
+        });
+
+        function ambientShow() { screensaverPhotos.show(); }
+        function ambientStart() { screensaverPhotos.start(); }
+        function ambientStop() { screensaverPhotos.stop(); }
 
         // --- OLED-Safe Idle Screensaver ---
         function idleTimeoutMs() {
