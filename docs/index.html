@@ -2557,7 +2557,7 @@
               apply: function() { applyPerfMode(); applyHomePhotosSettings(); } },
             { id: 'lang', cat: 1, type: 'choice', field: 'lang', store: 'fmtv_lang', def: 'auto', label: 'Language',
               options: [['auto', 'Auto (TV language)'], ['en', 'English'], ['pt', 'Português (Brasil)'], ['es', 'Español'], ['de', 'Deutsch'], ['fr', 'Français']],
-              apply: function() { applyStaticTranslations(); renderAppsShelf(); updateClock(); fetchWeather(); } },
+              apply: function() { applyStaticTranslations(); renderAppsShelf(); updateClock(); fetchWeather(); fetchTrendingPicks(); } },
             { id: 'city', cat: 2, type: 'text', field: 'city', store: 'fmtv_city', def: '', label: 'City Name (or leave Auto)',
               placeholder: 'e.g. Sao Paulo, Lisbon, NYC',
               apply: function() { fetchWeather(); } },
@@ -2631,6 +2631,7 @@
         // Change a setting: update state, save it, run its side effects. Nothing is "pending".
         function setSettingValue(def, value) {
             var previous = settingValue(def);
+            if (def.type === 'text' && typeof value === 'string') value = value.trim();
             if (def.hdmi) {
                 state.hdmiDevices[def.hdmi.id] = value;
                 try { localStorage.setItem('fmtv_hdmi_devices', JSON.stringify(state.hdmiDevices)); } catch (e) {}

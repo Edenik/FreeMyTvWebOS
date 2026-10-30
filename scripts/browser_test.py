@@ -644,6 +644,14 @@ setTimeout(function () {
     var saved = { favorites: state.favorites.slice(), hdmiDevices: JSON.parse(JSON.stringify(state.hdmiDevices)) };
     var savedStore = {};
     SETTINGS.forEach(function (d) { if (d.field) { saved[d.field] = state[d.field]; savedStore[d.store] = localStorage.getItem(d.store); } });
+    var extraKeys = ['fmtv_ambient_cache', 'fmtv_ambient_pause'];
+    var extra = {};
+    extraKeys.forEach(function (k) { extra[k] = localStorage.getItem(k); });
+    function called(label, id, value, expected) {
+      seen.length = 0;
+      setSettingValue(findSetting(id), value);
+      expected.forEach(function (n) { eq('engine ' + label + ' calls ' + n, seen.indexOf(n) !== -1, true); });
+    }
     try {
       setSettingValue(findSetting('theme'), 'oled');
       eq('engine theme state', state.theme, 'oled');
@@ -676,14 +684,13 @@ setTimeout(function () {
 
       var hd = hdmiSettings();
       eq('engine hdmi rows', hd.length, state.catalog.filter(isHDMI).length);
-      if (hd.length) {
-        seen.length = 0;
-        setSettingValue(hd[0], 'ps5');
-        eq('engine hdmi state', state.hdmiDevices[hd[0].hdmi.id], 'ps5');
-        eq('engine hdmi stored', JSON.parse(localStorage.getItem('fmtv_hdmi_devices'))[hd[0].hdmi.id], 'ps5');
-        eq('engine hdmi value', settingValue(hd[0]), 'ps5');
-        eq('engine hdmi shelf', seen.indexOf('renderAppsShelf') !== -1, true);
-      }
+      eq('engine has hdmi rows', hd.length > 0, true);
+      seen.length = 0;
+      setSettingValue(hd[0], 'ps5');
+      eq('engine hdmi state', state.hdmiDevices[hd[0].hdmi.id], 'ps5');
+      eq('engine hdmi stored', JSON.parse(localStorage.getItem('fmtv_hdmi_devices'))[hd[0].hdmi.id], 'ps5');
+      eq('engine hdmi value', settingValue(hd[0]), 'ps5');
+      eq('engine hdmi shelf', seen.indexOf('renderAppsShelf') !== -1, true);
       var cat0 = settingsForCategory(0);
       eq('engine cat0 first is shelf', cat0[0] && cat0[0].id, 'shelf');
       eq('engine cat0 hdmi follow', cat0.length, 1 + hd.length);
@@ -697,14 +704,28 @@ setTimeout(function () {
       eq('engine fav full', toggleFavorite('x'), 'full');
       eq('engine fav full unchanged', state.favorites.length, 8);
 
+      called('lang', 'lang', 'en', ['applyStaticTranslations', 'renderAppsShelf', 'updateClock', 'fetchWeather', 'fetchTrendingPicks']);
+      called('perfMode', 'perfMode', 'high', ['applyPerfMode', 'applyHomePhotosSettings']);
+      called('textSize', 'textSize', 'large', ['applyTextSize']);
+      called('clockFormat', 'clockFormat', '12h', ['updateClock']);
+      called('homePhotos', 'homePhotos', 'on', ['ambientRefresh', 'applyHomePhotosSettings']);
+      setSettingValue(findSetting('city'), '  Rome  ');
+      eq('engine text trimmed', state.city, 'Rome');
+
       seen.length = 0;
       setSettingValue(findSetting('theme'), 'day');
+      seen.length = 0;
       resetAllSettings();
       eq('engine reset theme', state.theme, 'auto');
       eq('engine reset city', state.city, '');
       eq('engine reset favorites', JSON.stringify(state.favorites), JSON.stringify(DEFAULT_FAVORITES));
       eq('engine reset hdmi', JSON.stringify(state.hdmiDevices), '{}');
-      eq('engine reset applies', seen.indexOf('applyTheme') !== -1 && seen.indexOf('fetchWeather') !== -1 && seen.indexOf('renderAppsShelf') !== -1, true);
+      ['applyStaticTranslations', 'applyPerfMode', 'applyTextSize', 'renderAppsShelf', 'applyTheme', 'updateClock', 'fetchWeather',
+        'fetchTrendingPicks', 'ambientRefresh', 'applyHomePhotosSettings'].forEach(function (n) {
+        eq('engine reset calls ' + n, seen.indexOf(n) !== -1, true);
+      });
+    } catch (e) {
+      fails.push('engine threw: ' + e);
     } finally {
       names.forEach(function (n) { window[n] = real[n]; });
       Object.keys(saved).forEach(function (f) { state[f] = saved[f]; });
@@ -713,7 +734,9 @@ setTimeout(function () {
       });
       localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
       localStorage.setItem('fmtv_hdmi_devices', JSON.stringify(state.hdmiDevices));
-      localStorage.removeItem('fmtv_ambient_cache');
+      extraKeys.forEach(function (k) {
+        if (extra[k] === null) localStorage.removeItem(k); else localStorage.setItem(k, extra[k]);
+      });
     }
     done();
   });
