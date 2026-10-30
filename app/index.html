@@ -291,7 +291,7 @@
         .greeting { margin-bottom: 12px; }
         .greeting-eyebrow { font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; color: #ffbd7a; font-weight: 600; }
         .greeting-title { font-size: 44px; line-height: 1.08; font-weight: 700; margin-top: 4px; }
-        .greeting-sub { font-size: 18px; color: var(--text-secondary); margin-top: 6px; }
+        .greeting-sub { font-size: 18px; color: var(--text-secondary); margin-top: 2px; }
         .greeting-sub:empty { display: none; }
         .hero-desc { display: none; } /* the node stays in the DOM: setMainFocus writes to it */
 
@@ -301,20 +301,25 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--accent);
-            margin-bottom: 6px;
+            margin-bottom: 2px;
         }
 
         .hero-title {
             font-size: 40px;
             font-weight: 700;
             letter-spacing: -1px;
-            margin-bottom: 6px;
+            margin-bottom: 0;
             line-height: 1.1;
         }
 
+        .scenes-row { display: flex; gap: 10px; margin-bottom: 8px; }
+        .scenes-row[hidden] { display: none; }
+        .scene-chip { display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 20px; border-radius: 22px; background: rgba(255,255,255,0.12); border: 0; color: var(--text-primary); font-size: 17px; font-weight: 500; font-family: inherit; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease; }
+        .scene-chip.focused { transform: scale(1.06); background: rgba(255,255,255,0.22); }
+
         /* Pick up where you left off: compact cards, name and time overlaid on the art */
-        .pickup-section { margin-bottom: 14px; }
-        .pickup-header { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+        .pickup-section { margin-bottom: 10px; }
+        .pickup-header { font-size: 18px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary); }
         .pickup-row { display: flex; gap: 14px; }
         .pickup-card { width: 300px; background: none; border: 0; padding: 0; color: inherit; text-align: left; cursor: pointer; font-family: inherit; position: relative; transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: 14px; }
         .pickup-section[hidden] { display: none; }
@@ -1242,6 +1247,8 @@
             <div class="hero-desc" id="heroDesc">Navigate smoothly with Magic Remote D-Pad or pointer. Launch apps in 100ms with zero ads.</div>
         </div>
 
+        <div class="scenes-row" id="scenesRow"></div>
+
         <!-- Pick up where you left off -->
         <div class="pickup-section" id="pickupSection" hidden>
             <div class="pickup-header">Pick up where you left off</div>
@@ -1490,6 +1497,7 @@
             catalog: DEFAULT_CATALOG.slice(),
             showTrending: localStorage.getItem('fmtv_show_trending') || 'on',
             pickup: localStorage.getItem('fmtv_pickup') || 'on',
+            scenes: localStorage.getItem('fmtv_scenes') || 'on',
             picksTab: 'movies',
             hourlyForecast: [],
             sunrise: '',
@@ -1577,7 +1585,7 @@
                 'Up / Down: move one row': 'Cima / Baixo: mover uma linha', 'OK: add or remove': 'OK: adicionar ou remover', 'Back: return': 'Voltar: retornar',
                 'Enter: save': 'Enter: salvar', 'Back: cancel': 'Voltar: cancelar', '%s of 8 selected': '%s de 8 selecionados',
                 'Keep at least one app on the shelf.': 'Mantenha pelo menos um app na prateleira.', 'Previous value': 'Valor anterior', 'Next value': 'Próximo valor',
-                'Show the movies and shows row on the home screen': 'Mostrar a linha de filmes e séries na tela inicial', 'Good morning': 'Bom dia', 'Good afternoon': 'Boa tarde', 'Good evening': 'Boa noite', 'Good night': 'Boa madrugada', 'Your Name': 'Seu Nome', 'e.g. Noa': 'ex.: Noa', 'Used in the greeting on the home screen': 'Usado na saudação da tela inicial', 'Pick up where you left off': 'Continue de onde parou', 'Today, %s': 'Hoje, %s', 'Yesterday, %s': 'Ontem, %s', 'Pick-up Row': 'Linha Continuar', 'Shows the apps you opened last, above the shelf': 'Mostra os apps abertos por último, acima da prateleira', 'Dim Photos at Night': 'Escurecer Fotos à Noite', 'A little dimmer after sunset, much dimmer after 23:00': 'Um pouco mais escuro após o pôr do sol, bem mais após 23:00', 'No ads. No account. Your settings stay on this TV.': 'Sem anúncios. Sem conta. Suas configurações ficam nesta TV.', 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posição do Relógio', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Photo Brightness': 'Brilho das Fotos', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Photos behind the clock when the TV is idle': 'Fotos atrás do relógio quando a TV está ociosa', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
+                'Show the movies and shows row on the home screen': 'Mostrar a linha de filmes e séries na tela inicial', 'Good morning': 'Bom dia', 'Good afternoon': 'Boa tarde', 'Good evening': 'Boa noite', 'Good night': 'Boa madrugada', 'Your Name': 'Seu Nome', 'e.g. Noa': 'ex.: Noa', 'Used in the greeting on the home screen': 'Usado na saudação da tela inicial', 'Pick up where you left off': 'Continue de onde parou', 'Today, %s': 'Hoje, %s', 'Yesterday, %s': 'Ontem, %s', 'Pick-up Row': 'Linha Continuar', 'Shows the apps you opened last, above the shelf': 'Mostra os apps abertos por último, acima da prateleira', 'Dim Photos at Night': 'Escurecer Fotos à Noite', 'A little dimmer after sunset, much dimmer after 23:00': 'Um pouco mais escuro após o pôr do sol, bem mais após 23:00', 'No ads. No account. Your settings stay on this TV.': 'Sem anúncios. Sem conta. Suas configurações ficam nesta TV.', 'Movie night': 'Noite de filme', 'Game on': 'Hora do jogo', 'Background music': 'Música de fundo', 'Scenes': 'Cenas', 'Scene': 'Cena', 'One-press Movie night, Game on and Music on the home screen': 'Noite de filme, jogo e música com um toque na tela inicial', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Abre o app certo e ajusta o visual. De volta a este app, tudo volta como era.', 'Name a device on an HDMI input in Customize first': 'Primeiro nomeie um dispositivo em uma entrada HDMI em Personalizar', 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posição do Relógio', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Photo Brightness': 'Brilho das Fotos', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Photos behind the clock when the TV is idle': 'Fotos atrás do relógio quando a TV está ociosa', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
                 'For the photos. Stored on this TV only': 'Para as fotos. Guardada só nesta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para filmes e séries em alta da semana', 'Back: categories': 'Voltar: categorias',
                 'OK or Right: open': 'OK ou Direita: abrir'
             },
@@ -1653,7 +1661,7 @@
                 'Up / Down: move one row': 'Arriba / Abajo: mover una fila', 'OK: add or remove': 'OK: añadir o quitar', 'Back: return': 'Atrás: volver',
                 'Enter: save': 'Enter: guardar', 'Back: cancel': 'Atrás: cancelar', '%s of 8 selected': '%s de 8 seleccionadas',
                 'Keep at least one app on the shelf.': 'Deja al menos una app en el estante.', 'Previous value': 'Valor anterior', 'Next value': 'Valor siguiente',
-                'Show the movies and shows row on the home screen': 'Mostrar la fila de películas y series en la pantalla de inicio', 'Good morning': 'Buenos días', 'Good afternoon': 'Buenas tardes', 'Good evening': 'Buenas noches', 'Good night': 'Buenas noches', 'Your Name': 'Tu Nombre', 'e.g. Noa': 'p. ej. Noa', 'Used in the greeting on the home screen': 'Se usa en el saludo de la pantalla de inicio', 'Pick up where you left off': 'Sigue donde lo dejaste', 'Today, %s': 'Hoy, %s', 'Yesterday, %s': 'Ayer, %s', 'Pick-up Row': 'Fila Seguir viendo', 'Shows the apps you opened last, above the shelf': 'Muestra las últimas apps abiertas, sobre el estante', 'Dim Photos at Night': 'Atenuar Fotos de Noche', 'A little dimmer after sunset, much dimmer after 23:00': 'Algo más tenue tras la puesta de sol, mucho más tras las 23:00', 'No ads. No account. Your settings stay on this TV.': 'Sin anuncios. Sin cuenta. Tus ajustes se quedan en este TV.', 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posición del Reloj', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Photo Brightness': 'Brillo de las Fotos', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Photos behind the clock when the TV is idle': 'Fotos tras el reloj cuando la TV está inactiva', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
+                'Show the movies and shows row on the home screen': 'Mostrar la fila de películas y series en la pantalla de inicio', 'Good morning': 'Buenos días', 'Good afternoon': 'Buenas tardes', 'Good evening': 'Buenas noches', 'Good night': 'Buenas noches', 'Your Name': 'Tu Nombre', 'e.g. Noa': 'p. ej. Noa', 'Used in the greeting on the home screen': 'Se usa en el saludo de la pantalla de inicio', 'Pick up where you left off': 'Sigue donde lo dejaste', 'Today, %s': 'Hoy, %s', 'Yesterday, %s': 'Ayer, %s', 'Pick-up Row': 'Fila Seguir viendo', 'Shows the apps you opened last, above the shelf': 'Muestra las últimas apps abiertas, sobre el estante', 'Dim Photos at Night': 'Atenuar Fotos de Noche', 'A little dimmer after sunset, much dimmer after 23:00': 'Algo más tenue tras la puesta de sol, mucho más tras las 23:00', 'No ads. No account. Your settings stay on this TV.': 'Sin anuncios. Sin cuenta. Tus ajustes se quedan en este TV.', 'Movie night': 'Noche de cine', 'Game on': 'A jugar', 'Background music': 'Música de fondo', 'Scenes': 'Escenas', 'Scene': 'Escena', 'One-press Movie night, Game on and Music on the home screen': 'Noche de cine, juego y música con una pulsación en el inicio', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Abre la app adecuada y ajusta el aspecto. Al volver a esta app, todo queda como estaba.', 'Name a device on an HDMI input in Customize first': 'Primero nombra un dispositivo en una entrada HDMI en Personalizar', 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posición del Reloj', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Photo Brightness': 'Brillo de las Fotos', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Photos behind the clock when the TV is idle': 'Fotos tras el reloj cuando la TV está inactiva', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
                 'For the photos. Stored on this TV only': 'Para las fotos. Se guarda solo en esta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para las películas y series en tendencia de la semana', 'Back: categories': 'Atrás: categorías',
                 'OK or Right: open': 'OK o Derecha: abrir'
             },
@@ -1729,7 +1737,7 @@
                 'Up / Down: move one row': 'Auf / Ab: eine Zeile bewegen', 'OK: add or remove': 'OK: hinzufügen oder entfernen', 'Back: return': 'Zurück: zurückkehren',
                 'Enter: save': 'Enter: speichern', 'Back: cancel': 'Zurück: abbrechen', '%s of 8 selected': '%s von 8 ausgewählt',
                 'Keep at least one app on the shelf.': 'Mindestens eine App in der Leiste behalten.', 'Previous value': 'Vorheriger Wert', 'Next value': 'Nächster Wert',
-                'Show the movies and shows row on the home screen': 'Die Zeile mit Filmen und Serien auf dem Startbildschirm zeigen', 'Good morning': 'Guten Morgen', 'Good afternoon': 'Guten Tag', 'Good evening': 'Guten Abend', 'Good night': 'Gute Nacht', 'Your Name': 'Dein Name', 'e.g. Noa': 'z. B. Noa', 'Used in the greeting on the home screen': 'Wird in der Begrüßung auf dem Startbildschirm verwendet', 'Pick up where you left off': 'Dort weitermachen, wo du aufgehört hast', 'Today, %s': 'Heute, %s', 'Yesterday, %s': 'Gestern, %s', 'Pick-up Row': 'Weiterschauen-Zeile', 'Shows the apps you opened last, above the shelf': 'Zeigt zuletzt geöffnete Apps über der Leiste', 'Dim Photos at Night': 'Fotos nachts abdunkeln', 'A little dimmer after sunset, much dimmer after 23:00': 'Nach Sonnenuntergang etwas dunkler, nach 23:00 viel dunkler', 'No ads. No account. Your settings stay on this TV.': 'Keine Werbung. Kein Konto. Deine Einstellungen bleiben auf diesem Fernseher.', 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Clock Position': 'Uhrposition', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Photo Brightness': 'Fotohelligkeit', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Photos behind the clock when the TV is idle': 'Fotos hinter der Uhr, wenn der Fernseher ruht', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
+                'Show the movies and shows row on the home screen': 'Die Zeile mit Filmen und Serien auf dem Startbildschirm zeigen', 'Good morning': 'Guten Morgen', 'Good afternoon': 'Guten Tag', 'Good evening': 'Guten Abend', 'Good night': 'Gute Nacht', 'Your Name': 'Dein Name', 'e.g. Noa': 'z. B. Noa', 'Used in the greeting on the home screen': 'Wird in der Begrüßung auf dem Startbildschirm verwendet', 'Pick up where you left off': 'Dort weitermachen, wo du aufgehört hast', 'Today, %s': 'Heute, %s', 'Yesterday, %s': 'Gestern, %s', 'Pick-up Row': 'Weiterschauen-Zeile', 'Shows the apps you opened last, above the shelf': 'Zeigt zuletzt geöffnete Apps über der Leiste', 'Dim Photos at Night': 'Fotos nachts abdunkeln', 'A little dimmer after sunset, much dimmer after 23:00': 'Nach Sonnenuntergang etwas dunkler, nach 23:00 viel dunkler', 'No ads. No account. Your settings stay on this TV.': 'Keine Werbung. Kein Konto. Deine Einstellungen bleiben auf diesem Fernseher.', 'Movie night': 'Filmabend', 'Game on': 'Spielzeit', 'Background music': 'Hintergrundmusik', 'Scenes': 'Szenen', 'Scene': 'Szene', 'One-press Movie night, Game on and Music on the home screen': 'Filmabend, Spiel und Musik mit einem Tastendruck auf dem Startbildschirm', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Öffnet die passende App und stellt das Aussehen ein. Zurück in dieser App ist alles wie vorher.', 'Name a device on an HDMI input in Customize first': 'Benenne zuerst in Anpassen ein Gerät an einem HDMI-Eingang', 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Clock Position': 'Uhrposition', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Photo Brightness': 'Fotohelligkeit', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Photos behind the clock when the TV is idle': 'Fotos hinter der Uhr, wenn der Fernseher ruht', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
                 'For the photos. Stored on this TV only': 'Für die Fotos. Nur auf diesem Fernseher gespeichert', 'Optional, for weekly trending movies and shows': 'Optional, für wöchentlich angesagte Filme und Serien', 'Back: categories': 'Zurück: Kategorien',
                 'OK or Right: open': 'OK oder Rechts: öffnen'
             },
@@ -1805,7 +1813,7 @@
                 'Up / Down: move one row': 'Haut / Bas : déplacer d’une ligne', 'OK: add or remove': 'OK : ajouter ou retirer', 'Back: return': 'Retour : revenir',
                 'Enter: save': 'Entrée : enregistrer', 'Back: cancel': 'Retour : annuler', '%s of 8 selected': '%s sur 8 sélectionnées',
                 'Keep at least one app on the shelf.': 'Gardez au moins une appli sur l’étagère.', 'Previous value': 'Valeur précédente', 'Next value': 'Valeur suivante',
-                'Show the movies and shows row on the home screen': 'Afficher la rangée de films et séries sur l’écran d’accueil', 'Good morning': 'Bonjour', 'Good afternoon': 'Bon après-midi', 'Good evening': 'Bonsoir', 'Good night': 'Bonne nuit', 'Your Name': 'Votre prénom', 'e.g. Noa': 'ex. : Noa', 'Used in the greeting on the home screen': 'Utilisé dans le message d’accueil de l’écran d’accueil', 'Pick up where you left off': 'Reprenez où vous en étiez', 'Today, %s': 'Aujourd’hui, %s', 'Yesterday, %s': 'Hier, %s', 'Pick-up Row': 'Rangée Reprendre', 'Shows the apps you opened last, above the shelf': 'Affiche les dernières applis ouvertes, au-dessus de l’étagère', 'Dim Photos at Night': 'Assombrir les photos la nuit', 'A little dimmer after sunset, much dimmer after 23:00': 'Un peu plus sombre après le coucher du soleil, bien plus après 23 h', 'No ads. No account. Your settings stay on this TV.': 'Pas de pub. Pas de compte. Vos réglages restent sur cette TV.', 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Clock Position': 'Position de l’horloge', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Photo Brightness': 'Luminosité des photos', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Photos behind the clock when the TV is idle': 'Photos derrière l’horloge quand la TV est inactive', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
+                'Show the movies and shows row on the home screen': 'Afficher la rangée de films et séries sur l’écran d’accueil', 'Good morning': 'Bonjour', 'Good afternoon': 'Bon après-midi', 'Good evening': 'Bonsoir', 'Good night': 'Bonne nuit', 'Your Name': 'Votre prénom', 'e.g. Noa': 'ex. : Noa', 'Used in the greeting on the home screen': 'Utilisé dans le message d’accueil de l’écran d’accueil', 'Pick up where you left off': 'Reprenez où vous en étiez', 'Today, %s': 'Aujourd’hui, %s', 'Yesterday, %s': 'Hier, %s', 'Pick-up Row': 'Rangée Reprendre', 'Shows the apps you opened last, above the shelf': 'Affiche les dernières applis ouvertes, au-dessus de l’étagère', 'Dim Photos at Night': 'Assombrir les photos la nuit', 'A little dimmer after sunset, much dimmer after 23:00': 'Un peu plus sombre après le coucher du soleil, bien plus après 23 h', 'No ads. No account. Your settings stay on this TV.': 'Pas de pub. Pas de compte. Vos réglages restent sur cette TV.', 'Movie night': 'Soirée cinéma', 'Game on': 'Place au jeu', 'Background music': 'Musique d’ambiance', 'Scenes': 'Scènes', 'Scene': 'Scène', 'One-press Movie night, Game on and Music on the home screen': 'Soirée cinéma, jeu et musique en une pression sur l’écran d’accueil', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Ouvre la bonne appli et règle l’apparence. De retour ici, tout redevient comme avant.', 'Name a device on an HDMI input in Customize first': 'Nommez d’abord un appareil sur une entrée HDMI dans Personnaliser', 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Clock Position': 'Position de l’horloge', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Photo Brightness': 'Luminosité des photos', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Photos behind the clock when the TV is idle': 'Photos derrière l’horloge quand la TV est inactive', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
                 'For the photos. Stored on this TV only': 'Pour les photos. Stockée uniquement sur cette TV', 'Optional, for weekly trending movies and shows': 'Facultatif, pour les films et séries tendance de la semaine', 'Back: categories': 'Retour : catégories',
                 'OK or Right: open': 'OK ou Droite : ouvrir'
             }
@@ -2525,6 +2533,87 @@
         }
 
         // The "Pick up where you left off" row: the apps opened last, from the local launch history.
+        // --- Scenes: one press opens the right app and sets this app's own look ---
+        var STREAMING_APPS = ['netflix', 'youtube.leanback.v4', 'amazon', 'com.disney.disneyplus-prod', 'com.crunchyroll.webapp', 'cdp-30'];
+        var SCENES = [
+            { id: 'movie', label: 'Movie night', icon: 'M3 5h18v14H3zM10 9l5 3-5 3z', look: { theme: 'oled', homePhotos: 'off' }, open: 'streaming' },
+            { id: 'game', label: 'Game on', icon: 'M2 8h20v10H2zM7 11v4M5 13h4M16 12h.01M18 14h.01', look: { homePhotos: 'off' }, open: 'game' },
+            { id: 'music', label: 'Background music', icon: 'M9 18V6l11-2v12M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM17 19a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', look: {}, open: 'spotify-beehive' }
+        ];
+
+        // spec: 'streaming' (last used streaming app, else the first one in the catalog), 'game' (first HDMI input
+        // you named as a console or PC), or an app id.
+        function pickSceneApp(spec, hist, catalog, hdmiChoices) {
+            function find(id) { return arrFind(catalog, function(c) { return c.id === id; }) || null; }
+            if (spec === 'streaming') {
+                var ids = catalog.map(function(c) { return c.id; }).filter(function(id) { return STREAMING_APPS.indexOf(id) !== -1; });
+                var rank = {};
+                ids.forEach(function(id, i) { rank[id] = i; });
+                ids.sort(function(a, b) { return (((hist[b] && hist[b].t) || 0) - ((hist[a] && hist[a].t) || 0)) || (rank[a] - rank[b]); });
+                return ids.length ? find(ids[0]) : null;
+            }
+            if (spec === 'game') {
+                return arrFind(catalog, function(c) { return isHDMI(c) && !!hdmiChoices[c.id] && hdmiChoices[c.id] !== 'default'; }) || null;
+            }
+            return find(spec);
+        }
+
+        function settingDef(id) { return arrFind(SETTINGS, function(d) { return d.id === id; }); }
+
+        // Saved as { field: { from: valueBefore, to: valueTheSceneSet } }.
+        function runScene(id) {
+            var scene = arrFind(SCENES, function(s) { return s.id === id; });
+            if (!scene) return;
+            var app = pickSceneApp(scene.open, readLaunchHist(), state.catalog, state.hdmiDevices);
+            if (!app) { showToast(t('Name a device on an HDMI input in Customize first'), 4000); return; }
+            restoreScene(); // a scene left over from a closed app goes back first, so "from" is always the user's own value
+            var restore = {};
+            Object.keys(scene.look).forEach(function(field) {
+                if (state[field] !== scene.look[field]) { restore[field] = { from: state[field], to: scene.look[field] }; }
+            });
+            if (Object.keys(restore).length) {
+                try { localStorage.setItem('fmtv_scene_restore', JSON.stringify(restore)); } catch (e) {}
+                Object.keys(restore).forEach(function(field) { var def = settingDef(field); if (def) setSettingValue(def, restore[field].to); });
+            }
+            launchApp(app.id);
+        }
+
+        // When the app comes back to the front (or starts again), put the look back the way it was before the scene.
+        // A field the user changed in the meantime keeps their choice.
+        function restoreScene() {
+            var restore = null;
+            try { restore = JSON.parse(localStorage.getItem('fmtv_scene_restore') || 'null'); } catch (e) {}
+            if (!restore) return;
+            try { localStorage.removeItem('fmtv_scene_restore'); } catch (e) {}
+            Object.keys(restore).forEach(function(field) {
+                var def = settingDef(field), entry = restore[field];
+                if (def && entry && state[field] === entry.to) setSettingValue(def, entry.from);
+            });
+        }
+
+        function renderScenes() {
+            var row = document.getElementById('scenesRow');
+            row.innerHTML = '';
+            row.hidden = state.scenes === 'off';
+            if (state.scenes !== 'off') {
+                SCENES.forEach(function(scene) {
+                    var chip = document.createElement('button');
+                    chip.className = 'scene-chip nav-item';
+                    chip.dataset.tag = 'Scene';
+                    chip.dataset.title = scene.label;
+                    chip.dataset.desc = 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.';
+                    chip.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + scene.icon + '"/></svg>';
+                    var label = document.createElement('span');
+                    label.textContent = t(scene.label);
+                    chip.appendChild(label);
+                    chip.addEventListener('mouseenter', function() { setMainFocus(chip); });
+                    chip.addEventListener('click', function() { runScene(scene.id); });
+                    row.appendChild(chip);
+                });
+            }
+            refreshMainNavList();
+        }
+
         function renderPickup() {
             var section = document.getElementById('pickupSection');
             var row = document.getElementById('pickupRow');
@@ -2806,6 +2895,10 @@
               hint: 'Shows the apps you opened last, above the shelf',
               options: ON_OFF,
               apply: function() { renderPickup(); } },
+            { id: 'scenes', cat: 1, type: 'choice', field: 'scenes', store: 'fmtv_scenes', def: 'on', label: 'Scenes',
+              hint: 'One-press Movie night, Game on and Music on the home screen',
+              options: ON_OFF,
+              apply: function() { renderScenes(); } },
             { id: 'textSize', cat: 1, type: 'choice', field: 'textSize', store: 'fmtv_text_size', def: 'normal', label: 'Text Size (weather & clock)',
               options: [['normal', 'Normal'], ['large', 'Large'], ['xlarge', 'Extra large']],
               apply: function() { applyTextSize(); } },
@@ -3902,7 +3995,7 @@
         // In the background (another app launched): stop downloading, pinging and holding the TV awake.
         function onVisibilityChange() {
             if (document.hidden) { if (screensaverOn) exitScreensaver(); syncHomePhotos(); keepAwakeStop(); }
-            else { lastActivity = Date.now(); renderPickup(); syncHomePhotos(); keepAwakeSync(); }
+            else { lastActivity = Date.now(); restoreScene(); renderScenes(); renderPickup(); syncHomePhotos(); keepAwakeSync(); }
         }
         document.addEventListener('visibilitychange', onVisibilityChange);
 
@@ -4008,6 +4101,8 @@
         applyPerfMode();
         applyTextSize();
         applyTrendingClass();
+        restoreScene();
+        renderScenes();
         renderAppsShelf();
         renderPicks(FALLBACK_MOVIES);
         applyTheme();

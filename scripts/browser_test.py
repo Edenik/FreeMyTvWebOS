@@ -119,6 +119,15 @@ setTimeout(function () {
     eq('hist malformed dropped', Object.keys(readLaunchHist()).join(','), 'ok');
     localStorage.removeItem('fmtv_launch_hist');
   }
+  if (need('pickSceneApp')) {
+    var hist2 = { 'com.disney.disneyplus-prod': { t: 5, n: 1 }, netflix: { t: 9, n: 1 } };
+    eq('scene streaming newest', pickSceneApp('streaming', hist2, DEFAULT_CATALOG, {}).id, 'netflix');
+    eq('scene streaming none used', pickSceneApp('streaming', {}, DEFAULT_CATALOG, {}).id, 'youtube.leanback.v4');
+    eq('scene game none named', pickSceneApp('game', {}, DEFAULT_CATALOG, {}), null);
+    eq('scene game ps5', pickSceneApp('game', {}, DEFAULT_CATALOG, { 'com.webos.app.hdmi2': 'ps5' }).id, 'com.webos.app.hdmi2');
+    eq('scene direct id', pickSceneApp('spotify-beehive', {}, DEFAULT_CATALOG, {}).id, 'spotify-beehive');
+    eq('scene direct missing', pickSceneApp('nope', {}, DEFAULT_CATALOG, {}), null);
+  }
   if (need('ambientBudgetAllows')) {
     var now = 10000000, recent = [], old = [], i;
     for (i = 0; i < 40; i++) { recent.push(now - 1000); old.push(now - 3700000); }
@@ -1383,6 +1392,60 @@ setTimeout(function () {
     eq('hover clears confirmReset', settingsUi.confirmReset, false);
     eq('hover removes the confirmation text', modalEl().textContent.indexOf('Press OK again to confirm'), -1);
     closeSettingsModal();
+    done();
+  });
+
+  steps.push(function (done) { // Movie night switches the look, opens an app, and coming back restores the look
+    var calls = [], oldWebOS = window.webOS;
+    window.webOS = { service: { request: function (uri, o) { calls.push(o); } } };
+    state.theme = 'auto'; state.homePhotos = 'on';
+    localStorage.removeItem('fmtv_scene_restore');
+    runScene('movie');
+    eq('scene theme', state.theme, 'oled');
+    eq('scene photos', state.homePhotos, 'off');
+    eq('scene launched', calls.length > 0 && /^(netflix|youtube\.leanback\.v4|amazon|com\.disney\.disneyplus-prod|com\.crunchyroll\.webapp|cdp-30)$/.test(calls[0].parameters.id), true);
+    if (calls[0]) calls[0].onSuccess({ returnValue: true });
+    restoreScene();
+    eq('scene restored theme', state.theme, 'auto');
+    eq('scene restored photos', state.homePhotos, 'on');
+    eq('scene restore key gone', localStorage.getItem('fmtv_scene_restore'), null);
+    // a restore left in storage (app closed while the scene ran) is applied by the next restoreScene, as at boot
+    state.theme = 'oled'; state.homePhotos = 'off';
+    localStorage.setItem('fmtv_scene_restore', JSON.stringify({ theme: { from: 'auto', to: 'oled' }, homePhotos: { from: 'on', to: 'off' } }));
+    restoreScene();
+    eq('boot restore theme', state.theme, 'auto');
+    eq('boot restore photos', state.homePhotos, 'on');
+    // the user changed the theme themselves before coming back: that choice stays, the untouched field still returns
+    state.theme = 'oled'; state.homePhotos = 'off';
+    localStorage.setItem('fmtv_scene_restore', JSON.stringify({ theme: { from: 'auto', to: 'oled' }, homePhotos: { from: 'on', to: 'off' } }));
+    setSettingValue(settingDef('theme'), 'day');
+    restoreScene();
+    eq('user theme kept', state.theme, 'day');
+    eq('untouched field restored', state.homePhotos, 'on');
+    eq('restore key gone again', localStorage.getItem('fmtv_scene_restore'), null);
+    state.theme = 'auto';
+    var before = calls.length;
+    state.hdmiDevices = {};
+    runScene('game');
+    eq('game scene without a named device launches nothing', calls.length, before);
+    var chips = document.querySelectorAll('#scenesRow .scene-chip');
+    eq('scene chips', chips.length, SCENES.length);
+    eq('scene chip in nav', mainNavItems.indexOf(chips[0]) !== -1, true);
+    eq('scene chips fit in a row', chips[0].getBoundingClientRect().height, 44);
+    state.scenes = 'off'; renderScenes();
+    eq('scenes hidden when off', document.getElementById('scenesRow').hidden, true);
+    state.scenes = 'on'; renderScenes();
+    window.webOS = oldWebOS;
+    done();
+  });
+
+  steps.push(function (done) { // scenes + pick-up row + shelf + Trending all fit on a 1080p screen
+    localStorage.setItem('fmtv_launch_hist', JSON.stringify({ netflix: { t: 3, n: 1 }, 'youtube.leanback.v4': { t: 2, n: 1 }, amazon: { t: 1, n: 1 } }));
+    state.pickup = 'on'; state.scenes = 'on'; state.showTrending = 'on'; applyTrendingClass(); renderScenes(); renderPickup();
+    var pk = document.querySelector('.picks-section').getBoundingClientRect();
+    eq('trending visible', pk.height > 0, true);
+    eq('trending bottom inside screen (' + Math.round(pk.bottom) + ')', pk.bottom <= window.innerHeight, true);
+    localStorage.removeItem('fmtv_launch_hist'); renderPickup();
     done();
   });
 
