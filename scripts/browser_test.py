@@ -781,6 +781,14 @@ setTimeout(function () {
     eq('no wrap past Close', settingsUi.catFocus, 5);
     press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp');
     eq('no wrap above first', settingsUi.catFocus, 0);
+    press('ArrowLeft');
+    eq('left in categories is a no-op', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:0');
+    eq('cats hints', document.getElementById('settingsHints').textContent.indexOf(t('OK or Right: open')) !== -1, true);
+    var catNode = modalEl().querySelectorAll('.settings-cat')[1];
+    press('ArrowDown');
+    eq('category keys do not rebuild the category list', modalEl().querySelectorAll('.settings-cat')[1] === catNode, true);
+    eq('category keys still show that category', settingsUi.cat === 1 && modalEl().querySelector('#settingsRows').getAttribute('data-cat') === '1', true);
+    press('ArrowUp');
     done();
   });
   steps.push(function (done) { // entering a category, choice rows change with Left and Right and save at once
@@ -800,6 +808,12 @@ setTimeout(function () {
     press('Enter');
     eq('OK cycles forward', state.idleMins, '3');
     eq('still one focus mark', sfCount(), 1);
+    eq('rows hints', document.getElementById('settingsHints').textContent.indexOf(t('Back: categories')) !== -1, true);
+    modalEl().querySelector('.settings-row[data-id="idleMins"] .sr-arrow[data-dir="1"]').click();
+    eq('arrow click changes once', state.idleMins, '5');
+    modalEl().querySelector('.settings-row[data-id="idleMins"] .sr-value').click();
+    eq('clicking the value acts like OK', state.idleMins, '10');
+    setSettingValue(findSetting('idleMins'), '3');
     done();
   });
   steps.push(function (done) { // back chain: rows -> categories -> closes
@@ -814,8 +828,11 @@ setTimeout(function () {
     eq('categories row first', settingsUi.row, 0);
     press('Enter');
     eq('Categories row returns', settingsUi.zone, 'cats');
+    eq('Categories row focuses its category', settingsUi.catFocus, 3);
     press('ArrowDown'); press('ArrowDown');
-    eq('Close item closes', (function () { settingsUi.catFocus = 5; press('Enter'); return modalOpen; })(), false);
+    eq('arrows reach Close', settingsUi.catFocus, 5);
+    press('Enter');
+    eq('Close item closes', modalOpen, false);
     done();
   });
   steps.push(function (done) { // text rows: inline editor, commit, cancel; secrets are masked everywhere
@@ -836,6 +853,17 @@ setTimeout(function () {
     press('Escape');
     eq('escape cancels', state.city, 'Haifa');
     eq('modal stays open after cancel', modalOpen, true);
+    press('Enter');
+    eq('letter key not prevented while editing', press('a').defaultPrevented, false);
+    var blurInput = document.getElementById('settingsEditInput'), commits = 0, realSet = window.setSettingValue;
+    window.setSettingValue = function (d, v) { commits++; return realSet(d, v); };
+    blurInput.value = 'Tiberias';
+    blurInput.dispatchEvent(new Event('blur'));
+    blurInput.blur();
+    window.setSettingValue = realSet;
+    eq('blur commits', state.city, 'Tiberias');
+    eq('blur commits once', commits, 1);
+    eq('blur returns to rows', settingsUi.zone, 'rows');
 
     settingsUi.cat = 4; settingsUi.catFocus = 4; settingsUi.zone = 'cats'; renderSettings(); press('Enter');
     goToRow('unsplashKey');
@@ -905,6 +933,63 @@ setTimeout(function () {
     closeSettingsModal();
     done();
   });
+  steps.push(function (done) { // a long apps grid keeps the focused tile fully visible going down and back up; partial last rows and empty catalogs
+    var keepCat = state.catalog, keepFav = state.favorites.slice(), big = state.catalog.slice(), k;
+    for (k = 0; big.length < 60; k++) big.push({ id: 'test.dummy' + k, title: 'Dummy ' + k });
+    state.catalog = big;
+    openSettingsModal();
+    press('Enter'); press('Enter'); // category 0, then "Shelf apps"
+    var grid = document.getElementById('settingsAppsGrid'), guard = 80, okDown = true, okUp = true, node;
+    eq('apps grid id is unique', document.querySelectorAll('#appsGrid').length + document.querySelectorAll('#settingsAppsGrid').length, 2);
+    eq('apps grid overflows', !!grid && grid.scrollHeight > grid.clientHeight, true);
+    function check() { node = grid.querySelector('.apps-tile.sf'); return !!node && inView(node, grid); }
+    while (settingsUi.appIdx < big.length - 5 && guard--) { press('ArrowDown'); if (!check()) okDown = false; }
+    while (settingsUi.appIdx < big.length - 1 && guard--) { press('ArrowRight'); if (!check()) okDown = false; }
+    eq('reached the last tile', settingsUi.appIdx, big.length - 1);
+    eq('focused tile visible going down', okDown, true);
+    while (settingsUi.appIdx >= 5 && guard--) { press('ArrowUp'); if (!check()) okUp = false; }
+    while (settingsUi.appIdx > 0 && guard--) { press('ArrowLeft'); if (!check()) okUp = false; }
+    eq('back at tile 0', settingsUi.appIdx, 0);
+    eq('focused tile visible coming back up', okUp, true);
+
+    var twelve = [];
+    for (k = 0; k < 12; k++) twelve.push({ id: 'test.twelve' + k, title: 'App ' + k });
+    state.catalog = twelve; state.favorites = [twelve[0].id];
+    renderSettings();
+    settingsUi.appIdx = 7; paintFocus(); press('ArrowDown');
+    eq('down from 7 reaches the partial last row', settingsUi.appIdx, 11);
+    press('ArrowDown');
+    eq('then Done', settingsUi.appIdx, 12);
+
+    state.catalog = [];
+    renderSettings();
+    settingsUi.appIdx = 0; paintFocus();
+    press('ArrowUp');
+    eq('up on an empty catalog stays valid', settingsUi.appIdx, 0);
+    press('ArrowLeft');
+    eq('left on an empty catalog stays valid', settingsUi.appIdx, 0);
+
+    state.catalog = keepCat; state.favorites = keepFav;
+    closeSettingsModal();
+    done();
+  });
+  steps.push(function (done) { // an HDMI row changes its device with Right and saves at once
+    var hd = hdmiSettings()[0];
+    if (!hd) { fails.push('no HDMI row in the test catalog'); done(); return; }
+    var keepDev = JSON.parse(JSON.stringify(state.hdmiDevices));
+    openSettingsModal();
+    press('Enter'); // category 0
+    goToRow(hd.id);
+    var before = settingValue(hd), idx = 0;
+    hd.options.forEach(function (o, j) { if (o[0] === before) idx = j; });
+    var want = hd.options[(idx + 1) % hd.options.length][0];
+    press('ArrowRight');
+    eq('hdmi row cycles', state.hdmiDevices[hd.hdmi.id], want);
+    eq('hdmi row saved', JSON.parse(localStorage.getItem('fmtv_hdmi_devices'))[hd.hdmi.id], want);
+    state.hdmiDevices = keepDev; localStorage.setItem('fmtv_hdmi_devices', JSON.stringify(keepDev));
+    closeSettingsModal();
+    done();
+  });
   steps.push(function (done) { // reset needs a second OK
     state.theme = 'day'; localStorage.setItem('fmtv_theme', 'day');
     openSettingsModal();
@@ -922,11 +1007,29 @@ setTimeout(function () {
   });
   steps.push(function (done) { // the idle screensaver does not start while the screen is open; hover only moves focus
     openSettingsModal();
-    var before = settingsUi.catFocus;
+    function move(x, y) { document.dispatchEvent(new MouseEvent('mousemove', { clientX: x, clientY: y, bubbles: true })); }
+    function over(node) { node.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); }
     var cats = modalEl().querySelectorAll('.settings-cat');
-    cats[2].dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    move(101, 201); over(cats[2]);
     eq('hover focuses without rebuilding', modalEl().querySelectorAll('.settings-cat')[2] === cats[2], true);
     eq('hover focus moved', settingsUi.catFocus, 2);
+    var rowsBefore = document.getElementById('settingsRows');
+    move(103, 203); over(cats[2].querySelector('.sc-name')); // a child span re-fires mouseover on the same category
+    eq('same category hover does not rebuild the rows', document.getElementById('settingsRows') === rowsBefore, true);
+    var row = modalEl().querySelector('#settingsRows .settings-row[data-i="1"]');
+    move(640, 300); over(row);
+    eq('row hover after the categories', settingsUi.zone, 'rows');
+    eq('row hover ring', modalEl().querySelector('.sf') === row, true);
+    eq('row hover rebuilt nothing', modalEl().querySelector('#settingsRows .settings-row[data-i="1"]') === row && modalEl().querySelectorAll('.settings-cat')[2] === cats[2], true);
+    move(120, 900); over(modalEl().querySelector('.settings-close'));
+    eq('Close hover from the rows', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:5');
+    press('ArrowUp');
+    eq('key moves focus', settingsUi.catFocus, 4);
+    over(modalEl().querySelectorAll('.settings-cat')[1]);
+    eq('mouseover without a pointer move keeps key focus', settingsUi.catFocus, 4);
+    move(120, 900); over(modalEl().querySelectorAll('.settings-cat')[1]);
+    eq('mousemove at the same spot is not a move', settingsUi.catFocus, 4);
+    cats = modalEl().querySelectorAll('.settings-cat');
     cats[2].click();
     eq('click enters the category', settingsUi.zone, 'rows');
     eq('click selected category', settingsUi.cat, 2);
