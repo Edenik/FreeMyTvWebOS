@@ -153,10 +153,12 @@ Some newer webOS releases block Developer Mode apps from listing installed apps.
 | **TMDB API Key** | Paste a free [TMDB API Key](https://www.themoviedb.org/settings/api) for live weekly trending movies & shows, or leave empty to use the built-in zero-key live popular feed. |
 | **Screensaver Starts After** | Idle time before the screensaver starts: 1, 3, 5, 10 or 30 minutes. Applies to the photo and the black-clock screensaver. |
 | **Ambient Photo Screensaver** | `On` or `Off`. Photos need an Unsplash key and a TV with `fetch` support (webOS 4 or newer); otherwise the black clock is used. |
-| **Photo Duration / Photo Motion** | 30 seconds, 90 seconds or 5 minutes per photo; `Ken Burns (zoom & drift)`, `Drift only` or `None`. High Performance mode always uses no motion. |
+| **Photo Duration / Photo Motion** | 30 seconds, 90 seconds or 5 minutes per photo; `Ken Burns (zoom & drift)`, `Drift only` or `None`. Motion is never frozen by High Performance mode, only by `None`. |
 | **Unsplash Access Key** | Paste the Access Key of a free [Unsplash developer app](https://unsplash.com/developers) (50 requests per hour). The app makes about 5 calls per refresh, at most every 12 hours, and shows "Photo by NAME on Unsplash". It also sends one ping per photo shown, at most 30 per hour. |
 | **Photos on Home Screen** | `Off` (default) or `On`. Shows the same Unsplash photos, slowly moving and dimmed, behind the home screen, with a small "Photo by NAME on Unsplash" credit in the bottom-left corner. Needs the Unsplash key; it pauses while the screensaver is showing. Needs a TV with `fetch` support (webOS 4 or newer). With Motion set to `None`, or in High Performance mode, the photo stays still. |
-| **Keep LG Screensaver Away** | `On` (default) or `Off`. While Free My TV's screensaver is showing, a tiny hidden muted video plays so LG's own screensaver does not cover it. It may also stop the TV's own auto-sleep from firing during that time, so turn it `Off` if you prefer the TV to sleep normally. Older webOS versions without this video feature skip it. |
+| **Photo Brightness** | `Soft`, `Normal` (default) or `Bright`: how strongly the photos show behind the clock. |
+| **Clock Position** | `Bottom Left` (default), `Bottom Right`, `Top Left`, `Top Right` or `Center (drifts slowly)`. In the corners the clock moves only a few pixels (OLED care); in the center it drifts further. |
+| **Keep LG Screensaver Away** | `On` (default) or `Off`. While the app is open, a tiny hidden muted video plays so LG's own screensaver does not cover it (LG's timer can fire before ours). It may also stop the TV's own auto-sleep while Free My TV is open, so turn it `Off` if you prefer the TV to sleep normally. Older webOS versions without this video feature skip it. |
 
 ---
 

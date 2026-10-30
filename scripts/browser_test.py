@@ -63,11 +63,11 @@ setTimeout(function () {
     return true;
   }
   if (need('ambientDim')) {
-    eq('dim black', ambientDim('#000000'), 0.55);
-    eq('dim white', ambientDim('#ffffff'), 0.25);
-    eq('dim mid', ambientDim('#808080'), 0.4);
-    eq('dim bad', ambientDim('nope'), 0.4);
-    eq('dim none', ambientDim(undefined), 0.4);
+    eq('dim black', ambientDim('#000000'), 0.85);
+    eq('dim white', ambientDim('#ffffff'), 0.5);
+    eq('dim mid', ambientDim('#808080'), 0.67);
+    eq('dim bad', ambientDim('nope'), 0.68);
+    eq('dim none', ambientDim(undefined), 0.68);
   }
   if (need('ambientBudgetAllows')) {
     var now = 10000000, recent = [], old = [], i;
@@ -278,7 +278,7 @@ setTimeout(function () {
       var a = document.getElementById('ssPhotoA').style.opacity, b = document.getElementById('ssPhotoB').style.opacity;
       eq('ambient class', isAmbient(), true);
       eq('credit', document.getElementById('screensaverCredit').textContent, t('Photo by %s on Unsplash', 'Ann'));
-      eq('photo visible', a === '0.55' || b === '0.55', true);
+      eq('photo visible', a === '0.85' || b === '0.85', true);
       eq('ping once', calls.filter(function (c) { return c.url.indexOf('/photos/z1/download') !== -1; }).length, 1);
       exitScreensaver();
       eq('ambient removed', isAmbient(), false);
@@ -301,7 +301,7 @@ setTimeout(function () {
     enterScreensaver();
     setTimeout(function () { eq('empty ambient', isAmbient(), false); exitScreensaver(); done(); }, 200);
   });
-  steps.push(function (done) { // motion None and performance mode both leave the photo still
+  steps.push(function (done) { // motion None leaves the photo still; performance mode does not
     seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none'; state.perfMode = 'standard';
     window.fetch = fakeFetch(200, '49', []);
     enterScreensaver();
@@ -313,25 +313,52 @@ setTimeout(function () {
       enterScreensaver();
       setTimeout(function () {
         var other = document.getElementById('ssPhotoB');
-        eq('perf transform', other.style.transform, 'translate(0%, 0%) scale(1.06)');
+        eq('perf keeps motion', /scale\(1\.2\)/.test(other.style.transform), true);
         exitScreensaver();
         state.perfMode = 'standard';
         done();
       }, 400);
     }, 400);
   });
-  steps.push(function (done) { // Ken Burns zooms and drifts within 2.5%
+  steps.push(function (done) { // Photo Brightness scales the opacity (capped at 1); Clock Position sets the overlay class
+    seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none';
+    eq('bright soft', (state.ambientBright = 'soft', ambientBrightness()), 0.75);
+    eq('bright normal', (state.ambientBright = 'normal', ambientBrightness()), 1);
+    eq('bright bright', (state.ambientBright = 'bright', ambientBrightness()), 1.25);
+    state.ambientBright = 'soft';
+    window.fetch = fakeFetch(200, '49', []);
+    enterScreensaver();
+    setTimeout(function () {
+      var a = document.getElementById('ssPhotoA').style.opacity, b = document.getElementById('ssPhotoB').style.opacity;
+      eq('soft opacity', a === '0.64' || b === '0.64', true);
+      exitScreensaver();
+      state.ambientBright = 'normal';
+      var ov = document.getElementById('screensaverOverlay');
+      state.clockPos = 'tr'; applyClockPosition();
+      eq('pos tr', ov.classList.contains('pos-tr') && !ov.classList.contains('pos-bl'), true);
+      state.clockPos = 'br'; applyClockPosition();
+      eq('pos br', ov.classList.contains('pos-br') && !ov.classList.contains('pos-tr'), true);
+      state.clockPos = 'center'; applyClockPosition();
+      eq('pos center', /pos-/.test(ov.className), false);
+      state.clockPos = 'bl'; applyClockPosition();
+      var m = /translate\((-?\d+)px, (-?\d+)px\)/.exec(document.getElementById('screensaverClockWrap').style.transform);
+      eq('corner shift small', !!m && Math.abs(+m[1]) <= 6 && Math.abs(+m[2]) <= 6, true);
+      eq('pos bl', ov.classList.contains('pos-bl'), true);
+      done();
+    }, 400);
+  });
+  steps.push(function (done) { // Ken Burns zooms and drifts within 4%
     seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'kenburns';
     window.fetch = fakeFetch(200, '49', []);
     enterScreensaver();
     setTimeout(function () {
-      var shown = document.getElementById('ssPhotoA').style.opacity === '0.55' ? document.getElementById('ssPhotoA') : document.getElementById('ssPhotoB');
+      var shown = document.getElementById('ssPhotoA').style.opacity === '0.85' ? document.getElementById('ssPhotoA') : document.getElementById('ssPhotoB');
       var m = /translate\((-?[\d.]+)%, (-?[\d.]+)%\) scale\(([\d.]+)\)/.exec(shown.style.transform);
       eq('kb parsed', !!m, true);
       if (m) {
-        eq('kb dx', Math.abs(parseFloat(m[1])) <= 2.5, true);
-        eq('kb dy', Math.abs(parseFloat(m[2])) <= 2.5, true);
-        eq('kb scale', m[3], '1.14');
+        eq('kb dx', Math.abs(parseFloat(m[1])) <= 4, true);
+        eq('kb dy', Math.abs(parseFloat(m[2])) <= 4, true);
+        eq('kb scale', m[3], '1.2');
       }
       exitScreensaver();
       done();
@@ -435,11 +462,11 @@ setTimeout(function () {
     enterScreensaver();
     setTimeout(function () {
       var a = document.getElementById('ssPhotoA'), b = document.getElementById('ssPhotoB');
-      eq('swap first B', b.style.opacity, '0.55');
+      eq('swap first B', b.style.opacity, '0.85');
       eq('swap first A hidden', a.style.opacity === '' || a.style.opacity === '0', true);
       ambientShow();
       setTimeout(function () {
-        eq('swap second A', a.style.opacity, '0.55');
+        eq('swap second A', a.style.opacity, '0.85');
         eq('swap second B', b.style.opacity, '0');
         exitScreensaver();
         done();
@@ -472,7 +499,7 @@ setTimeout(function () {
   }
   if (typeof syncHomePhotos !== 'function') { fails.push('syncHomePhotos missing'); write(); return; }
 
-  steps.push(function (done) { // home photos show dimmed (0.3 for a dark photo), with credit and one ping; Off hides them
+  steps.push(function (done) { // home photos show dimmed (0.47 for a dark photo), with credit and one ping; Off hides them
     seedMany([photo('h1', 'Ann')]);
     state.ambient = 'off'; state.homePhotos = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none'; state.perfMode = 'standard';
     var calls = []; window.fetch = fakeFetch(200, '49', calls);
@@ -480,7 +507,7 @@ setTimeout(function () {
     setTimeout(function () {
       eq('home active', homeActive(), true);
       eq('home credit', homeCredit(), t('Photo by %s on Unsplash', 'Ann'));
-      eq('home dim', homeOpacities().indexOf('0.3') !== -1, true);
+      eq('home dim', homeOpacities().indexOf('0.47') !== -1, true);
       eq('home pings', calls.filter(function (c) { return c.url.indexOf('/photos/h1/download') !== -1; }).length, 1);
       state.homePhotos = 'off';
       syncHomePhotos();
