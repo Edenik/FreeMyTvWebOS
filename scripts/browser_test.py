@@ -260,13 +260,13 @@ setTimeout(function () {
    'Ambient Photo Screensaver', 'Off', 'Photo Duration', '30 seconds', '90 seconds', 'Photo Motion',
    'Ken Burns (zoom & drift)', 'Drift only', 'None', 'Unsplash Access Key (Optional)',
    'Optional for photo screensaver', 'Photo by %s on Unsplash',
-   'Home screen', 'Look & Feel', 'People', 'Language & Location', 'Photos & Screensaver', 'Accounts & Keys', 'Reset & About', 'Close', 'Categories',
+   'Home screen', 'Look & Feel', 'People', 'Language & Location', 'Photos & Screensaver', 'Accounts & Keys', 'Reset & About', 'Close',
    'Shelf apps', 'OK to edit', 'OK to open', 'Not set', 'Saved', 'Reset settings', 'Puts every setting and the shelf back to defaults. People and history stay.',
    'Erase everything on this TV', 'Deletes every person, setting, key and history, then starts first-run setup',
    'Press OK again to erase everything', 'Version', 'Selected', 'Press OK again to confirm',
    'Up / Down: move', 'Left / Right: change value', 'OK: select or edit', 'Back: close', 'Changes apply instantly',
    'Up / Down: move one row', 'OK: add or remove', 'Back: return', 'Enter: save', 'Back: cancel', '%s of 8 selected',
-   'Keep at least one app on the shelf.', 'Previous value', 'Next value',
+   'Keep at least one app on the shelf.', 'Keep at least one grown-up profile', 'Previous value', 'Next value',
    'Dimmed, slowly moving photos behind the dashboard', 'Photos behind the clock when the TV is idle',
    'Plays a hidden video so LG does not cover ours', 'For the photos. Stored on this TV only',
    'Optional, for weekly trending movies and shows', 'Back: categories', 'OK or Right: open'].forEach(function (k) {
@@ -2022,6 +2022,41 @@ setTimeout(function () {
     eq('a lone person is never locked', state.locked, false);
     eq('a lone person gets Customize back', document.getElementById('customizeBtn').offsetParent !== null, true);
     eq('a lone person leaves no profile list', localStorage.getItem('fmtv_profiles'), null);
+    // the last unlocked person cannot be removed, or nobody could reach Customize or Erase
+    saveProfiles([{ id: 'a', name: 'A', color: '#2a7de1', data: personData('A') }, { id: 'b', name: 'B', color: '#1fa05a', data: personData('B', true) }, { id: 'c', name: 'C', color: '#ff9f43', data: personData('C', true) }]);
+    localStorage.setItem('fmtv_active_profile', 'a');
+    applyProfile(personData('A'));
+    eq('last grown-up is not a remove target', removeTargets().map(function (x) { return x.id; }).join(','), 'b,c');
+    removeProfileById('a');
+    eq('last grown-up cannot be removed', readProfiles().length, 3);
+    eq('last grown-up stays active', activeProfileId(), 'a');
+    removeProfileById('b');
+    eq('a locked person can be removed', readProfiles().map(function (x) { return x.id; }).join(','), 'a,c');
+    // moving to a locked person closes Customize
+    openSettingsModal();
+    eq('customize open before the switch', modalOpen, true);
+    switchProfile('c');
+    eq('switching to a locked person closes Customize', modalOpen, false);
+    eq('and hides the modal', document.getElementById('settingsModal').classList.contains('active'), false);
+    switchProfile('a');
+    // the screensaver covers the picker and the wizard, and handing back keeps them as they were
+    var ssOverlay = document.getElementById('screensaverOverlay');
+    openPicker(); picker.focus = 1;
+    enterScreensaver();
+    eq('screensaver over the picker', screensaverOn && ssOverlay.classList.contains('active') && picker.open, true);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    eq('first key only ends the screensaver', screensaverOn, false);
+    eq('picker still open with its focus', picker.open && picker.focus, 1);
+    eq('picker overlay still shown', document.getElementById('profileOverlay').hidden, false);
+    closePicker();
+    openWizard(); wizardGo(1); wizard.focus = 0;
+    var wzStep = wizard.step;
+    enterScreensaver();
+    eq('screensaver over the wizard', screensaverOn && wizard.open, true);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    eq('wizard key ended the screensaver only', screensaverOn, false);
+    eq('wizard keeps step and focus', wizard.open && wizard.step === wzStep && wizard.focus, 0);
+    closeWizard();
     // clean up
     localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
     applyProfile(orig);
