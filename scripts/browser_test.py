@@ -259,16 +259,16 @@ setTimeout(function () {
    'Ambient Photo Screensaver', 'Off', 'Photo Duration', '30 seconds', '90 seconds', 'Photo Motion',
    'Ken Burns (zoom & drift)', 'Drift only', 'None', 'Unsplash Access Key (Optional)',
    'Optional for photo screensaver', 'Photo by %s on Unsplash',
-   'Home screen', 'Look & Feel', 'People', 'Language & Location', 'Photos & Screensaver', 'Accounts & Keys', 'Reset & About', 'Close',
-   'Shelf apps', 'OK to edit', 'OK to open', 'Not set', 'Saved', 'Reset settings', 'Puts every setting and the shelf back to defaults. People and history stay.',
+   'Home screen', 'Look & Feel', 'People', 'Language & Location', 'Photos & Screensaver', 'Accounts & Keys', 'Reset & About', 'Close', 'More options',
+   'Shelf apps', 'Not set', 'Saved', 'Reset settings', 'Puts every setting and the shelf back to defaults. People and history stay.',
    'Erase everything on this TV', 'Deletes every person, setting, key and history, then starts first-run setup',
    'Press OK again to erase everything', 'Version', 'Selected', 'Press OK again to confirm',
-   'Up / Down: move', 'Left / Right: change value', 'OK: select or edit', 'Back: close', 'Changes apply instantly',
+   'OK switch · Back close', 'Left / Right change · Back close', 'OK edit · Back close', 'OK open · Back close', 'Back close',
    'Up / Down: move one row', 'OK: add or remove', 'Back: return', 'Enter: save', 'Back: cancel', '%s of 8 selected',
-   'Keep at least one app on the shelf.', 'Keep at least one grown-up profile', 'Previous value', 'Next value',
+   'Keep at least one app on the shelf.', 'Keep at least one grown-up profile',
    'Dimmed, slowly moving photos behind the dashboard', 'Photos behind the clock when the TV is idle',
    'Plays a hidden video so LG does not cover ours', 'For the photos. Stored on this TV only',
-   'Optional, for weekly trending movies and shows', 'Back: categories', 'OK or Right: open'].forEach(function (k) {
+   'Optional, for weekly trending movies and shows'].forEach(function (k) {
     if (!Object.prototype.hasOwnProperty.call(I18N.pt, k)) out.ambient.push('no translation: ' + k);
   });
   var pre = document.createElement('pre');
@@ -1057,7 +1057,7 @@ setTimeout(function () {
     return a.top >= b.top - 1 && a.bottom <= b.bottom + 1;
   }
   function rowIndexOf(id) {
-    var rows = settingsForCategory(settingsUi.cat);
+    var rows = settingsRowsFor(settingsUi.cat);
     for (var i = 0; i < rows.length; i++) if (rows[i].id === id) return i;
     return -1;
   }
@@ -1078,9 +1078,9 @@ setTimeout(function () {
     eq('down x4 selects category 4', settingsUi.cat, 4);
     eq('rows show that category', !!modalEl().querySelector('.settings-row[data-id="homePhotos"]'), true);
     press('ArrowDown'); press('ArrowDown'); press('ArrowDown');
-    eq('down reaches Close', settingsUi.catFocus, 7);
+    eq('down reaches the last group', settingsUi.catFocus, 6);
     press('ArrowDown');
-    eq('no wrap past Close', settingsUi.catFocus, 7);
+    eq('no wrap past the last group', settingsUi.catFocus, 6);
     for (var u = 0; u < 9; u++) press('ArrowUp');
     eq('no wrap above first', settingsUi.catFocus, 0);
     eq('fr key hint feminine', I18N.fr['For the photos. Stored on this TV only'].indexOf('Stockée uniquement sur cette TV') !== -1, true);
@@ -1090,7 +1090,7 @@ setTimeout(function () {
     eq('de confirm', I18N.de['Press OK again to confirm'], 'Zum Bestätigen erneut OK drücken');
     press('ArrowLeft');
     eq('left in categories is a no-op', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:0');
-    eq('cats hints', document.getElementById('settingsHints').textContent.indexOf(t('OK or Right: open')) !== -1, true);
+    eq('cats hints', document.getElementById('settingsHints').textContent, t('OK open · Back close'));
     var catNode = modalEl().querySelectorAll('.settings-cat')[1];
     press('ArrowDown');
     eq('category keys do not rebuild the category list', modalEl().querySelectorAll('.settings-cat')[1] === catNode, true);
@@ -1115,11 +1115,11 @@ setTimeout(function () {
     press('Enter');
     eq('OK cycles forward', state.idleMins, '3');
     eq('still one focus mark', sfCount(), 1);
-    eq('rows hints', document.getElementById('settingsHints').textContent.indexOf(t('Back: categories')) !== -1, true);
-    modalEl().querySelector('.settings-row[data-id="idleMins"] .sr-arrow[data-dir="1"]').click();
-    eq('arrow click changes once', state.idleMins, '5');
+    eq('rows hints', document.getElementById('settingsHints').textContent, t('Left / Right change · Back close'));
     modalEl().querySelector('.settings-row[data-id="idleMins"] .sr-value').click();
-    eq('clicking the value acts like OK', state.idleMins, '10');
+    eq('clicking the value acts like OK', state.idleMins, '5');
+    modalEl().querySelector('.settings-row[data-id="idleMins"] .sr-chevron').click();
+    eq('clicking the chevron acts like OK', state.idleMins, '10');
     setSettingValue(findSetting('idleMins'), '3');
     done();
   });
@@ -1130,15 +1130,13 @@ setTimeout(function () {
     eq('back from cats closes', modalOpen, false);
     openSettingsModal();
     settingsUi.cat = 4; settingsUi.catFocus = 4; renderSettings(); press('Enter');
-    goToRow('keepAwake'); // then up past the first row
+    goToRow('moreOptions'); // then up past the first row
     var guard = 20; while (settingsUi.row > 0 && guard--) press('ArrowUp');
     eq('first row reached', settingsUi.row, 0);
     press('ArrowUp');
     eq('Up from the first row returns to the category list', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:4');
-    press('ArrowDown'); press('ArrowDown'); press('ArrowDown');
-    eq('arrows reach Close', settingsUi.catFocus, 7);
-    press('Enter');
-    eq('Close item closes', modalOpen, false);
+    press('Escape');
+    eq('Back from the group list closes', modalOpen, false);
     done();
   });
   steps.push(function (done) { // text rows: inline editor, commit, cancel; secrets are masked everywhere
@@ -1321,6 +1319,152 @@ setTimeout(function () {
     state.catalog = keepCat;
     closeSettingsModal();
     renderAppsShelf();
+    done();
+  });
+  steps.push(function (done) { // full-screen settings page: shell, switches, value rows, More options, hint bar
+    var MAX_FIVE_ROWS_ENABLED = false; // Task 3 sets this to true once the four groups hold at most five rows each
+    function pageOf(cat, more) { settingsUi.cat = cat; settingsUi.catFocus = cat; settingsUi.zone = 'rows'; settingsUi.row = 0; settingsUi.more = !!more; renderSettings(); }
+    function px(n) { return Math.round(n) + 'px'; }
+    openSettingsModal();
+    var m = modalEl(), r = m.getBoundingClientRect(), cs = getComputedStyle(m);
+    eq('settings root is full viewport', Math.round(r.width) + 'x' + Math.round(r.height) + '@' + Math.round(r.left) + ',' + Math.round(r.top), window.innerWidth + 'x' + window.innerHeight + '@0,0');
+    eq('settings background', cs.backgroundColor, 'rgb(15, 17, 21)');
+    eq('settings padding', cs.paddingTop + ' ' + cs.paddingRight + ' ' + cs.paddingBottom + ' ' + cs.paddingLeft, '84px 96px 60px 96px');
+    eq('no close button', m.querySelectorAll('.settings-close').length, 0);
+    eq('no Close text button', [].filter.call(m.querySelectorAll('button'), function (b) { return b.textContent === t('Close'); }).length, 0);
+    eq('no header row', m.querySelectorAll('.settings-head').length, 0);
+    var title = document.getElementById('settingsTitle');
+    eq('title text', title.textContent, t('Settings'));
+    eq('title size', getComputedStyle(title).fontSize, '54px');
+    var cat0 = m.querySelector('.settings-cat');
+    eq('group row height', px(cat0.getBoundingClientRect().height), '84px');
+    eq('group row text', getComputedStyle(cat0).fontSize, '30px');
+    eq('group list has no count chips', m.querySelectorAll('.sc-count').length, 0);
+    eq('current group background', getComputedStyle(cat0).backgroundColor, 'rgba(255, 255, 255, 0.1)');
+    eq('left column width', px(m.querySelector('.settings-left').getBoundingClientRect().width), '450px');
+    var ver = document.getElementById('appVersion');
+    eq('version line', ver.textContent, 'Free My TV ' + APP_VERSION);
+    eq('version size', getComputedStyle(ver).fontSize, '21px');
+    eq('version sits at the bottom of the left column', Math.abs(ver.getBoundingClientRect().bottom - (window.innerHeight - 60)) <= 2, true);
+
+    // value rows: 114px minimum, 30px label, 22px hint
+    pageOf(4, false);
+    var idle = m.querySelector('.settings-row[data-id="idleMins"]');
+    eq('row min height', getComputedStyle(idle).minHeight, '114px');
+    eq('row label size', getComputedStyle(idle.querySelector('.sr-label')).fontSize, '30px');
+    var hinted = m.querySelector('.settings-row[data-id="homePhotos"] .sr-hint');
+    eq('row hint size', hinted && getComputedStyle(hinted).fontSize, '22px');
+    eq('choice row shows value and chevron', idle.querySelector('.sr-value').textContent + '|' + (idle.querySelector('.sr-chevron') || {}).textContent, t('3 minutes') + '|›');
+    eq('choice row has no switch', idle.querySelectorAll('.sr-switch').length, 0);
+    eq('no arrow buttons anywhere', m.querySelectorAll('.sr-arrow').length, 0);
+
+    // every on/off setting is a switch, on every page
+    var swCount = 0;
+    for (var c = 0; c < 7; c++) {
+      [false, true].forEach(function (more) {
+        pageOf(c, more);
+        SETTINGS.forEach(function (d) {
+          if (d.type !== 'choice' || !d.field || (d.cat !== c)) return;
+          if (d.show && !d.show()) return;
+          if (!!d.more !== more) return;
+          var row = m.querySelector('.settings-row[data-id="' + d.id + '"]');
+          var sw = row && row.querySelector('.sr-switch');
+          var vals = d.options.map(function (o) { return o[0]; }).sort().join(',');
+          if (vals === 'off,on') {
+            swCount++;
+            if (!sw) { fails.push('switch missing for ' + d.id); return; }
+            var kn = sw.querySelector('.sr-knob'), sr = sw.getBoundingClientRect();
+            var isOn = state[d.field] === 'on';
+            var bg = getComputedStyle(sw).backgroundColor;
+            if (Math.round(sr.width) !== 78 || Math.round(sr.height) !== 45 || !kn || Math.round(kn.getBoundingClientRect().width) !== 36) fails.push('switch size ' + d.id);
+            if (bg !== (isOn ? 'rgb(60, 130, 246)' : 'rgb(58, 65, 78)')) fails.push('switch colour ' + d.id + ' ' + bg);
+            if (row.querySelector('.sr-chevron') || row.querySelector('.sr-arrow')) fails.push('switch row has chevron/arrows ' + d.id);
+          } else if (sw) { fails.push('non on/off row rendered as a switch: ' + d.id); }
+        });
+      });
+    }
+    eq('switch rows found (ambient, nightDim, keepAwake, ...)', swCount >= 6, true);
+    eq('isSwitchSetting helper agrees', isSwitchSetting(findSetting('ambient')) + ':' + isSwitchSetting(findSetting('idleMins')) + ':' + isSwitchSetting(findSetting('homePhotos')), 'true:false:true');
+
+    // OK and Left/Right both flip a switch; a click flips it too
+    pageOf(4, false);
+    state.ambient = 'on'; renderSettings(); goToRow('ambient');
+    press('Enter');
+    eq('OK flips the switch', state.ambient + ':' + localStorage.getItem('fmtv_ambient'), 'off:off');
+    eq('switch repaints', m.querySelector('.settings-row[data-id="ambient"] .sr-switch').className.indexOf('on') !== -1, false);
+    press('ArrowRight');
+    eq('Right flips the switch back', state.ambient, 'on');
+    press('ArrowLeft');
+    eq('Left flips the switch', state.ambient, 'off');
+    m.querySelector('.settings-row[data-id="ambient"]').click();
+    eq('click flips the switch', state.ambient, 'on');
+
+    // hint bar per row type
+    eq('switch hint', document.getElementById('settingsHints').textContent, t('OK switch · Back close'));
+    goToRow('idleMins');
+    eq('choice hint', document.getElementById('settingsHints').textContent, t('Left / Right change · Back close'));
+    pageOf(3, false); goToRow('city');
+    eq('text hint', document.getElementById('settingsHints').textContent, t('OK edit · Back close'));
+    pageOf(0, false); goToRow('shelf');
+    eq('link hint', document.getElementById('settingsHints').textContent, t('OK open · Back close'));
+    pageOf(6, false); goToRow('runSetup');
+    eq('run hint', document.getElementById('settingsHints').textContent, t('OK open · Back close'));
+    eq('hint bar has no "apply instantly"', document.getElementById('settingsHints').textContent.indexOf('apply instantly'), -1);
+    eq('hint bar is one line', document.getElementById('settingsHints').getBoundingClientRect().height < 40, true);
+
+    // More options: a flagged row leaves the group page and a synthetic row opens a sub-page
+    eq('keepAwake is flagged more', findSetting('keepAwake').more, true);
+    var main4 = settingsRowsFor(4).map(function (d) { return d.id; });
+    eq('keepAwake not on the group page', main4.indexOf('keepAwake'), -1);
+    eq('group page ends with More options', main4[main4.length - 1], 'moreOptions');
+    eq('settingsForCategory still lists every row', settingsForCategory(4).some(function (d) { return d.id === 'keepAwake'; }), true);
+    eq('groups without more rows get no More options', settingsRowsFor(6).some(function (d) { return d.id === 'moreOptions'; }), false);
+    settingsUi.zone = 'cats'; settingsUi.cat = 4; settingsUi.catFocus = 4; settingsUi.more = false; renderSettings();
+    press('Enter');
+    goToRow('moreOptions');
+    var moreRow = m.querySelector('.settings-row[data-id="moreOptions"]');
+    eq('More options hint lists the hidden labels', moreRow.querySelector('.sr-hint').textContent, moreOptionsHint(4));
+    eq('hint names the hidden row', moreRow.querySelector('.sr-hint').textContent, t('Keep LG Screensaver Away'));
+    eq('More options row has a chevron', !!moreRow.querySelector('.sr-chevron'), true);
+    eq('More options hint bar', document.getElementById('settingsHints').textContent, t('OK open · Back close'));
+    press('Enter');
+    eq('OK opens the sub-page', settingsUi.more + ':' + settingsUi.zone, 'true:rows');
+    var mt = document.getElementById('settingsMoreTitle');
+    eq('sub-page title', mt && mt.textContent, t('More options'));
+    eq('sub-page shows the hidden row', !!m.querySelector('.settings-row[data-id="keepAwake"]'), true);
+    eq('sub-page hides the group rows', !!m.querySelector('.settings-row[data-id="homePhotos"]'), false);
+    eq('sub-page focus on the first row', settingsUi.row, 0);
+    press('Enter');
+    eq('switch inside the sub-page flips', state.keepAwake, 'off');
+    press('Enter');
+    eq('and back', state.keepAwake, 'on');
+    press('Escape');
+    eq('Back returns to the group page', settingsUi.more + ':' + settingsUi.zone, 'false:rows');
+    eq('Back focuses More options', m.querySelector('.settings-row.sf').getAttribute('data-id'), 'moreOptions');
+    eq('modal still open after Back from sub-page', modalOpen, true);
+    press('Enter'); press('ArrowUp');
+    eq('Up from the first sub-page row goes to the group list', settingsUi.zone + ':' + settingsUi.more + ':' + settingsUi.catFocus, 'cats:false:4');
+    press('Enter'); goToRow('moreOptions'); press('Enter');
+    settingsPointerLive = true;
+    m.querySelector('.settings-cat[data-i="1"]').onmouseover();
+    eq('hovering another group leaves the sub-page', settingsUi.more + ':' + settingsUi.cat, 'false:1');
+    closeSettingsModal();
+    openSettingsModal();
+    eq('reopening starts on the group page', settingsUi.more, false);
+    closeSettingsModal();
+
+    // Erase / Reset still ask twice inside the new page
+    openSettingsModal(); pageOf(6, false); goToRow('reset'); press('Enter');
+    eq('reset asks', settingsUi.confirmReset, 'reset');
+    press('ArrowDown');
+    eq('moving away cancels the ask', settingsUi.confirmReset, false);
+    closeSettingsModal();
+
+    // five rows per group: switched on by Task 3
+    for (var g = 0; g < 7; g++) {
+      if (MAX_FIVE_ROWS_ENABLED) eq('group ' + g + ' shows at most five rows', settingsRowsFor(g).length <= 5, true);
+    }
+    eq('max-five check is pending until Task 3', MAX_FIVE_ROWS_ENABLED, false);
     done();
   });
   steps.push(function (done) { // the greeting shows the name and the part of the day
@@ -1552,9 +1696,7 @@ setTimeout(function () {
     eq('version row shows the version', settingsRowsFor(6)[3].value(), APP_VERSION);
 
     openSettingsModal();
-    var counts = [].map.call(modalEl().querySelectorAll('.settings-cat .sc-count'), function (n) { return n.textContent; });
-    eq('seven category chips with counts', counts.length, 7);
-    eq('chip counts follow the schema', counts.join(','), [0, 1, 2, 3, 4, 5, 6].map(function (c) { return String(settingsRowsFor(c).length); }).join(','));
+    eq('seven groups in the list', modalEl().querySelectorAll('.settings-cat').length, 7);
     for (var c = 0; c < 7; c++) {
       settingsUi.zone = 'cats'; settingsUi.catFocus = c; settingsUi.cat = c; renderSettings();
       press('ArrowRight');
@@ -1575,8 +1717,8 @@ setTimeout(function () {
       eq('group ' + c + ' Up from the first row leaves for the categories', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:' + c);
     }
     eq('no note in the left column', modalEl().querySelector('#settingsNote') === null && modalEl().querySelectorAll('#settingsCats .settings-note').length, 0);
-    var clr = modalEl().querySelector('.settings-close').getBoundingClientRect(), hr = document.getElementById('settingsHints').getBoundingClientRect();
-    eq('Close ends above the hint bar', clr.bottom <= hr.top - 4, true);
+    var lastGroup = modalEl().querySelectorAll('.settings-cat')[6].getBoundingClientRect(), vr = document.getElementById('appVersion').getBoundingClientRect();
+    eq('the version line sits below the last group', lastGroup.bottom <= vr.top, true);
     settingsUi.zone = 'cats'; settingsUi.catFocus = 6; settingsUi.cat = 6; renderSettings();
     var aboutRow = modalEl().querySelector('#settingsRows .settings-row[data-id="about"]');
     eq('About row holds the independence note', !!aboutRow && aboutRow.textContent.indexOf(t('Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.')) !== -1, true);
@@ -1643,14 +1785,14 @@ setTimeout(function () {
     eq('row hover after the categories', settingsUi.zone, 'rows');
     eq('row hover ring', modalEl().querySelector('.sf') === row, true);
     eq('row hover rebuilt nothing', modalEl().querySelector('#settingsRows .settings-row[data-i="1"]') === row && modalEl().querySelectorAll('.settings-cat')[2] === cats[2], true);
-    move(120, 900); over(modalEl().querySelector('.settings-close'));
-    eq('Close hover from the rows', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:7');
+    move(120, 900); over(modalEl().querySelectorAll('.settings-cat')[6]);
+    eq('last group hover from the rows', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:6');
     press('ArrowUp');
-    eq('key moves focus', settingsUi.catFocus, 6);
+    eq('key moves focus', settingsUi.catFocus, 5);
     over(modalEl().querySelectorAll('.settings-cat')[1]);
-    eq('mouseover without a pointer move keeps key focus', settingsUi.catFocus, 6);
+    eq('mouseover without a pointer move keeps key focus', settingsUi.catFocus, 5);
     move(120, 900); over(modalEl().querySelectorAll('.settings-cat')[1]);
-    eq('mousemove at the same spot is not a move', settingsUi.catFocus, 6);
+    eq('mousemove at the same spot is not a move', settingsUi.catFocus, 5);
     cats = modalEl().querySelectorAll('.settings-cat');
     cats[2].click();
     eq('click enters the category', settingsUi.zone, 'rows');
