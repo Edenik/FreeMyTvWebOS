@@ -153,6 +153,8 @@ setTimeout(function () {
     eq('shape partial', ambientShape({ id: 'x' }), null);
     eq('shape null', ambientShape(null), null);
   }
+  var bootFocus = document.querySelector('.nav-item.focused');
+  eq('boot focus starts on the first app tile', !!bootFocus && bootFocus.classList.contains('app-tile'), true);
   eq('state ambient', state.ambient, 'on');
   eq('state secs', state.ambientSecs, '90');
   eq('state motion', state.ambientMotion, 'drift');
@@ -1436,6 +1438,54 @@ setTimeout(function () {
     eq('scenes hidden when off', document.getElementById('scenesRow').hidden, true);
     state.scenes = 'on'; renderScenes();
     window.webOS = oldWebOS;
+    done();
+  });
+
+  steps.push(function (done) { // a launch that does not happen never leaves the scene look behind
+    var oldWebOS = window.webOS, keepPending = pendingLaunch, keepEdit = shelfEdit;
+    function reset() { state.theme = 'auto'; state.homePhotos = 'on'; localStorage.removeItem('fmtv_scene_restore'); pendingLaunch = null; shelfEdit = false; }
+    function untouched(label) {
+      eq(label + ' theme', state.theme, 'auto'); eq(label + ' photos', state.homePhotos, 'on');
+      eq(label + ' no restore key', localStorage.getItem('fmtv_scene_restore'), null);
+    }
+    pendingLaunch = null;
+    reset(); window.webOS = { service: { request: function (uri, o) { o.onFailure({ errorText: 'nope' }); } } };
+    runScene('movie'); untouched('failed launch (sync)');
+    reset(); window.webOS = { service: { request: function (uri, o) { setTimeout(function () { o.onFailure({ errorText: 'nope' }); }, 20); } } };
+    runScene('movie');
+    eq('look applied while the request is open', state.theme, 'oled');
+    setTimeout(function () {
+      untouched('failed launch (async)');
+      reset(); window.webOS = { service: { request: function () {} } };
+      pendingLaunch = { timer: null };
+      runScene('movie'); untouched('pending launch');
+      pendingLaunch = null; shelfEdit = true;
+      runScene('movie'); untouched('shelf edit');
+      shelfEdit = false; window.webOS = undefined;
+      runScene('movie'); untouched('no webOS');
+      var sets = 0, realSet = Storage.prototype.setItem;
+      window.webOS = { service: { request: function () {} } };
+      Storage.prototype.setItem = function (k, v) { if (k === 'fmtv_scene_restore') throw new Error('full'); return realSet.call(this, k, v); };
+      runScene('movie');
+      Storage.prototype.setItem = realSet;
+      untouched('restore key cannot be saved');
+      reset(); window.webOS = oldWebOS; pendingLaunch = keepPending; shelfEdit = keepEdit;
+      done();
+    }, 150);
+  });
+
+  steps.push(function (done) { // chips follow the language and Reset
+    var keepLang = state.lang, other = keepLang === 'de' ? 'fr' : 'de';
+    state.lang = other; applyStaticTranslations(); renderAppsShelf();
+    var first = document.querySelector('#scenesRow .scene-chip span');
+    eq('chip text follows language', first && first.textContent, t('Movie night'));
+    state.lang = keepLang; applyStaticTranslations(); renderAppsShelf();
+    state.scenes = 'off'; renderScenes();
+    eq('scenes off hides row', document.getElementById('scenesRow').hidden, true);
+    resetAllSettings();
+    eq('reset shows the row again', document.getElementById('scenesRow').hidden, false);
+    eq('reset chips present', document.querySelectorAll('#scenesRow .scene-chip').length, SCENES.length);
+    state.lang = keepLang;
     done();
   });
 

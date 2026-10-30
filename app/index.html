@@ -2456,6 +2456,7 @@
                 showToast(message, 5000);
             }
             function failure(error) {
+                restoreScene(); // a scene's look goes back when its app did not open
                 var detail = error && error.errorText || '';
                 if (/not installed|not found|does not exist|unknown app/i.test(detail)) {
                     finish(t('%s is not installed or is unavailable on this TV.', title));
@@ -2486,6 +2487,7 @@
             }
             showToast(t('Opening %s…', title), 8000);
             request.timer = setTimeout(function() {
+                if (pendingLaunch === request) restoreScene();
                 finish(t('No response opening %s. Please try again.', title));
             }, 8000);
             try {
@@ -2561,21 +2563,24 @@
         function settingDef(id) { return arrFind(SETTINGS, function(d) { return d.id === id; }); }
 
         // Saved as { field: { from: valueBefore, to: valueTheSceneSet } }.
+        // The look changes only after the launch request is really under way, and only if the way back is saved.
         function runScene(id) {
             var scene = arrFind(SCENES, function(s) { return s.id === id; });
             if (!scene) return;
+            if (shelfEdit || pendingLaunch) return;
             var app = pickSceneApp(scene.open, readLaunchHist(), state.catalog, state.hdmiDevices);
             if (!app) { showToast(t('Name a device on an HDMI input in Customize first'), 4000); return; }
             restoreScene(); // a scene left over from a closed app goes back first, so "from" is always the user's own value
+            var canLaunch = !!(window.webOS && window.webOS.service && typeof window.webOS.service.request === 'function');
+            launchApp(app.id);
+            if (!canLaunch || !pendingLaunch) return; // nothing opened (or it already failed): leave the look alone
             var restore = {};
             Object.keys(scene.look).forEach(function(field) {
                 if (state[field] !== scene.look[field]) { restore[field] = { from: state[field], to: scene.look[field] }; }
             });
-            if (Object.keys(restore).length) {
-                try { localStorage.setItem('fmtv_scene_restore', JSON.stringify(restore)); } catch (e) {}
-                Object.keys(restore).forEach(function(field) { var def = settingDef(field); if (def) setSettingValue(def, restore[field].to); });
-            }
-            launchApp(app.id);
+            if (!Object.keys(restore).length) return;
+            try { localStorage.setItem('fmtv_scene_restore', JSON.stringify(restore)); } catch (e) { return; } // no way back: do not change the look
+            Object.keys(restore).forEach(function(field) { var def = settingDef(field); if (def) setSettingValue(def, restore[field].to); });
         }
 
         // When the app comes back to the front (or starts again), put the look back the way it was before the scene.
@@ -2591,7 +2596,7 @@
             });
         }
 
-        function renderScenes() {
+        function renderScenes(quiet) {
             var row = document.getElementById('scenesRow');
             row.innerHTML = '';
             row.hidden = state.scenes === 'off';
@@ -2611,7 +2616,7 @@
                     row.appendChild(chip);
                 });
             }
-            refreshMainNavList();
+            if (!quiet) refreshMainNavList(); // renderAppsShelf passes quiet: renderPickup refreshes right after
         }
 
         function renderPickup() {
@@ -2695,6 +2700,7 @@
             });
 
             document.getElementById('shelfCountHint').textContent = shelfEdit ? (movingTileId ? t('← / → Move • OK Place • Back Cancel') : t('Select a tile • OK Pick up • Done to save')) : t('%s Apps • Instant Launch', favItems.length);
+            renderScenes(true); // also follows language changes and Reset
             renderPickup(); // keeps the pick-up row in step with the catalog; it also refreshes the nav list
         }
 
@@ -3995,7 +4001,7 @@
         // In the background (another app launched): stop downloading, pinging and holding the TV awake.
         function onVisibilityChange() {
             if (document.hidden) { if (screensaverOn) exitScreensaver(); syncHomePhotos(); keepAwakeStop(); }
-            else { lastActivity = Date.now(); restoreScene(); renderScenes(); renderPickup(); syncHomePhotos(); keepAwakeSync(); }
+            else { lastActivity = Date.now(); restoreScene(); renderPickup(); syncHomePhotos(); keepAwakeSync(); }
         }
         document.addEventListener('visibilitychange', onVisibilityChange);
 
@@ -4102,7 +4108,6 @@
         applyTextSize();
         applyTrendingClass();
         restoreScene();
-        renderScenes();
         renderAppsShelf();
         renderPicks(FALLBACK_MOVIES);
         applyTheme();
