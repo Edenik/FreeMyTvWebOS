@@ -284,11 +284,8 @@
 
         /* Top Shelf Hero Details */
         .hero-shelf {
-            height: auto;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            transition: all 0.3s ease;
         }
 
         .greeting { margin-bottom: 12px; }
@@ -296,7 +293,7 @@
         .greeting-title { font-size: 44px; line-height: 1.08; font-weight: 700; margin-top: 4px; }
         .greeting-sub { font-size: 18px; color: var(--text-secondary); margin-top: 6px; }
         .greeting-sub:empty { display: none; }
-        .hero-desc { display: none; }
+        .hero-desc { display: none; } /* the node stays in the DOM: setMainFocus writes to it */
 
         .hero-tag {
             font-size: 13px;
@@ -315,17 +312,20 @@
             line-height: 1.1;
         }
 
-        .hero-desc {
-            font-size: 16px;
-            font-weight: 400;
-            color: var(--text-secondary);
-            max-width: 820px;
-            line-height: 1.4;
-            display: none; /* kept in the DOM: setMainFocus still writes to it */
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+        /* Pick up where you left off: compact cards, name and time overlaid on the art */
+        .pickup-section { margin-bottom: 14px; }
+        .pickup-header { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+        .pickup-row { display: flex; gap: 14px; }
+        .pickup-card { width: 300px; background: none; border: 0; padding: 0; color: inherit; text-align: left; cursor: pointer; font-family: inherit; position: relative; transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: 14px; }
+        .pickup-section[hidden] { display: none; }
+        .pickup-art { width: 300px; height: 110px; border-radius: 14px; overflow: hidden; position: relative; }
+        .pickup-art .app-icon { width: 100%; height: 100%; border-radius: 0; }
+        .pickup-art .app-icon img.tile-brand-logo { width: 46%; height: 58%; left: 27%; top: 8px; }
+        .pickup-art .app-art-fallback { font-size: 22px; padding-bottom: 28px; }
+        .pickup-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 12px 8px; background: linear-gradient(to top, rgba(0,0,0,.78), rgba(0,0,0,0)); }
+        .pickup-name { font-size: 16px; font-weight: 600; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pickup-when { font-size: 13px; color: rgba(255,255,255,.78); line-height: 1.2; }
+        .pickup-card.focused { transform: scale(1.06); box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 30px rgba(255,255,255,.25); }
 
         /* Glass App Shelf */
         .shelf-wrapper {
@@ -1216,6 +1216,12 @@
             <div class="hero-desc" id="heroDesc">Navigate smoothly with Magic Remote D-Pad or pointer. Launch apps in 100ms with zero ads.</div>
         </div>
 
+        <!-- Pick up where you left off -->
+        <div class="pickup-section" id="pickupSection" hidden>
+            <div class="pickup-header">Pick up where you left off</div>
+            <div class="pickup-row" id="pickupRow"></div>
+        </div>
+
         <!-- Glass Shelf: Apps -->
         <div class="shelf-wrapper">
             <div class="shelf-top-bar">
@@ -1451,6 +1457,7 @@
             userName: localStorage.getItem('fmtv_user_name') || '',
             catalog: DEFAULT_CATALOG.slice(),
             showTrending: localStorage.getItem('fmtv_show_trending') || 'on',
+            pickup: localStorage.getItem('fmtv_pickup') || 'on',
             picksTab: 'movies',
             hourlyForecast: [],
             sunrise: '',
@@ -1538,7 +1545,7 @@
                 'Up / Down: move one row': 'Cima / Baixo: mover uma linha', 'OK: add or remove': 'OK: adicionar ou remover', 'Back: return': 'Voltar: retornar',
                 'Enter: save': 'Enter: salvar', 'Back: cancel': 'Voltar: cancelar', '%s of 8 selected': '%s de 8 selecionados',
                 'Keep at least one app on the shelf.': 'Mantenha pelo menos um app na prateleira.', 'Previous value': 'Valor anterior', 'Next value': 'Próximo valor',
-                'Show the movies and shows row on the home screen': 'Mostrar a linha de filmes e séries na tela inicial', 'Good morning': 'Bom dia', 'Good afternoon': 'Boa tarde', 'Good evening': 'Boa noite', 'Good night': 'Boa madrugada', 'Your Name': 'Seu Nome', 'e.g. Noa': 'ex.: Noa', 'Used in the greeting on the home screen': 'Usado na saudação da tela inicial', 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posição do Relógio', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Photo Brightness': 'Brilho das Fotos', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Photos behind the clock when the TV is idle': 'Fotos atrás do relógio quando a TV está ociosa', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
+                'Show the movies and shows row on the home screen': 'Mostrar a linha de filmes e séries na tela inicial', 'Good morning': 'Bom dia', 'Good afternoon': 'Boa tarde', 'Good evening': 'Boa noite', 'Good night': 'Boa madrugada', 'Your Name': 'Seu Nome', 'e.g. Noa': 'ex.: Noa', 'Used in the greeting on the home screen': 'Usado na saudação da tela inicial', 'Pick up where you left off': 'Continue de onde parou', 'Today, %s': 'Hoje, %s', 'Yesterday, %s': 'Ontem, %s', 'Pick-up Row': 'Linha Continuar', 'Shows the apps you opened last, above the shelf': 'Mostra os apps abertos por último, acima da prateleira', 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posição do Relógio', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Photo Brightness': 'Brilho das Fotos', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Photos behind the clock when the TV is idle': 'Fotos atrás do relógio quando a TV está ociosa', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
                 'For the photos. Stored on this TV only': 'Para as fotos. Guardada só nesta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para filmes e séries em alta da semana', 'Back: categories': 'Voltar: categorias',
                 'OK or Right: open': 'OK ou Direita: abrir'
             },
@@ -1614,7 +1621,7 @@
                 'Up / Down: move one row': 'Arriba / Abajo: mover una fila', 'OK: add or remove': 'OK: añadir o quitar', 'Back: return': 'Atrás: volver',
                 'Enter: save': 'Enter: guardar', 'Back: cancel': 'Atrás: cancelar', '%s of 8 selected': '%s de 8 seleccionadas',
                 'Keep at least one app on the shelf.': 'Deja al menos una app en el estante.', 'Previous value': 'Valor anterior', 'Next value': 'Valor siguiente',
-                'Show the movies and shows row on the home screen': 'Mostrar la fila de películas y series en la pantalla de inicio', 'Good morning': 'Buenos días', 'Good afternoon': 'Buenas tardes', 'Good evening': 'Buenas noches', 'Good night': 'Buenas noches', 'Your Name': 'Tu Nombre', 'e.g. Noa': 'p. ej. Noa', 'Used in the greeting on the home screen': 'Se usa en el saludo de la pantalla de inicio', 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posición del Reloj', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Photo Brightness': 'Brillo de las Fotos', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Photos behind the clock when the TV is idle': 'Fotos tras el reloj cuando la TV está inactiva', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
+                'Show the movies and shows row on the home screen': 'Mostrar la fila de películas y series en la pantalla de inicio', 'Good morning': 'Buenos días', 'Good afternoon': 'Buenas tardes', 'Good evening': 'Buenas noches', 'Good night': 'Buenas noches', 'Your Name': 'Tu Nombre', 'e.g. Noa': 'p. ej. Noa', 'Used in the greeting on the home screen': 'Se usa en el saludo de la pantalla de inicio', 'Pick up where you left off': 'Sigue donde lo dejaste', 'Today, %s': 'Hoy, %s', 'Yesterday, %s': 'Ayer, %s', 'Pick-up Row': 'Fila Seguir viendo', 'Shows the apps you opened last, above the shelf': 'Muestra las últimas apps abiertas, sobre el estante', 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posición del Reloj', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Photo Brightness': 'Brillo de las Fotos', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Photos behind the clock when the TV is idle': 'Fotos tras el reloj cuando la TV está inactiva', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
                 'For the photos. Stored on this TV only': 'Para las fotos. Se guarda solo en esta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para las películas y series en tendencia de la semana', 'Back: categories': 'Atrás: categorías',
                 'OK or Right: open': 'OK o Derecha: abrir'
             },
@@ -1690,7 +1697,7 @@
                 'Up / Down: move one row': 'Auf / Ab: eine Zeile bewegen', 'OK: add or remove': 'OK: hinzufügen oder entfernen', 'Back: return': 'Zurück: zurückkehren',
                 'Enter: save': 'Enter: speichern', 'Back: cancel': 'Zurück: abbrechen', '%s of 8 selected': '%s von 8 ausgewählt',
                 'Keep at least one app on the shelf.': 'Mindestens eine App in der Leiste behalten.', 'Previous value': 'Vorheriger Wert', 'Next value': 'Nächster Wert',
-                'Show the movies and shows row on the home screen': 'Die Zeile mit Filmen und Serien auf dem Startbildschirm zeigen', 'Good morning': 'Guten Morgen', 'Good afternoon': 'Guten Tag', 'Good evening': 'Guten Abend', 'Good night': 'Gute Nacht', 'Your Name': 'Dein Name', 'e.g. Noa': 'z. B. Noa', 'Used in the greeting on the home screen': 'Wird in der Begrüßung auf dem Startbildschirm verwendet', 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Clock Position': 'Uhrposition', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Photo Brightness': 'Fotohelligkeit', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Photos behind the clock when the TV is idle': 'Fotos hinter der Uhr, wenn der Fernseher ruht', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
+                'Show the movies and shows row on the home screen': 'Die Zeile mit Filmen und Serien auf dem Startbildschirm zeigen', 'Good morning': 'Guten Morgen', 'Good afternoon': 'Guten Tag', 'Good evening': 'Guten Abend', 'Good night': 'Gute Nacht', 'Your Name': 'Dein Name', 'e.g. Noa': 'z. B. Noa', 'Used in the greeting on the home screen': 'Wird in der Begrüßung auf dem Startbildschirm verwendet', 'Pick up where you left off': 'Dort weitermachen, wo du aufgehört hast', 'Today, %s': 'Heute, %s', 'Yesterday, %s': 'Gestern, %s', 'Pick-up Row': 'Weiterschauen-Zeile', 'Shows the apps you opened last, above the shelf': 'Zeigt zuletzt geöffnete Apps über der Leiste', 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Clock Position': 'Uhrposition', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Photo Brightness': 'Fotohelligkeit', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Photos behind the clock when the TV is idle': 'Fotos hinter der Uhr, wenn der Fernseher ruht', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
                 'For the photos. Stored on this TV only': 'Für die Fotos. Nur auf diesem Fernseher gespeichert', 'Optional, for weekly trending movies and shows': 'Optional, für wöchentlich angesagte Filme und Serien', 'Back: categories': 'Zurück: Kategorien',
                 'OK or Right: open': 'OK oder Rechts: öffnen'
             },
@@ -1766,7 +1773,7 @@
                 'Up / Down: move one row': 'Haut / Bas : déplacer d’une ligne', 'OK: add or remove': 'OK : ajouter ou retirer', 'Back: return': 'Retour : revenir',
                 'Enter: save': 'Entrée : enregistrer', 'Back: cancel': 'Retour : annuler', '%s of 8 selected': '%s sur 8 sélectionnées',
                 'Keep at least one app on the shelf.': 'Gardez au moins une appli sur l’étagère.', 'Previous value': 'Valeur précédente', 'Next value': 'Valeur suivante',
-                'Show the movies and shows row on the home screen': 'Afficher la rangée de films et séries sur l’écran d’accueil', 'Good morning': 'Bonjour', 'Good afternoon': 'Bon après-midi', 'Good evening': 'Bonsoir', 'Good night': 'Bonne nuit', 'Your Name': 'Votre prénom', 'e.g. Noa': 'ex. : Noa', 'Used in the greeting on the home screen': 'Utilisé dans le message d’accueil de l’écran d’accueil', 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Clock Position': 'Position de l’horloge', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Photo Brightness': 'Luminosité des photos', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Photos behind the clock when the TV is idle': 'Photos derrière l’horloge quand la TV est inactive', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
+                'Show the movies and shows row on the home screen': 'Afficher la rangée de films et séries sur l’écran d’accueil', 'Good morning': 'Bonjour', 'Good afternoon': 'Bon après-midi', 'Good evening': 'Bonsoir', 'Good night': 'Bonne nuit', 'Your Name': 'Votre prénom', 'e.g. Noa': 'ex. : Noa', 'Used in the greeting on the home screen': 'Utilisé dans le message d’accueil de l’écran d’accueil', 'Pick up where you left off': 'Reprenez où vous en étiez', 'Today, %s': 'Aujourd’hui, %s', 'Yesterday, %s': 'Hier, %s', 'Pick-up Row': 'Rangée Reprendre', 'Shows the apps you opened last, above the shelf': 'Affiche les dernières applis ouvertes, au-dessus de l’étagère', 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Clock Position': 'Position de l’horloge', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Photo Brightness': 'Luminosité des photos', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Photos behind the clock when the TV is idle': 'Photos derrière l’horloge quand la TV est inactive', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
                 'For the photos. Stored on this TV only': 'Pour les photos. Stockée uniquement sur cette TV', 'Optional, for weekly trending movies and shows': 'Facultatif, pour les films et séries tendance de la semaine', 'Back: categories': 'Retour : catégories',
                 'OK or Right: open': 'OK ou Droite : ouvrir'
             }
@@ -2333,9 +2340,55 @@
 
         var LG_SETTINGS_APP = 'com.palm.app.settings';
 
+        // --- Launch history: what you opened last, kept only on this TV ---
+        var LAUNCH_HIST_KEY = 'fmtv_launch_hist';
+        var LAUNCH_HIST_MAX = 30;
+
+        function readLaunchHist() {
+            try {
+                var h = JSON.parse(localStorage.getItem(LAUNCH_HIST_KEY) || '{}');
+                return h && typeof h === 'object' && !Array.isArray(h) ? h : {};
+            } catch (e) { return {}; }
+        }
+
+        function recordLaunch(appId, nowMs) {
+            var hist = readLaunchHist();
+            var entry = hist[appId] || { t: 0, n: 0 };
+            entry.t = nowMs;
+            entry.n = (entry.n || 0) + 1;
+            hist[appId] = entry;
+            var ids = Object.keys(hist);
+            if (ids.length > LAUNCH_HIST_MAX) {
+                ids.sort(function(a, b) { return hist[a].t - hist[b].t; });
+                for (var i = 0; i < ids.length - LAUNCH_HIST_MAX; i++) delete hist[ids[i]];
+            }
+            try { localStorage.setItem(LAUNCH_HIST_KEY, JSON.stringify(hist)); } catch (e) {}
+        }
+
+        // Newest first, only apps that exist in the catalog.
+        function recentApps(hist, catalog, limit) {
+            var items = [];
+            catalog.forEach(function(app) { if (hist[app.id]) items.push({ app: app, t: hist[app.id].t }); });
+            items.sort(function(a, b) { return b.t - a.t; });
+            return items.slice(0, limit);
+        }
+
+        function relativeWhen(ts, nowMs) {
+            var then = new Date(ts), now = new Date(nowMs);
+            var hhmm = pad2(then.getHours()) + ':' + pad2(then.getMinutes());
+            var dayStart = function(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); };
+            var days = Math.round((dayStart(now) - dayStart(then)) / 86400000);
+            if (days <= 0) return t('Today, %s', hhmm);
+            if (days === 1) return t('Yesterday, %s', hhmm);
+            var locale = LANG_LOCALES[currentLang()];
+            if (days < 7) return then.toLocaleDateString(locale, { weekday: 'long' });
+            return then.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+        }
+
         // titleOverride names apps that are not in the shelf catalog (the LG Settings app) in the toasts.
         function launchApp(appId, contentTarget, titleOverride) {
             var launchParams = { id: appId };
+            var track = appId !== LG_SETTINGS_APP; // the LG Settings app is not an app to pick up
             if (contentTarget && CONTENT_TARGET_RE.test(contentTarget)) launchParams.params = { contentTarget: contentTarget };
             else contentTarget = '';
             if (shelfEdit || pendingLaunch) return; // Ignore repeated remote presses while a request is pending.
@@ -2377,7 +2430,7 @@
                             if (pendingLaunch !== request) return;
                             var reply = null;
                             try { reply = JSON.parse(result && result.stdout || ''); } catch (e) {}
-                            if (reply && reply.returnValue === true) finish(t('Opening %s…', title));
+                            if (reply && reply.returnValue === true) { if (track) recordLaunch(appId, Date.now()); finish(t('Opening %s…', title)); }
                             else if (reply && reply.returnValue === false) failure(reply);
                             else finish(t('Could not confirm %s opened. Please try again.', title));
                         },
@@ -2396,7 +2449,7 @@
                     onSuccess: function(result) {
                         if (pendingLaunch !== request) return;
                         if (result && result.returnValue === false) fallback(result);
-                        else finish(t('Opening %s…', title));
+                        else { if (track) recordLaunch(appId, Date.now()); finish(t('Opening %s…', title)); }
                     },
                     onFailure: fallback
                 });
@@ -2404,6 +2457,77 @@
         }
 
         // --- Render App Shelf & Trending Row ---
+        // The artwork block of a tile: HDMI device art, a brand logo, or the app title as readable fallback.
+        function buildAppIcon(app, device) {
+            var iconDiv = document.createElement('div');
+            iconDiv.className = 'app-icon';
+            iconDiv.style.background = app.bg || 'linear-gradient(135deg, #0a84ff, #0040a0)';
+            if (isHDMI(app)) {
+                iconDiv.style.background = device.color;
+                if (device.logo) {
+                    var fallback = document.createElement('span');
+                    fallback.className = 'app-art-fallback';
+                    fallback.textContent = device.title;
+                    iconDiv.appendChild(fallback);
+                    addTileImage(iconDiv, 'assets/brands/' + device.logo + '.svg', true);
+                } else {
+                    iconDiv.innerHTML = deviceArtwork(device.shape);
+                }
+            } else {
+                var fallback = document.createElement('span');
+                fallback.className = 'app-art-fallback';
+                fallback.textContent = app.title;
+                iconDiv.appendChild(fallback);
+                var logo = APP_LOGOS[app.id];
+                if (logo || app.iconUrl) {
+                    addTileImage(iconDiv, logo ? 'assets/brands/' + logo + '.svg' : app.iconUrl, !!logo);
+                }
+            }
+            return iconDiv;
+        }
+
+        // The "Pick up where you left off" row: the apps opened last, from the local launch history.
+        function renderPickup() {
+            var section = document.getElementById('pickupSection');
+            var row = document.getElementById('pickupRow');
+            row.innerHTML = '';
+            var recent = state.pickup === 'on' && !shelfEdit ? recentApps(readLaunchHist(), state.catalog, 3) : [];
+            section.hidden = recent.length === 0;
+            var now = Date.now();
+            recent.forEach(function(item) {
+                var app = item.app;
+                var device = devicePreset(app, state.hdmiDevices);
+                var title = device.title || app.title;
+                var card = document.createElement('button');
+                card.className = 'pickup-card nav-item';
+                card.dataset.id = app.id;
+                card.dataset.tag = app.tag;
+                card.dataset.title = title;
+                card.dataset.desc = app.desc;
+                card.dataset.color = app.color;
+                card.setAttribute('aria-label', title);
+                var art = document.createElement('div');
+                art.className = 'pickup-art';
+                art.appendChild(buildAppIcon(app, device));
+                var caption = document.createElement('div');
+                caption.className = 'pickup-caption';
+                var name = document.createElement('div');
+                name.className = 'pickup-name';
+                name.textContent = title;
+                var when = document.createElement('div');
+                when.className = 'pickup-when';
+                when.textContent = relativeWhen(item.t, now);
+                caption.appendChild(name);
+                caption.appendChild(when);
+                art.appendChild(caption);
+                card.appendChild(art);
+                card.addEventListener('mouseenter', function() { setMainFocus(card); });
+                card.addEventListener('click', function() { launchApp(app.id); });
+                row.appendChild(card);
+            });
+            refreshMainNavList();
+        }
+
         function renderAppsShelf() {
             var grid = document.getElementById('appsGrid');
             grid.innerHTML = '';
@@ -2426,30 +2550,7 @@
                 btn.setAttribute('aria-label', title + (device.title ? ' — ' + app.title : ''));
                 btn.dataset.color = app.color;
 
-                var iconDiv = document.createElement('div');
-                iconDiv.className = 'app-icon';
-                iconDiv.style.background = app.bg || 'linear-gradient(135deg, #0a84ff, #0040a0)';
-                if (isHDMI(app)) {
-                    iconDiv.style.background = device.color;
-                    if (device.logo) {
-                        var fallback = document.createElement('span');
-                        fallback.className = 'app-art-fallback';
-                        fallback.textContent = device.title;
-                        iconDiv.appendChild(fallback);
-                        addTileImage(iconDiv, 'assets/brands/' + device.logo + '.svg', true);
-                    } else {
-                        iconDiv.innerHTML = deviceArtwork(device.shape);
-                    }
-                } else {
-                    var fallback = document.createElement('span');
-                    fallback.className = 'app-art-fallback';
-                    fallback.textContent = app.title;
-                    iconDiv.appendChild(fallback);
-                    var logo = APP_LOGOS[app.id];
-                    if (logo || app.iconUrl) {
-                        addTileImage(iconDiv, logo ? 'assets/brands/' + logo + '.svg' : app.iconUrl, !!logo);
-                    }
-                }
+                var iconDiv = buildAppIcon(app, device);
 
                 var labelDiv = document.createElement('div');
                 labelDiv.className = 'app-label';
@@ -2663,6 +2764,10 @@
               hint: 'Show the movies and shows row on the home screen',
               options: ON_OFF,
               apply: function() { applyTrendingClass(); refreshMainNavList(); fetchTrendingPicks(); } },
+            { id: 'pickup', cat: 1, type: 'choice', field: 'pickup', store: 'fmtv_pickup', def: 'on', label: 'Pick-up Row',
+              hint: 'Shows the apps you opened last, above the shelf',
+              options: ON_OFF,
+              apply: function() { renderPickup(); } },
             { id: 'textSize', cat: 1, type: 'choice', field: 'textSize', store: 'fmtv_text_size', def: 'normal', label: 'Text Size (weather & clock)',
               options: [['normal', 'Normal'], ['large', 'Large'], ['xlarge', 'Extra large']],
               apply: function() { applyTextSize(); } },
@@ -3738,7 +3843,7 @@
         // In the background (another app launched): stop downloading, pinging and holding the TV awake.
         function onVisibilityChange() {
             if (document.hidden) { if (screensaverOn) exitScreensaver(); syncHomePhotos(); keepAwakeStop(); }
-            else { lastActivity = Date.now(); syncHomePhotos(); keepAwakeSync(); }
+            else { lastActivity = Date.now(); renderPickup(); syncHomePhotos(); keepAwakeSync(); }
         }
         document.addEventListener('visibilitychange', onVisibilityChange);
 
@@ -3844,6 +3949,7 @@
         applyPerfMode();
         applyTextSize();
         applyTrendingClass();
+        renderPickup();
         renderAppsShelf();
         renderPicks(FALLBACK_MOVIES);
         applyTheme();

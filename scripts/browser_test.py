@@ -81,6 +81,23 @@ setTimeout(function () {
     eq('greet name', greetingText(19, 'Noa'), t('Good evening') + ', Noa');
     eq('greet no name', greetingText(19, ''), t('Good evening'));
   }
+  if (need('recordLaunch') && need('recentApps') && need('relativeWhen')) {
+    localStorage.removeItem('fmtv_launch_hist');
+    var T = new Date(2026, 9, 30, 21, 10).getTime();
+    recordLaunch('netflix', T - 86400000);
+    recordLaunch('youtube.leanback.v4', T - 3600000);
+    recordLaunch('netflix', T - 86400000 + 1000);
+    var hist = readLaunchHist();
+    eq('hist count', hist.netflix.n, 2);
+    var recent = recentApps(hist, DEFAULT_CATALOG, 3);
+    eq('recent order', recent.map(function (r) { return r.app.id; }).join(','), 'youtube.leanback.v4,netflix');
+    eq('recent limit', recentApps(hist, DEFAULT_CATALOG, 1).length, 1);
+    eq('recent unknown app ignored', recentApps({ nope: { t: 1, n: 1 } }, DEFAULT_CATALOG, 3).length, 0);
+    eq('when today', relativeWhen(T - 3600000, T), t('Today, %s', '20:10'));
+    eq('when yesterday', relativeWhen(T - 86400000, T), t('Yesterday, %s', '21:10'));
+    eq('when older', relativeWhen(T - 3 * 86400000, T).length > 0, true);
+    localStorage.removeItem('fmtv_launch_hist');
+  }
   if (need('ambientBudgetAllows')) {
     var now = 10000000, recent = [], old = [], i;
     for (i = 0; i < 40; i++) { recent.push(now - 1000); old.push(now - 3700000); }
@@ -1196,6 +1213,22 @@ setTimeout(function () {
     eq('greeting eyebrow set', document.getElementById('greetingEyebrow').textContent.length > 0, true);
     state.userName = ''; updateGreeting();
     eq('greeting no name', document.getElementById('greetingTitle').textContent, t(greetingKey(new Date().getHours())));
+    done();
+  });
+  steps.push(function (done) { // the pick-up row lists the last apps, newest first, and hides when off or empty
+    localStorage.removeItem('fmtv_launch_hist');
+    state.pickup = 'on'; renderPickup();
+    eq('pickup empty hidden', document.getElementById('pickupSection').hidden, true);
+    var T = Date.now();
+    recordLaunch('netflix', T - 5000); recordLaunch('youtube.leanback.v4', T - 1000);
+    renderPickup();
+    var cards = document.querySelectorAll('#pickupRow .pickup-card');
+    eq('pickup cards', cards.length, 2);
+    eq('pickup first is newest', cards[0].dataset.id, 'youtube.leanback.v4');
+    eq('pickup in nav', mainNavItems.indexOf(cards[0]) !== -1, true);
+    state.pickup = 'off'; renderPickup();
+    eq('pickup off hidden', document.getElementById('pickupSection').hidden, true);
+    localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on'; renderPickup();
     done();
   });
   steps.push(function (done) { // an HDMI row changes its device with Right and saves at once
