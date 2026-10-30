@@ -569,6 +569,62 @@ setTimeout(function () {
     }, 200);
   });
 
+  steps.push(function (done) { // a changed Photo Duration restarts the running home player
+    seedMany([photo('d1', 'Ann')]);
+    state.ambient = 'off'; state.homePhotos = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none';
+    window.fetch = fakeFetch(200, '49', []);
+    syncHomePhotos();
+    setTimeout(function () {
+      eq('duration active', homeActive(), true);
+      var before = homePhotoPlayer.run;
+      state.ambientSecs = '30';
+      if (typeof applyHomePhotosSettings !== 'function') { fails.push('applyHomePhotosSettings missing'); }
+      else { applyHomePhotosSettings(); }
+      eq('duration restarted', homePhotoPlayer.run > before, true);
+      eq('duration still active', homeActive(), true);
+      state.ambientSecs = '90'; state.homePhotos = 'off';
+      syncHomePhotos();
+      done();
+    }, 400);
+  });
+
+  var hiddenFlag = false;
+  Object.defineProperty(document, 'hidden', { configurable: true, get: function () { return hiddenFlag; } });
+  function setHidden(v) { hiddenFlag = v; document.dispatchEvent(new Event('visibilitychange')); }
+  steps.push(function (done) { // home photos stop while the app is in the background and resume on return
+    seedMany([photo('v1', 'Ann')]);
+    state.ambient = 'off'; state.homePhotos = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none';
+    window.fetch = fakeFetch(200, '49', []);
+    syncHomePhotos();
+    setTimeout(function () {
+      eq('vis home active', homeActive(), true);
+      setHidden(true);
+      eq('vis home hidden', homeActive(), false);
+      eq('vis wanted hidden', homePhotosWanted(), false);
+      setHidden(false);
+      eq('vis home visible again', homeActive(), true);
+      state.homePhotos = 'off'; syncHomePhotos();
+      done();
+    }, 400);
+  });
+  steps.push(function (done) { // the screensaver and keep-awake end when the app goes to the background
+    seedMany([photo('v2', 'Ann')]);
+    state.ambient = 'on'; state.unsplashKey = 'k'; state.keepAwake = 'on'; state.homePhotos = 'off';
+    window.fetch = fakeFetch(200, '49', []);
+    enterScreensaver();
+    setTimeout(function () {
+      eq('vis saver on', isAmbient(), true);
+      setHidden(true);
+      eq('vis saver flag', screensaverOn, false);
+      eq('vis saver ambient', isAmbient(), false);
+      eq('vis keepAwake timer', keepAwakeTimer, null);
+      setHidden(false);
+      delete document.hidden;
+      state.homePhotos = 'off'; syncHomePhotos();
+      done();
+    }, 400);
+  });
+
   (function run(i) {
     if (i >= steps.length) { write(); return; }
     steps[i](function () { setTimeout(function () { run(i + 1); }, 100); });
@@ -599,7 +655,7 @@ def run_language(chrome, lang, workdir):
     shutil.copytree(os.path.join(REPO_DIR, "app", "assets"), os.path.join(workdir, "assets"), dirs_exist_ok=True)
     res = subprocess.run(
         [chrome, "--headless=new", "--disable-gpu", "--no-sandbox", "--window-size=1920,1080",
-         "--virtual-time-budget=15000", f"--user-data-dir={os.path.join(workdir, 'profile_' + lang)}",
+         "--virtual-time-budget=25000", f"--user-data-dir={os.path.join(workdir, 'profile_' + lang)}",
          "--dump-dom", f"file://{page}"],
         capture_output=True, text=True, timeout=120)
     m = re.search(r'<pre id="__result">(.*?)</pre>', res.stdout, re.S)

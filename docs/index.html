@@ -2967,7 +2967,7 @@
         });
 
         function homePhotosWanted() {
-            return state.homePhotos === 'on' && ambientCacheReady() && !screensaverOn;
+            return state.homePhotos === 'on' && ambientCacheReady() && !screensaverOn && !document.hidden;
         }
 
         // Start or stop the home photos so they match the settings and the screensaver state.
@@ -2976,6 +2976,9 @@
             if (wanted && !homePhotoPlayer.on) homePhotoPlayer.start();
             else if (!wanted && homePhotoPlayer.on) homePhotoPlayer.stop();
         }
+
+        // A changed duration or motion only applies on a fresh start, so restart a running player.
+        function applyHomePhotosSettings() { if (homePhotoPlayer.on) homePhotoPlayer.stop(); syncHomePhotos(); }
 
         // --- Keep LG's own screensaver away while ours shows ---
         // A playing video holds the TV's screensaver off (checked on an LG UR91, webOS 23). A 64x36 canvas stream
@@ -3050,6 +3053,13 @@
             keepAwakeStop();
         }
 
+        // In the background (another app launched): stop downloading, pinging and holding the TV awake.
+        function onVisibilityChange() {
+            if (document.hidden) { if (screensaverOn) exitScreensaver(); syncHomePhotos(); keepAwakeStop(); }
+            else { lastActivity = Date.now(); syncHomePhotos(); }
+        }
+        document.addEventListener('visibilitychange', onVisibilityChange);
+
         function markActivity() {
             lastActivity = Date.now();
             if (screensaverOn) exitScreensaver();
@@ -3058,7 +3068,7 @@
         document.addEventListener('mousedown', markActivity);
 
         setInterval(function() {
-            if (!screensaverOn && !modalOpen && !drawerOpen && Date.now() - lastActivity > idleTimeoutMs()) {
+            if (!screensaverOn && !document.hidden && !modalOpen && !drawerOpen && Date.now() - lastActivity > idleTimeoutMs()) {
                 enterScreensaver();
             }
         }, 10000);
@@ -3144,7 +3154,7 @@
                 localStorage.removeItem('fmtv_ambient_pause');
             }
             ambientRefresh(false);
-            syncHomePhotos();
+            applyHomePhotosSettings();
             closeSettingsModal();
             showToast(t('Saved & Applied!'));
         });

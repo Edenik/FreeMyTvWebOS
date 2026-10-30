@@ -153,8 +153,8 @@ Some newer webOS releases block Developer Mode apps from listing installed apps.
 | **Ambient Photo Screensaver** | `On` or `Off`. Photos need an Unsplash key and a TV with `fetch` support (webOS 4 or newer); otherwise the black clock is used. |
 | **Photo Duration / Photo Motion** | 30 seconds, 90 seconds or 5 minutes per photo; `Ken Burns (zoom & drift)`, `Drift only` or `None`. High Performance mode always uses no motion. |
 | **Unsplash Access Key** | Paste the Access Key of a free [Unsplash developer app](https://unsplash.com/developers) (50 requests per hour). The app makes about 5 calls per refresh, at most every 12 hours, and shows "Photo by NAME on Unsplash". It also sends one ping per photo shown, at most 30 per hour. |
-| **Photos on Home Screen** | `Off` (default) or `On`. Shows the same Unsplash photos, slowly moving and dimmed, behind the home screen, with a small "Photo by NAME on Unsplash" credit in the bottom-left corner. Needs the Unsplash key; it pauses while the screensaver is showing. |
-| **Keep LG Screensaver Away** | `On` (default) or `Off`. While Free My TV's screensaver is showing, a tiny hidden muted video plays so LG's own screensaver does not cover it. It may also stop the TV's own auto-sleep from firing during that time, so turn it `Off` if you prefer the TV to sleep normally. |
+| **Photos on Home Screen** | `Off` (default) or `On`. Shows the same Unsplash photos, slowly moving and dimmed, behind the home screen, with a small "Photo by NAME on Unsplash" credit in the bottom-left corner. Needs the Unsplash key; it pauses while the screensaver is showing. Needs a TV with `fetch` support (webOS 4 or newer). With Motion set to `None`, or in High Performance mode, the photo stays still. |
+| **Keep LG Screensaver Away** | `On` (default) or `Off`. While Free My TV's screensaver is showing, a tiny hidden muted video plays so LG's own screensaver does not cover it. It may also stop the TV's own auto-sleep from firing during that time, so turn it `Off` if you prefer the TV to sleep normally. Older webOS versions without this video feature skip it. |
 
 ---
 
@@ -351,8 +351,8 @@ Clique no botão **⚙️ Customize** no canto superior direito do painel usando
 | **Chave da API do TMDB** | Cole uma [chave gratuita da API do TMDB](https://www.themoviedb.org/settings/api) para ver filmes e séries em alta da semana ao vivo, ou deixe em branco para usar o feed ao vivo popular embutido (sem necessidade de chave). |
 | **Protetor de Tela Inicia Após** | Tempo parado antes do protetor de tela: 1, 3, 5, 10 ou 30 minutos. |
 | **Protetor de Tela com Fotos** | `Ligado` ou `Desligado`, com duração (30 s, 90 s ou 5 min) e movimento (Ken Burns, só deslize ou nenhum). Precisa de uma chave de acesso do [Unsplash](https://unsplash.com/developers) (50 requisições por hora). |
-| **Fotos na Tela Inicial** | `Desligado` (padrão) ou `Ligado`. Mostra as mesmas fotos do Unsplash, em movimento lento e escurecidas, atrás da tela inicial, com o crédito "Foto de NOME no Unsplash" no canto inferior esquerdo. Precisa da chave do Unsplash e pausa enquanto o protetor de tela aparece. |
-| **Evitar o Protetor de Tela da LG** | `Ligado` (padrão) ou `Desligado`. Enquanto o protetor de tela do Free My TV aparece, um vídeo minúsculo, mudo e invisível toca para que o protetor da própria LG não o cubra. Pode impedir também o desligamento automático da TV nesse período; desligue se preferir o comportamento normal. |
+| **Fotos na Tela Inicial** | `Desligado` (padrão) ou `Ligado`. Mostra as mesmas fotos do Unsplash, em movimento lento e escurecidas, atrás da tela inicial, com o crédito "Foto de NOME no Unsplash" no canto inferior esquerdo. Precisa da chave do Unsplash e pausa enquanto o protetor de tela aparece. Precisa de uma TV com suporte a `fetch` (webOS 4 ou mais novo). Com Movimento em `Nenhum`, ou no modo de Alta Performance, a foto fica parada. |
+| **Evitar o Protetor de Tela da LG** | `Ligado` (padrão) ou `Desligado`. Enquanto o protetor de tela do Free My TV aparece, um vídeo minúsculo, mudo e invisível toca para que o protetor da própria LG não o cubra. Pode impedir também o desligamento automático da TV nesse período; desligue se preferir o comportamento normal. Versões antigas do webOS sem esse recurso de vídeo o ignoram. |
 
 ---
 
