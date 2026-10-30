@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 dist/*.manifest.json
+
+# Local planning docs from the superpowers workflow (never published)
+docs/superpowers/
