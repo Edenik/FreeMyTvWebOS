@@ -1059,7 +1059,7 @@ setTimeout(function () {
   }
   function rowIndexOf(id) {
     var rows = settingsForCategory(settingsUi.cat);
-    for (var i = 0; i < rows.length; i++) if (rows[i].id === id) return i + 1; // +1: the "Categories" row comes first
+    for (var i = 0; i < rows.length; i++) if (rows[i].id === id) return i;
     return -1;
   }
   function goToRow(id) { var n = rowIndexOf(id), guard = 40; while (settingsUi.row < n && guard--) press('ArrowDown'); while (settingsUi.row > n && guard--) press('ArrowUp'); }
@@ -1103,7 +1103,7 @@ setTimeout(function () {
     settingsUi.cat = 4; settingsUi.catFocus = 4; renderSettings();
     press('ArrowRight');
     eq('zone rows', settingsUi.zone, 'rows');
-    eq('lands on first setting', settingsUi.row, 1);
+    eq('lands on first setting', settingsUi.row, 0);
     eq('one focus mark rows', sfCount(), 1);
     state.idleMins = '3';
     goToRow('idleMins');
@@ -1131,12 +1131,11 @@ setTimeout(function () {
     eq('back from cats closes', modalOpen, false);
     openSettingsModal();
     settingsUi.cat = 4; settingsUi.catFocus = 4; renderSettings(); press('Enter');
-    goToRow('keepAwake'); // then up to the "Categories" row
+    goToRow('keepAwake'); // then up past the first row
     var guard = 20; while (settingsUi.row > 0 && guard--) press('ArrowUp');
-    eq('categories row first', settingsUi.row, 0);
-    press('Enter');
-    eq('Categories row returns', settingsUi.zone, 'cats');
-    eq('Categories row focuses its category', settingsUi.catFocus, 4);
+    eq('first row reached', settingsUi.row, 0);
+    press('ArrowUp');
+    eq('Up from the first row returns to the category list', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:4');
     press('ArrowDown'); press('ArrowDown'); press('ArrowDown');
     eq('arrows reach Close', settingsUi.catFocus, 7);
     press('Enter');
@@ -1432,14 +1431,14 @@ setTimeout(function () {
       eq('group ' + c + ' lists its settings in order', SETTINGS.filter(function (d) { return d.cat === c; }).map(function (d) { return d.id; }).join(','), ids.join(','));
     });
     eq('every setting is in a group', SETTINGS.filter(function (d) { return !(d.cat >= 0 && d.cat < 7); }).length, 0);
-    eq('Reset & About rows', settingsRowsFor(6).map(function (d) { return d.id; }).join(','), 'back,runSetup,reset,eraseAll,version');
+    eq('Reset & About rows', settingsRowsFor(6).map(function (d) { return d.id; }).join(','), 'runSetup,reset,eraseAll,version');
     eq('reset label', findSetting('reset').label, 'Reset settings');
-    eq('version row shows the version', settingsRowsFor(6)[4].value(), APP_VERSION);
+    eq('version row shows the version', settingsRowsFor(6)[3].value(), APP_VERSION);
 
     openSettingsModal();
     var counts = [].map.call(modalEl().querySelectorAll('.settings-cat .sc-count'), function (n) { return n.textContent; });
     eq('seven category chips with counts', counts.length, 7);
-    eq('chip counts follow the schema', counts.join(','), [0, 1, 2, 3, 4, 5, 6].map(function (c) { return String(settingsRowsFor(c).length - 1); }).join(','));
+    eq('chip counts follow the schema', counts.join(','), [0, 1, 2, 3, 4, 5, 6].map(function (c) { return String(settingsRowsFor(c).length); }).join(','));
     for (var c = 0; c < 7; c++) {
       settingsUi.zone = 'cats'; settingsUi.catFocus = c; settingsUi.cat = c; renderSettings();
       press('ArrowRight');
@@ -1447,7 +1446,23 @@ setTimeout(function () {
       var rws = settingsRowsFor(c), lastRow = modalEl().querySelector('.settings-row.sf');
       eq('group ' + c + ' Down reaches the last row', settingsUi.row === rws.length - 1 && !!lastRow && lastRow.getAttribute('data-id') === rws[rws.length - 1].id, true);
       press('Escape');
+      settingsUi.cat = c; settingsUi.catFocus = c; press('ArrowRight');
+      eq('group ' + c + ' has no back row', modalEl().querySelectorAll('.settings-row[data-id="back"]').length + ':' + rws.some(function (d) { return d.type === 'back'; }), '0:false');
+      eq('group ' + c + ' opens on the first setting', settingsUi.row === 0 && modalEl().querySelector('.settings-row.sf').getAttribute('data-id') === rws[0].id, true);
+      if (rws.length > 1) {
+        press('ArrowDown');
+        eq('group ' + c + ' Down from the first row', settingsUi.row === 1 && modalEl().querySelector('.settings-row.sf').getAttribute('data-id') === rws[1].id, true);
+        press('ArrowUp');
+        eq('group ' + c + ' Up returns to the first row', settingsUi.row === 0 && settingsUi.zone === 'rows', true);
+      }
+      press('ArrowUp');
+      eq('group ' + c + ' Up from the first row leaves for the categories', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:' + c);
     }
+    var note = modalEl().querySelector('#settingsNote');
+    eq('independence note text', !!note && note.textContent, t('Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.'));
+    eq('independence note is not focusable', !!note && note.tagName === 'DIV' && !note.classList.contains('nav-item') && !note.classList.contains('settings-cat') && !note.hasAttribute('tabindex') && !note.hasAttribute('data-i'), true);
+    var nr = note.getBoundingClientRect(), clr = modalEl().querySelector('.settings-close').getBoundingClientRect(), lcr = modalEl().querySelectorAll('.settings-cat')[6].getBoundingClientRect();
+    eq('note sits between the categories and Close without overlap', nr.top >= lcr.bottom - 1 && nr.bottom <= clr.top + 1 && nr.height > 0, true);
     closeSettingsModal();
 
     // Reset keeps people and history
@@ -1538,11 +1553,20 @@ setTimeout(function () {
     settingsUi.cat = 6; settingsUi.catFocus = 6; settingsUi.zone = 'rows'; settingsUi.row = resetIdx;
     renderSettings();
     press('Enter');
-    eq('reset asks for confirmation', settingsUi.confirmReset, true);
+    eq('reset asks for confirmation', settingsUi.confirmReset, 'reset');
     eq('confirmation text shown', modalEl().textContent.indexOf('Press OK again to confirm') >= 0, true);
-    move(700, 400); over(modalEl().querySelector('#settingsRows .settings-row[data-i="1"]'));
+    move(700, 400); over(modalEl().querySelector('#settingsRows .settings-row[data-i="0"]'));
     eq('hover clears confirmReset', settingsUi.confirmReset, false);
     eq('hover removes the confirmation text', modalEl().textContent.indexOf('Press OK again to confirm'), -1);
+    // armed Reset must not arm-and-run Erase: a click straight on Erase only asks
+    localStorage.setItem('fmtv_theme', 'day');
+    erasing = false; // an earlier step ran the real erase
+    settingsUi.row = resetIdx; press('Enter');
+    eq('reset armed', settingsUi.confirmReset, 'reset');
+    modalEl().querySelector('#settingsRows .settings-row[data-id="eraseAll"]').click();
+    eq('erase only asks after Reset was armed', settingsUi.confirmReset, 'eraseAll');
+    eq('nothing erased by the first press on Erase', String(erasing) + ':' + localStorage.getItem('fmtv_theme'), 'false:day');
+    eq('erase text shows only on Erase', modalEl().querySelector('.settings-row[data-id="reset"]').textContent.indexOf(t('Press OK again to confirm')), -1);
     closeSettingsModal();
     done();
   });
@@ -1908,7 +1932,7 @@ setTimeout(function () {
     cyclePick(1);
     eq('remove can pick the active person', removeTargetProfile().id, activeProfileId());
     activateRow(settingDef('removePerson'));
-    eq('remove asks first', settingsUi.confirmReset, true);
+    eq('remove asks first', settingsUi.confirmReset, 'removePerson');
     eq('remove confirm names the person', document.querySelector('#settingsRows .settings-row[data-id="removePerson"] .sr-value').textContent, t('Press OK again to remove %s', removeTargetProfile().name));
     eq('remove asks and keeps the people', readProfiles().length, 2);
     activateRow(settingDef('removePerson'));
