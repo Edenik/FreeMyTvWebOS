@@ -69,6 +69,25 @@ setTimeout(function () {
     eq('dim bad', ambientDim('nope'), 0.68);
     eq('dim none', ambientDim(undefined), 0.68);
   }
+  if (need('nightFactor')) {
+    eq('night noon', nightFactor(new Date(2026, 9, 30, 12, 0), '16:52'), 1);
+    eq('night before sunset', nightFactor(new Date(2026, 9, 30, 16, 51), '16:52'), 1);
+    eq('night after sunset', nightFactor(new Date(2026, 9, 30, 16, 52), '16:52'), 0.75);
+    eq('night 22:59', nightFactor(new Date(2026, 9, 30, 22, 59), '16:52'), 0.75);
+    eq('night 23:00', nightFactor(new Date(2026, 9, 30, 23, 0), '16:52'), 0.5);
+    eq('night 04:59', nightFactor(new Date(2026, 9, 30, 4, 59), '16:52'), 0.5);
+    eq('night 05:00', nightFactor(new Date(2026, 9, 30, 5, 0), '16:52'), 1);
+    eq('night unknown sunset', nightFactor(new Date(2026, 9, 30, 17, 59), ''), 1);
+    eq('night unknown sunset after', nightFactor(new Date(2026, 9, 30, 18, 0), ''), 0.75);
+  }
+  if (need('screensaverWeatherVisible')) {
+    eq('ssweather noon', screensaverWeatherVisible(12, '22C'), true);
+    eq('ssweather 22', screensaverWeatherVisible(22, '22C'), true);
+    eq('ssweather 23', screensaverWeatherVisible(23, '22C'), false);
+    eq('ssweather 04', screensaverWeatherVisible(4, '22C'), false);
+    eq('ssweather 05', screensaverWeatherVisible(5, '22C'), true);
+    eq('ssweather loading', screensaverWeatherVisible(12, 'Loading...'), false);
+  }
   if (need('greetingKey') && need('greetingText')) {
     eq('greet 4', greetingKey(4), 'Good night');
     eq('greet 5', greetingKey(5), 'Good morning');
@@ -193,6 +212,7 @@ setTimeout(function () {
     document.body.appendChild(pre);
   }
   function reset() {
+    state.nightDim = 'off'; // the clock must not change exact opacity assertions
     ['fmtv_ambient_cache', 'fmtv_ambient_calls', 'fmtv_ambient_pause', 'fmtv_ambient_pinged'].forEach(function (k) {
       localStorage.removeItem(k);
     });
@@ -433,6 +453,20 @@ setTimeout(function () {
       eq('kenburns no leg timer', !!shown._moveTimer, false);
       exitScreensaver();
       state.ambientMotion = 'drift';
+      done();
+    }, 400);
+  });
+  steps.push(function (done) { // Dim Photos at Night scales the opacity when on
+    seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none'; state.nightDim = 'on'; state.ambientBright = 'normal';
+    var realNow = window.nightFactor;
+    window.nightFactor = function () { return 0.5; };
+    window.fetch = fakeFetch(200, '49', []);
+    enterScreensaver();
+    setTimeout(function () {
+      var a = document.getElementById('ssPhotoA').style.opacity, b = document.getElementById('ssPhotoB').style.opacity;
+      eq('night dim opacity', a === '0.43' || b === '0.43', true); // 0.85 * 0.5 = 0.425, rounded to 0.43
+      exitScreensaver();
+      window.nightFactor = realNow; state.nightDim = 'off';
       done();
     }, 400);
   });
