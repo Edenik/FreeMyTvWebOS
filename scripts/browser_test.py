@@ -1596,6 +1596,17 @@ setTimeout(function () {
     eq('wizard toggles an app', state.favorites.indexOf(firstApp) !== -1, !had);
     wizard.focus = wizard.items.length - 1; key('Enter');
     eq('wizard step look', WIZARD_STEPS[wizard.step], 'look');
+    var wzq = function (sel) { return document.querySelectorAll('#wizardOverlay ' + sel); };
+    eq('wizard look eyebrow', wzq('.wz-eyebrow')[0].textContent, t('Step %s of %s', 4, 5));
+    eq('wizard rail has 5 rows', wzq('.wz-rail-row').length, 5);
+    eq('wizard rail one current row', wzq('.wz-rail-row.current').length, 1);
+    eq('wizard rail done rows before the current one', wzq('.wz-rail-row.done').length, 3);
+    eq('wizard rail brand and note', !!wzq('.wz-brand')[0] && wzq('.wz-note')[0].textContent, t('Nothing here needs an account. You can change every choice later in Customize.'));
+    eq('wizard look title uses the name', wzq('.wz-title')[0].textContent, t('How should it look, %s?', 'Noa'));
+    eq('wizard one thumbnail per look card', wzq('.wz-look .wz-thumb').length, WIZARD_LOOKS.length);
+    eq('wizard primary pill is in the footer', wzq('.wz-footer .wz-primary').length, 1);
+    eq('wizard primary pill is the last item before Skip', wizard.items[wizard.items.length - 1].classList.contains('wz-primary'), true);
+    eq('wizard hint bar has three hints', wzq('.wz-hints span').length, 3);
     wizard.focus = 0; key('ArrowRight');
     eq('wizard previews a look', state.theme, 'night');
     key('Enter');
