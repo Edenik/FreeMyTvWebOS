@@ -105,3 +105,37 @@ merged without explicit approval. The locally rebuilt `dist/*.ipk` is not part o
 ## Open items
 
 None blocking. The Unsplash Access Key must be supplied by the user before the on-TV test.
+
+## Addendum: keep LG's screensaver away, and photos on the home screen
+
+Added after on-TV testing (LG UR91, webOS 23). LG's own screensaver takes over a few minutes after the last remote
+press and covers ours. A throwaway test app showed that playing a tiny muted video (a 64x36 canvas stream shown in a
+4x4 px `<video>`) held it off for 7+ minutes; the Screen Wake Lock API was refused (`NotAllowedError`).
+
+### Keep LG's screensaver away (setting `fmtv_keep_awake`, On / Off, default On)
+- While our screensaver is showing (ambient or black clock), the app plays that hidden muted video. It starts in
+  `enterScreensaver()` and stops in `exitScreensaver()`. Any key press still exits.
+- Skipped silently when the engine has no `canvas.captureStream` (older webOS).
+- Risk to mention in the docs: the TV's own auto-sleep may also not fire while our screensaver runs; the switch turns
+  the behaviour off.
+
+### Photos on the home screen (setting `fmtv_home_photos`, On / Off, default Off)
+- A full-screen photo layer behind the dashboard (below `.container`), fed by the same cache, key, photo duration and
+  motion settings as the screensaver; opacity is the screensaver's dim value times 0.55 (about 0.30 for dark photos), plus
+  a top and bottom gradient so text stays readable.
+- It keeps the Unsplash credit in a small dim line in the bottom-left corner.
+- It runs only when a key is set, the cache is non-empty and the engine has `fetch`; it pauses while the screensaver
+  is showing and resumes on exit. It does not depend on the "Ambient Photo Screensaver" switch.
+- Background refreshes run when either "Ambient Photo Screensaver" or "Photos on Home Screen" is On.
+- Shown photos are pinged under the same budget rules (at most 30 per hour, each photo once).
+
+### Photo player refactor
+The screensaver-only render code becomes one `ambientPlayer(cfg)` factory with two instances (screensaver, home
+screen). Each start or stop bumps a run counter so a late image load from an earlier run is ignored (this fixes the
+deferred stale-preload finding).
+
+### Testing additions
+`scripts/browser_test.py` scenarios: stale preload ignored, A/B swap, skip-on-error and `src` cleared after exit; home
+photos on and off, takeover by the screensaver and resume, no key, refresh for home photos only; keep-awake video
+starts and stops with the screensaver, respects Off, and survives a missing `captureStream`. State defaults, new
+controls and the new translations are probed.
