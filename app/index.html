@@ -977,6 +977,8 @@
             color: rgba(255, 255, 255, 0.35);
             margin-top: 14px;
         }
+
+        .screensaver-credit:empty { display: none; }
     </style>
     <script>
         (function() {
@@ -2690,7 +2692,9 @@
         function ambientRead(key, fallback) {
             try {
                 var raw = localStorage.getItem(key);
-                return raw ? JSON.parse(raw) : fallback;
+                var val = raw ? JSON.parse(raw) : fallback;
+                if (Object.prototype.toString.call(fallback) === '[object Array]' && Object.prototype.toString.call(val) !== '[object Array]') return fallback;
+                return val;
             } catch (e) {
                 return fallback;
             }
@@ -2720,6 +2724,11 @@
                 done(new Error('blocked'));
                 return;
             }
+            var url = pathOrUrl.indexOf('http') === 0 ? pathOrUrl : 'https://api.unsplash.com' + pathOrUrl;
+            if (url.indexOf('https://api.unsplash.com/') !== 0) {
+                done(new Error('blocked'));
+                return;
+            }
             try {
                 log.push(now);
                 localStorage.setItem('fmtv_ambient_calls', JSON.stringify(log));
@@ -2727,7 +2736,6 @@
                 done(e);
                 return;
             }
-            var url = pathOrUrl.indexOf('http') === 0 ? pathOrUrl : 'https://api.unsplash.com' + pathOrUrl;
             fetch(url, { headers: { 'Authorization': 'Client-ID ' + state.unsplashKey, 'Accept-Version': 'v1' } }).then(function(res) {
                 var remaining = parseInt(res.headers.get('X-Ratelimit-Remaining'), 10);
                 if (res.status === 403 || res.status === 429 || remaining < AMBIENT_MIN_REMAINING) {
@@ -2754,16 +2762,20 @@
             }
 
             function next() {
-                if (step >= AMBIENT_THEMES.length) { finish(); return; }
-                var theme = AMBIENT_THEMES[step++];
-                ambientApi('/photos/random?count=30&orientation=landscape&content_filter=high&query=' + encodeURIComponent(theme), AMBIENT_MAX_CALLS, function(err, list) {
-                    if (err || !list || !list.length) { finish(); return; }
-                    for (var i = 0; i < list.length; i++) {
-                        var s = ambientShape(list[i]);
-                        if (s && !seen[s.id]) { seen[s.id] = 1; photos.push(s); }
-                    }
-                    next();
-                });
+                try {
+                    if (step >= AMBIENT_THEMES.length) { finish(); return; }
+                    var theme = AMBIENT_THEMES[step++];
+                    ambientApi('/photos/random?count=30&orientation=landscape&content_filter=high&query=' + encodeURIComponent(theme), AMBIENT_MAX_CALLS, function(err, list) {
+                        if (err || !list || !list.length) { finish(); return; }
+                        for (var i = 0; i < list.length; i++) {
+                            var s = ambientShape(list[i]);
+                            if (s && !seen[s.id]) { seen[s.id] = 1; photos.push(s); }
+                        }
+                        next();
+                    });
+                } catch (e) {
+                    finish();
+                }
             }
             next();
         }
@@ -2777,7 +2789,7 @@
 
         function ambientReady() {
             var cache = ambientRead('fmtv_ambient_cache', null);
-            return state.ambient === 'on' && !!state.unsplashKey && !!cache && !!cache.photos && cache.photos.length > 0;
+            return typeof fetch === 'function' && state.ambient === 'on' && !!state.unsplashKey && !!cache && !!cache.photos && cache.photos.length > 0;
         }
 
         // Slow zoom and drift (Ken Burns), drift only, or still. Only transform and opacity animate.
@@ -2798,8 +2810,9 @@
         function ambientPing(p) {
             var pinged = ambientRead('fmtv_ambient_pinged', []);
             if (pinged.indexOf(p.id) !== -1) return;
+            if (ambientPaused() || !ambientBudgetAllows(ambientCalls(), Date.now(), AMBIENT_PING_CAP)) return;
             pinged.push(p.id);
-            localStorage.setItem('fmtv_ambient_pinged', JSON.stringify(pinged.slice(-300)));
+            try { localStorage.setItem('fmtv_ambient_pinged', JSON.stringify(pinged.slice(-300))); } catch (e) {}
             ambientApi(p.dl, AMBIENT_PING_CAP, function() {});
         }
 

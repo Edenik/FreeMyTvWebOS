@@ -65,7 +65,7 @@ today's black clock.
   last hour, which keeps 10 for refreshes, and each photo is pinged at most once (the ids are remembered in
   `localStorage`).
 - Photo URLs load from Unsplash's image servers, not the API.
-- Result: under about 15 API calls a day in normal use.
+- Result: about 15 API calls a day for refreshes, plus one ping per photo shown (at most 30 per hour).
 
 ## Rendering
 

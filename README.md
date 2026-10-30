@@ -152,7 +152,7 @@ Some newer webOS releases block Developer Mode apps from listing installed apps.
 | **Screensaver Starts After** | Idle time before the screensaver starts: 1, 3, 5, 10 or 30 minutes. Applies to the photo and the black-clock screensaver. |
 | **Ambient Photo Screensaver** | `On` or `Off`. Photos need an Unsplash key and a TV with `fetch` support (webOS 4 or newer); otherwise the black clock is used. |
 | **Photo Duration / Photo Motion** | 30 seconds, 90 seconds or 5 minutes per photo; `Ken Burns (zoom & drift)`, `Drift only` or `None`. High Performance mode always uses no motion. |
-| **Unsplash Access Key** | Paste the Access Key of a free [Unsplash developer app](https://unsplash.com/developers) (50 requests per hour). The app makes about 5 calls per refresh, at most every 12 hours, and shows "Photo by NAME on Unsplash". |
+| **Unsplash Access Key** | Paste the Access Key of a free [Unsplash developer app](https://unsplash.com/developers) (50 requests per hour). The app makes about 5 calls per refresh, at most every 12 hours, and shows "Photo by NAME on Unsplash". It also sends one ping per photo shown, at most 30 per hour. |
 
 ---
 

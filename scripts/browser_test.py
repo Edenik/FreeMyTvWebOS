@@ -313,6 +313,67 @@ setTimeout(function () {
     }, 400);
   });
 
+  var pingPhoto = { id: 'q1', raw: 'assets/icon.png', color: '#000000', name: 'Ann', dl: 'https://api.unsplash.com/photos/q1/download' };
+  steps.push(function (done) { // ping budget blocked: no fetch, id not recorded
+    reset(); state.unsplashKey = 'k'; var calls = [], log = [], n;
+    for (n = 0; n < 30; n++) log.push(Date.now() - 1000);
+    localStorage.setItem('fmtv_ambient_calls', JSON.stringify(log));
+    window.fetch = fakeFetch(200, '49', calls);
+    ambientPing(pingPhoto);
+    setTimeout(function () {
+      eq('ping blocked calls', calls.length, 0);
+      eq('ping blocked unrecorded', (localStorage.getItem('fmtv_ambient_pinged') || '').indexOf('q1'), -1);
+      done();
+    }, 100);
+  });
+  steps.push(function (done) { // ping sent once and recorded once
+    reset(); state.unsplashKey = 'k'; var calls = [];
+    window.fetch = fakeFetch(200, '49', calls);
+    ambientPing(pingPhoto); ambientPing(pingPhoto);
+    setTimeout(function () {
+      eq('ping once calls', calls.length, 1);
+      eq('ping once url', calls[0] && calls[0].url, pingPhoto.dl);
+      eq('ping once recorded', JSON.parse(localStorage.getItem('fmtv_ambient_pinged')).join(','), 'q1');
+      done();
+    }, 100);
+  });
+  steps.push(function (done) { // JSON null in the call log does not wedge a refresh
+    reset(); state.ambient = 'on'; state.unsplashKey = 'k'; var calls = [];
+    localStorage.setItem('fmtv_ambient_calls', 'null');
+    window.fetch = fakeFetch(200, '49', calls);
+    ambientRefresh(true);
+    setTimeout(function () {
+      eq('null log calls', calls.length, 5);
+      eq('null log refreshing', ambientRefreshing, false);
+      done();
+    }, 400);
+  });
+  steps.push(function (done) { // empty credit takes no space
+    reset(); exitScreensaver();
+    eq('credit hidden', getComputedStyle(document.getElementById('screensaverCredit')).display, 'none');
+    done();
+  });
+  steps.push(function (done) { // key is only sent to api.unsplash.com
+    reset(); state.unsplashKey = 'k'; var calls = [], got = null;
+    window.fetch = fakeFetch(200, '49', calls);
+    ambientApi('https://evil.test/x', 40, function (err) { got = err; });
+    setTimeout(function () {
+      eq('evil calls', calls.length, 0);
+      eq('evil error', !!got, true);
+      eq('evil unlogged', localStorage.getItem('fmtv_ambient_calls'), null);
+      done();
+    }, 100);
+  });
+  steps.push(function (done) { // ambientReady needs fetch
+    seedCache(); state.ambient = 'on'; state.unsplashKey = 'k';
+    var saved = window.fetch;
+    window.fetch = undefined;
+    eq('ready no fetch', ambientReady(), false);
+    window.fetch = saved || fakeFetch(200, '49', []);
+    eq('ready with fetch', ambientReady(), true);
+    done();
+  });
+
   (function run(i) {
     if (i >= steps.length) { write(); return; }
     steps[i](function () { setTimeout(function () { run(i + 1); }, 100); });
