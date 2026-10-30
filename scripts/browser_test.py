@@ -69,6 +69,18 @@ setTimeout(function () {
     eq('dim bad', ambientDim('nope'), 0.68);
     eq('dim none', ambientDim(undefined), 0.68);
   }
+  if (need('greetingKey') && need('greetingText')) {
+    eq('greet 4', greetingKey(4), 'Good night');
+    eq('greet 5', greetingKey(5), 'Good morning');
+    eq('greet 11', greetingKey(11), 'Good morning');
+    eq('greet 12', greetingKey(12), 'Good afternoon');
+    eq('greet 16', greetingKey(16), 'Good afternoon');
+    eq('greet 17', greetingKey(17), 'Good evening');
+    eq('greet 21', greetingKey(21), 'Good evening');
+    eq('greet 22', greetingKey(22), 'Good night');
+    eq('greet name', greetingText(19, 'Noa'), t('Good evening') + ', Noa');
+    eq('greet no name', greetingText(19, ''), t('Good evening'));
+  }
   if (need('ambientBudgetAllows')) {
     var now = 10000000, recent = [], old = [], i;
     for (i = 0; i < 40; i++) { recent.push(now - 1000); old.push(now - 3700000); }
@@ -1176,6 +1188,14 @@ setTimeout(function () {
     state.catalog = keepCat;
     closeSettingsModal();
     renderAppsShelf();
+    done();
+  });
+  steps.push(function (done) { // the greeting shows the name and the part of the day
+    state.userName = 'Noa'; updateGreeting();
+    eq('greeting title', document.getElementById('greetingTitle').textContent, greetingText(new Date().getHours(), 'Noa'));
+    eq('greeting eyebrow set', document.getElementById('greetingEyebrow').textContent.length > 0, true);
+    state.userName = ''; updateGreeting();
+    eq('greeting no name', document.getElementById('greetingTitle').textContent, t(greetingKey(new Date().getHours())));
     done();
   });
   steps.push(function (done) { // an HDMI row changes its device with Right and saves at once
