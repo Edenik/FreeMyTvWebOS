@@ -1386,6 +1386,14 @@ setTimeout(function () {
     done();
   });
 
+  steps.push(function (done) { // the honest privacy line sits on the home screen
+    var tl = document.getElementById('trustLine'), sp = tl && tl.querySelector('span');
+    eq('trust line exists', !!tl, true);
+    eq('trust line text', sp ? sp.textContent : null, t('No ads. No account. Your settings stay on this TV.'));
+    eq('trust line visible', !!tl && tl.getClientRects().length > 0, true);
+    done();
+  });
+
   (function run(i) {
     if (i >= steps.length) { write(); return; }
     steps[i](function () { setTimeout(function () { run(i + 1); }, 100); });

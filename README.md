@@ -186,6 +186,9 @@ See the full [ROADMAP.md](ROADMAP.md) for detailed technical specifications.
 | ipapi.co | Approximate location from your public IP | **Only if enabled** in Customize → *Auto-locate by IP* |
 | TVMaze (`api.tvmaze.com`) | Zero-key trending shows | Shows tab without a TMDB key |
 | TMDB (`api.themoviedb.org`) | Trending movies/shows | Only with your key. v3 keys only work as a URL query parameter; prefer the v4 token (sent as a header). The key is stored in plain text in the TV's `localStorage` |
+| Unsplash (`api.unsplash.com`) | Screensaver and home photos | Only with your key (Customize → photos) |
+
+In short: weather (Open-Meteo), trending titles (TMDB with your key; otherwise TVMaze for shows and bundled curated picks for movies), photos (Unsplash, only with your key) and an optional IP-based city lookup (ipapi.co, off by default) are the only outbound requests; your settings never leave the TV, which is what the home screen's "No ads. No account. Your settings stay on this TV." line means.
 
 No telemetry, no ads, no other destinations.
 
@@ -388,6 +391,9 @@ Veja o [ROADMAP.md](ROADMAP.md) completo para as especificações técnicas deta
 | ipapi.co | Localização aproximada pelo seu IP público | **Só se ativado** em Personalizar → *Auto-locate by IP* |
 | TVMaze (`api.tvmaze.com`) | Séries em alta sem chave | Aba Shows sem chave TMDB |
 | TMDB (`api.themoviedb.org`) | Filmes/séries em alta | Só com a sua chave. Chaves v3 só funcionam na query string da URL; prefira o token v4 (enviado em cabeçalho). A chave fica em texto simples no `localStorage` da TV |
+| Unsplash (`api.unsplash.com`) | Fotos do protetor de tela e da tela inicial | Só com a sua chave (Personalizar → fotos) |
+
+Resumindo: clima (Open-Meteo), títulos em alta (TMDB com a sua chave; senão TVMaze para séries e sugestões embutidas para filmes), fotos (Unsplash, só com a sua chave) e a busca opcional da cidade pelo IP (ipapi.co, desativada por padrão) são as únicas requisições externas; suas configurações nunca saem da TV.
 
 Sem telemetria, sem anúncios, sem outros destinos.
 
