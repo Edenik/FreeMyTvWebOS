@@ -543,16 +543,20 @@ setTimeout(function () {
   var awakeVideo = document.getElementById('keepAwakeVideo'), awakeCanvas = document.getElementById('keepAwakeCanvas');
   if (typeof keepAwakeStart !== 'function') { fails.push('keepAwakeStart missing'); write(); return; }
 
-  steps.push(function (done) { // On: the hidden video plays only while our screensaver shows
+  steps.push(function (done) { // On: the hidden video plays whenever the app is in front, and our screensaver ending does not stop it
     seedMany([photo('k1', 'Ann')]);
     state.ambient = 'on'; state.unsplashKey = 'k'; state.keepAwake = 'on'; state.homePhotos = 'off';
     window.fetch = fakeFetch(200, '49', []);
-    eq('awake idle', awakeVideo.srcObject === null || awakeVideo.srcObject === undefined, true);
-    enterScreensaver();
+    keepAwakeStop();
+    eq('awake stopped first', keepAwakeTimer, null);
+    keepAwakeSync();
     setTimeout(function () {
       eq('awake playing', !!awakeVideo.srcObject, true);
       eq('awake timer', keepAwakeTimer !== null, true);
+      enterScreensaver();
       exitScreensaver();
+      eq('awake survives screensaver exit', keepAwakeTimer !== null, true);
+      keepAwakeStop();
       eq('awake stopped', awakeVideo.srcObject === null || awakeVideo.srcObject === undefined, true);
       eq('awake timer cleared', keepAwakeTimer, null);
       done();
@@ -560,6 +564,7 @@ setTimeout(function () {
   });
   steps.push(function (done) { // Off: nothing plays; the black-clock screensaver is unaffected
     reset(); state.keepAwake = 'off';
+    keepAwakeSync();
     enterScreensaver();
     setTimeout(function () {
       eq('awake off video', !!awakeVideo.srcObject, false);
@@ -571,15 +576,17 @@ setTimeout(function () {
   });
   steps.push(function (done) { // an engine without captureStream is skipped without errors
     reset(); state.keepAwake = 'on';
+    keepAwakeStop();
     awakeCanvas.captureStream = undefined; // shadows the prototype method on this element
     var threw = false;
-    try { enterScreensaver(); } catch (e) { threw = true; }
+    try { keepAwakeSync(); enterScreensaver(); } catch (e) { threw = true; }
     setTimeout(function () {
       eq('awake no captureStream threw', threw, false);
       eq('awake no captureStream video', !!awakeVideo.srcObject, false);
       eq('awake no captureStream timer', keepAwakeTimer, null);
       exitScreensaver();
       delete awakeCanvas.captureStream;
+      keepAwakeSync();
       done();
     }, 200);
   });
@@ -634,6 +641,7 @@ setTimeout(function () {
       eq('vis saver ambient', isAmbient(), false);
       eq('vis keepAwake timer', keepAwakeTimer, null);
       setHidden(false);
+      eq('vis keepAwake back', keepAwakeTimer !== null, true);
       delete document.hidden;
       state.homePhotos = 'off'; syncHomePhotos();
       done();

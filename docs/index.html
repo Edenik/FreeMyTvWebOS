@@ -2592,7 +2592,8 @@
               apply: function() { applyHomePhotosSettings(); } },
             { id: 'keepAwake', cat: 3, type: 'choice', field: 'keepAwake', store: 'fmtv_keep_awake', def: 'on', label: 'Keep LG Screensaver Away',
               hint: 'Plays a hidden video so LG does not cover ours',
-              options: ON_OFF },
+              options: ON_OFF,
+              apply: function() { keepAwakeSync(); } },
             { id: 'unsplashKey', cat: 4, type: 'text', secret: true, field: 'unsplashKey', store: 'fmtv_unsplash_key', def: '', label: 'Unsplash Access Key (Optional)',
               hint: 'For the photos. Stored on this TV only',
               apply: function(previous) {
@@ -3469,6 +3470,13 @@
             }
         }
 
+        // LG's own timer can fire before ours, so the video runs whenever the app is in front, not only during our screensaver.
+        function keepAwakeSync() {
+            if (state.keepAwake === 'on' && !document.hidden) keepAwakeStart();
+            else keepAwakeStop();
+        }
+        keepAwakeSync();
+
         // --- OLED-Safe Idle Screensaver ---
         function idleTimeoutMs() {
             var mins = parseInt(state.idleMins, 10);
@@ -3505,13 +3513,12 @@
             screensaverOverlay.classList.remove('active');
             clearInterval(pixelShiftTimer);
             ambientStop();
-            keepAwakeStop();
         }
 
         // In the background (another app launched): stop downloading, pinging and holding the TV awake.
         function onVisibilityChange() {
             if (document.hidden) { if (screensaverOn) exitScreensaver(); syncHomePhotos(); keepAwakeStop(); }
-            else { lastActivity = Date.now(); syncHomePhotos(); }
+            else { lastActivity = Date.now(); syncHomePhotos(); keepAwakeSync(); }
         }
         document.addEventListener('visibilitychange', onVisibilityChange);
 
@@ -3523,7 +3530,9 @@
         document.addEventListener('mousedown', markActivity);
 
         setInterval(function() {
-            if (!screensaverOn && !document.hidden && !modalOpen && !drawerOpen && Date.now() - lastActivity > idleTimeoutMs()) {
+            if (!screensaverOn && !document.hidden && !drawerOpen && Date.now() - lastActivity > idleTimeoutMs()) {
+                // Settings save instantly, so closing Customize loses nothing; without this LG's own screensaver wins.
+                if (modalOpen) closeSettingsModal();
                 enterScreensaver();
             }
         }, 10000);
