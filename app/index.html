@@ -2441,12 +2441,28 @@
         var LAUNCH_HIST_KEY = 'fmtv_launch_hist';
         var LAUNCH_HIST_MAX = 30;
 
+        // Six-hour buckets of the local day: night 0-5, morning 6-11, afternoon 12-17, evening 18-23.
+        function launchBucket(nowMs) { return Math.floor(new Date(nowMs).getHours() / 6); }
+
+        // Always four finite non-negative numbers; anything malformed counts as zeros.
+        function normBuckets(b) {
+            var out = [0, 0, 0, 0];
+            if (b && Object.prototype.toString.call(b) === '[object Array]') {
+                for (var i = 0; i < 4; i++) {
+                    var v = b[i];
+                    if (typeof v === 'number' && isFinite(v) && v > 0) out[i] = Math.floor(v);
+                }
+            }
+            return out;
+        }
+
         function readLaunchHist() {
             try {
                 var h = JSON.parse(localStorage.getItem(LAUNCH_HIST_KEY) || '{}');
                 if (!h || typeof h !== 'object' || Array.isArray(h)) return {};
                 Object.keys(h).forEach(function(id) {
                     if (!h[id] || typeof h[id] !== 'object' || typeof h[id].t !== 'number' || isNaN(h[id].t)) delete h[id];
+                    else h[id].b = normBuckets(h[id].b);
                 });
                 return h;
             } catch (e) { return {}; }
@@ -2457,6 +2473,8 @@
             var entry = hist[appId] || { t: 0, n: 0 };
             entry.t = nowMs;
             entry.n = (entry.n || 0) + 1;
+            entry.b = normBuckets(entry.b);
+            entry.b[launchBucket(nowMs)]++;
             hist[appId] = entry;
             var ids = Object.keys(hist);
             if (ids.length > LAUNCH_HIST_MAX) {
@@ -2466,11 +2484,23 @@
             try { localStorage.setItem(LAUNCH_HIST_KEY, JSON.stringify(hist)); } catch (e) {}
         }
 
-        // Newest first, only apps that exist in the catalog.
-        function recentApps(hist, catalog, limit) {
-            var items = [];
-            catalog.forEach(function(app) { if (hist[app.id]) items.push({ app: app, t: hist[app.id].t }); });
-            items.sort(function(a, b) { return b.t - a.t; });
+        // Newest first, only apps that exist in the catalog. Habit rule: an app opened at least
+        // HABIT_MIN times in the current six-hour bucket, and last opened within HABIT_DAYS days,
+        // goes ahead of the others; within each group order is newest first, then catalog order.
+        // One launch is not a habit, and with no bucket data this is plain newest-first.
+        var HABIT_MIN = 2;
+        var HABIT_DAYS = 14;
+        function recentApps(hist, catalog, limit, nowMs) {
+            if (typeof nowMs !== 'number' || isNaN(nowMs)) nowMs = Date.now();
+            var bucket = launchBucket(nowMs), items = [];
+            catalog.forEach(function(app, idx) {
+                var e = hist[app.id];
+                if (!e) return;
+                var habit = normBuckets(e.b)[bucket];
+                var fresh = nowMs - e.t <= HABIT_DAYS * 86400000;
+                items.push({ app: app, t: e.t, idx: idx, hot: habit >= HABIT_MIN && fresh ? 1 : 0 });
+            });
+            items.sort(function(a, b) { return (b.hot - a.hot) || (b.t - a.t) || (a.idx - b.idx); });
             return items.slice(0, limit);
         }
 
@@ -2678,7 +2708,7 @@
             var section = document.getElementById('pickupSection');
             var row = document.getElementById('pickupRow');
             row.innerHTML = '';
-            var recent = state.pickup === 'on' && !shelfEdit ? recentApps(readLaunchHist(), state.catalog, 3) : [];
+            var recent = state.pickup === 'on' && !shelfEdit ? recentApps(readLaunchHist(), state.catalog, 3, Date.now()) : [];
             section.hidden = recent.length === 0;
             var now = Date.now();
             recent.forEach(function(item) {

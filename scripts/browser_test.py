@@ -154,6 +154,37 @@ setTimeout(function () {
     localStorage.setItem('fmtv_launch_hist', JSON.stringify({ netflix: 5, youtube: { t: 'x' }, ok: { t: 1, n: 1 } }));
     eq('hist malformed dropped', Object.keys(readLaunchHist()).join(','), 'ok');
     localStorage.removeItem('fmtv_launch_hist');
+    // time-of-day buckets: hours 3, 8, 14, 21 land in buckets 0..3
+    [3, 8, 14, 21].forEach(function (h) { recordLaunch('bk', new Date(2026, 9, 30, h, 5).getTime()); });
+    recordLaunch('bk', new Date(2026, 9, 30, 23, 59).getTime());
+    eq('buckets counted', JSON.stringify(readLaunchHist().bk.b), '[1,1,1,2]');
+    eq('bucket edges', [0, 5, 6, 11, 12, 17, 18, 23].map(function (h) { return launchBucket(new Date(2026, 9, 30, h).getTime()); }).join(','), '0,0,1,1,2,2,3,3');
+    localStorage.setItem('fmtv_launch_hist', JSON.stringify({ old: { t: T, n: 3 }, bad: { t: T, n: 1, b: 'x' }, bad2: { t: T, n: 1, b: [1, 'a', null, -4, 9, 9] }, bad3: { t: T, n: 1, b: { 0: 5 } } }));
+    eq('old entry gets zeros', JSON.stringify(readLaunchHist().old.b), '[0,0,0,0]');
+    eq('malformed b zeros', JSON.stringify(readLaunchHist().bad.b), '[0,0,0,0]');
+    eq('partly malformed b', JSON.stringify(readLaunchHist().bad2.b), '[1,0,0,0]');
+    eq('object b zeros', JSON.stringify(readLaunchHist().bad3.b), '[0,0,0,0]');
+    recordLaunch('bad', new Date(2026, 9, 30, 9, 0).getTime());
+    eq('record repairs malformed b', JSON.stringify(readLaunchHist().bad.b), '[0,1,0,0]');
+    localStorage.removeItem('fmtv_launch_hist');
+    for (var ci = 0; ci < 40; ci++) recordLaunch('app' + ci, T + ci);
+    eq('history cap', Object.keys(readLaunchHist()).length, 30);
+    localStorage.removeItem('fmtv_launch_hist');
+    // habit ranking (T is 21:10 = evening bucket 3)
+    var ids = function (h) { return recentApps(h, DEFAULT_CATALOG, 5, T).map(function (r) { return r.app.id; }).join(','); };
+    var HR = 3600000, DAY = 86400000;
+    eq('rank (a) no bucket data = newest first', ids({ netflix: { t: T - 5 * HR, n: 1 }, 'youtube.leanback.v4': { t: T - HR, n: 1 } }), 'youtube.leanback.v4,netflix');
+    eq('rank (a) empty b = newest first', ids({ netflix: { t: T - 5 * HR, n: 1, b: [0, 0, 0, 0] }, 'youtube.leanback.v4': { t: T - HR, n: 1, b: 'x' } }), 'youtube.leanback.v4,netflix');
+    eq('rank (b) habit beats recent', ids({ netflix: { t: T - 5 * HR, n: 2, b: [0, 0, 0, 2] }, 'youtube.leanback.v4': { t: T - HR, n: 1, b: [0, 1, 0, 0] } }), 'netflix,youtube.leanback.v4');
+    eq('rank (c) one launch is not a habit', ids({ netflix: { t: T - 5 * HR, n: 1, b: [0, 0, 0, 1] }, 'youtube.leanback.v4': { t: T - HR, n: 1, b: [0, 1, 0, 0] } }), 'youtube.leanback.v4,netflix');
+    eq('rank habit in other bucket ignored', ids({ netflix: { t: T - 5 * HR, n: 5, b: [0, 5, 0, 0] }, 'youtube.leanback.v4': { t: T - HR, n: 1, b: [0, 0, 0, 0] } }), 'youtube.leanback.v4,netflix');
+    eq('rank stale habit ignored', ids({ netflix: { t: T - 20 * DAY, n: 9, b: [0, 0, 0, 9] }, 'youtube.leanback.v4': { t: T - HR, n: 1 } }), 'youtube.leanback.v4,netflix');
+    eq('rank (d) tie by recency', ids({ netflix: { t: T - 5 * HR, n: 2, b: [0, 0, 0, 2] }, 'youtube.leanback.v4': { t: T - HR, n: 2, b: [0, 0, 0, 2] } }), 'youtube.leanback.v4,netflix');
+    var cat0 = DEFAULT_CATALOG[0].id, cat1 = DEFAULT_CATALOG[1].id, tieH = {};
+    tieH[cat1] = { t: T - HR, n: 1 }; tieH[cat0] = { t: T - HR, n: 1 };
+    eq('rank (d) tie by catalog order', ids(tieH), cat0 + ',' + cat1);
+    eq('rank 3-arg form still works', recentApps({ netflix: { t: 1, n: 1 }, 'youtube.leanback.v4': { t: 2, n: 1 } }, DEFAULT_CATALOG, 3).map(function (r) { return r.app.id; }).join(','), 'youtube.leanback.v4,netflix');
+    eq('scene ignores habit', pickSceneApp('streaming', { netflix: { t: 9, n: 1, b: [0, 0, 0, 0] }, 'com.disney.disneyplus-prod': { t: 5, n: 8, b: [0, 0, 0, 8] } }, DEFAULT_CATALOG, {}).id, 'netflix');
   }
   if (need('pickSceneApp')) {
     var hist2 = { 'com.disney.disneyplus-prod': { t: 5, n: 1 }, netflix: { t: 9, n: 1 } };
