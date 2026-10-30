@@ -139,15 +139,16 @@ setTimeout(function () {
   if (need('recordLaunch') && need('recentApps') && need('relativeWhen')) {
     localStorage.removeItem('fmtv_launch_hist');
     var T = new Date(2026, 9, 30, 21, 10).getTime();
+    var TA = new Date(2026, 9, 30, 15, 10).getTime(); // afternoon: netflix's 21:10 launches are no habit then, so plain recency decides
     recordLaunch('netflix', T - 86400000);
     recordLaunch('youtube.leanback.v4', T - 3600000);
     recordLaunch('netflix', T - 86400000 + 1000);
     var hist = readLaunchHist();
     eq('hist count', hist.netflix.n, 2);
-    var recent = recentApps(hist, DEFAULT_CATALOG, 3);
+    var recent = recentApps(hist, DEFAULT_CATALOG, 3, TA);
     eq('recent order', recent.map(function (r) { return r.app.id; }).join(','), 'youtube.leanback.v4,netflix');
-    eq('recent limit', recentApps(hist, DEFAULT_CATALOG, 1).length, 1);
-    eq('recent unknown app ignored', recentApps({ nope: { t: 1, n: 1 } }, DEFAULT_CATALOG, 3).length, 0);
+    eq('recent limit', recentApps(hist, DEFAULT_CATALOG, 1, TA).length, 1);
+    eq('recent unknown app ignored', recentApps({ nope: { t: 1, n: 1 } }, DEFAULT_CATALOG, 3, TA).length, 0);
     eq('when today', relativeWhen(T - 3600000, T), t('Today, %s', '20:10'));
     eq('when yesterday', relativeWhen(T - 86400000, T), t('Yesterday, %s', '21:10'));
     eq('when older', relativeWhen(T - 3 * 86400000, T).length > 0, true);
