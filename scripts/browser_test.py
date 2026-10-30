@@ -118,6 +118,14 @@ setTimeout(function () {
   if (!document.getElementById('cfgHomePhotos')) out.ambient.push('missing #cfgHomePhotos');
   if (!document.getElementById('homePhotos')) out.ambient.push('missing #homePhotos');
   if (!Object.prototype.hasOwnProperty.call(I18N.pt, 'Photos on Home Screen')) out.ambient.push('no translation: Photos on Home Screen');
+  if (typeof SETTINGS !== 'object' || !SETTINGS.length) {
+    out.ambient.push('SETTINGS missing');
+  } else {
+    SETTINGS.forEach(function (d) {
+      if (d.field && d.id !== 'lang' && state[d.field] !== d.def) out.ambient.push('default mismatch: ' + d.id + ' state=' + JSON.stringify(state[d.field]) + ' def=' + JSON.stringify(d.def));
+      if (d.type === 'choice' && !d.options) out.ambient.push('no options: ' + d.id);
+    });
+  }
   var keyField = document.getElementById('cfgUnsplashKey');
   eq('unsplash key field masked', keyField && keyField.type, 'password');
   ['Screensaver Starts After', '1 minute', '3 minutes', '5 minutes', '10 minutes', '30 minutes',
@@ -623,6 +631,91 @@ setTimeout(function () {
       state.homePhotos = 'off'; syncHomePhotos();
       done();
     }, 400);
+  });
+
+  if (typeof setSettingValue !== 'function') { fails.push('setSettingValue missing'); write(); return; }
+
+  steps.push(function (done) { // the settings engine: persistence, side effects, cycling, favorites, reset
+    var seen = [];
+    var names = ['applyTheme', 'updateClock', 'applyTextSize', 'applyPerfMode', 'applyStaticTranslations', 'renderAppsShelf',
+      'fetchWeather', 'fetchTrendingPicks', 'applyHomePhotosSettings', 'ambientRefresh'];
+    var real = {};
+    names.forEach(function (n) { real[n] = window[n]; window[n] = function () { seen.push(n); }; });
+    var saved = { favorites: state.favorites.slice(), hdmiDevices: JSON.parse(JSON.stringify(state.hdmiDevices)) };
+    var savedStore = {};
+    SETTINGS.forEach(function (d) { if (d.field) { saved[d.field] = state[d.field]; savedStore[d.store] = localStorage.getItem(d.store); } });
+    try {
+      setSettingValue(findSetting('theme'), 'oled');
+      eq('engine theme state', state.theme, 'oled');
+      eq('engine theme stored', localStorage.getItem('fmtv_theme'), 'oled');
+      eq('engine theme apply', seen.indexOf('applyTheme') !== -1, true);
+
+      state.idleMins = '3';
+      cycleSetting(findSetting('idleMins'), 1);
+      eq('engine cycle +1', state.idleMins, '5');
+      state.idleMins = '30';
+      cycleSetting(findSetting('idleMins'), 1);
+      eq('engine cycle wraps up', state.idleMins, '1');
+      cycleSetting(findSetting('idleMins'), -1);
+      eq('engine cycle wraps down', state.idleMins, '30');
+
+      seen.length = 0;
+      setSettingValue(findSetting('city'), 'Haifa');
+      eq('engine city state', state.city, 'Haifa');
+      eq('engine city weather', seen.indexOf('fetchWeather') !== -1, true);
+
+      localStorage.setItem('fmtv_ambient_cache', '{"photos":[],"at":1}');
+      setSettingValue(findSetting('unsplashKey'), 'key-one');
+      eq('engine key clears cache', localStorage.getItem('fmtv_ambient_cache'), null);
+      localStorage.setItem('fmtv_ambient_cache', '{"photos":[],"at":1}');
+      setSettingValue(findSetting('unsplashKey'), 'key-one');
+      eq('engine same key keeps cache', localStorage.getItem('fmtv_ambient_cache') !== null, true);
+      eq('engine secret hidden', settingValueText(findSetting('unsplashKey')).indexOf('key-one'), -1);
+      state.unsplashKey = '';
+      eq('engine secret empty', settingValueText(findSetting('unsplashKey')), t('Not set'));
+
+      var hd = hdmiSettings();
+      eq('engine hdmi rows', hd.length, state.catalog.filter(isHDMI).length);
+      if (hd.length) {
+        seen.length = 0;
+        setSettingValue(hd[0], 'ps5');
+        eq('engine hdmi state', state.hdmiDevices[hd[0].hdmi.id], 'ps5');
+        eq('engine hdmi stored', JSON.parse(localStorage.getItem('fmtv_hdmi_devices'))[hd[0].hdmi.id], 'ps5');
+        eq('engine hdmi value', settingValue(hd[0]), 'ps5');
+        eq('engine hdmi shelf', seen.indexOf('renderAppsShelf') !== -1, true);
+      }
+      var cat0 = settingsForCategory(0);
+      eq('engine cat0 first is shelf', cat0[0] && cat0[0].id, 'shelf');
+      eq('engine cat0 hdmi follow', cat0.length, 1 + hd.length);
+
+      state.favorites = ['a'];
+      eq('engine fav last', toggleFavorite('a'), 'last');
+      eq('engine fav add', toggleFavorite('b'), 'added');
+      eq('engine fav stored', localStorage.getItem('fmtv_favorites'), JSON.stringify(['a', 'b']));
+      eq('engine fav remove', toggleFavorite('b'), 'removed');
+      state.favorites = ['1', '2', '3', '4', '5', '6', '7', '8'];
+      eq('engine fav full', toggleFavorite('x'), 'full');
+      eq('engine fav full unchanged', state.favorites.length, 8);
+
+      seen.length = 0;
+      setSettingValue(findSetting('theme'), 'day');
+      resetAllSettings();
+      eq('engine reset theme', state.theme, 'auto');
+      eq('engine reset city', state.city, '');
+      eq('engine reset favorites', JSON.stringify(state.favorites), JSON.stringify(DEFAULT_FAVORITES));
+      eq('engine reset hdmi', JSON.stringify(state.hdmiDevices), '{}');
+      eq('engine reset applies', seen.indexOf('applyTheme') !== -1 && seen.indexOf('fetchWeather') !== -1 && seen.indexOf('renderAppsShelf') !== -1, true);
+    } finally {
+      names.forEach(function (n) { window[n] = real[n]; });
+      Object.keys(saved).forEach(function (f) { state[f] = saved[f]; });
+      Object.keys(savedStore).forEach(function (k) {
+        if (savedStore[k] === null) localStorage.removeItem(k); else localStorage.setItem(k, savedStore[k]);
+      });
+      localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
+      localStorage.setItem('fmtv_hdmi_devices', JSON.stringify(state.hdmiDevices));
+      localStorage.removeItem('fmtv_ambient_cache');
+    }
+    done();
   });
 
   (function run(i) {
