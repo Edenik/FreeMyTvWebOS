@@ -110,6 +110,10 @@ setTimeout(function () {
   ['cfgIdleMins', 'cfgAmbient', 'cfgAmbientSecs', 'cfgAmbientMotion', 'cfgUnsplashKey'].forEach(function (id) {
     if (!document.getElementById(id)) out.ambient.push('missing #' + id);
   });
+  eq('state home photos', state.homePhotos, 'off');
+  if (!document.getElementById('cfgHomePhotos')) out.ambient.push('missing #cfgHomePhotos');
+  if (!document.getElementById('homePhotos')) out.ambient.push('missing #homePhotos');
+  if (!Object.prototype.hasOwnProperty.call(I18N.pt, 'Photos on Home Screen')) out.ambient.push('no translation: Photos on Home Screen');
   var keyField = document.getElementById('cfgUnsplashKey');
   eq('unsplash key field masked', keyField && keyField.type, 'password');
   ['Screensaver Starts After', '1 minute', '3 minutes', '5 minutes', '10 minutes', '30 minutes',
@@ -439,6 +443,82 @@ setTimeout(function () {
       state.ambientMotion = 'kenburns';
       done();
     }, 600);
+  });
+
+  var home = document.getElementById('homePhotos');
+  function homeActive() { return !!home && /\bactive\b/.test(home.className); }
+  function homeCredit() { return document.getElementById('homePhotoCredit').textContent; }
+  function homeOpacities() {
+    return [document.getElementById('hpPhotoA').style.opacity, document.getElementById('hpPhotoB').style.opacity];
+  }
+  if (typeof syncHomePhotos !== 'function') { fails.push('syncHomePhotos missing'); write(); return; }
+
+  steps.push(function (done) { // home photos show dimmed (0.3 for a dark photo), with credit and one ping; Off hides them
+    seedMany([photo('h1', 'Ann')]);
+    state.ambient = 'off'; state.homePhotos = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none'; state.perfMode = 'standard';
+    var calls = []; window.fetch = fakeFetch(200, '49', calls);
+    syncHomePhotos();
+    setTimeout(function () {
+      eq('home active', homeActive(), true);
+      eq('home credit', homeCredit(), t('Photo by %s on Unsplash', 'Ann'));
+      eq('home dim', homeOpacities().indexOf('0.3') !== -1, true);
+      eq('home pings', calls.filter(function (c) { return c.url.indexOf('/photos/h1/download') !== -1; }).length, 1);
+      state.homePhotos = 'off';
+      syncHomePhotos();
+      eq('home off inactive', homeActive(), false);
+      eq('home off credit', homeCredit(), '');
+      eq('home off src', document.getElementById('hpPhotoA').getAttribute('src'), null);
+      done();
+    }, 500);
+  });
+  steps.push(function (done) { // the screensaver takes over and the home photos resume on exit
+    seedMany([photo('h2', 'Ann')]);
+    state.ambient = 'on'; state.homePhotos = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none';
+    window.fetch = fakeFetch(200, '49', []);
+    syncHomePhotos();
+    enterScreensaver();
+    setTimeout(function () {
+      eq('home paused', homeActive(), false);
+      eq('screensaver ambient', isAmbient(), true);
+      exitScreensaver();
+      setTimeout(function () {
+        eq('home resumes', homeActive(), true);
+        state.homePhotos = 'off';
+        syncHomePhotos();
+        done();
+      }, 300);
+    }, 400);
+  });
+  steps.push(function (done) { // no key, or an empty cache, means no home photos
+    seedMany([photo('h3', 'Ann')]);
+    state.homePhotos = 'on'; state.unsplashKey = '';
+    syncHomePhotos();
+    eq('home nokey', homeActive(), false);
+    state.unsplashKey = 'k'; reset();
+    syncHomePhotos();
+    eq('home empty cache', homeActive(), false);
+    state.homePhotos = 'off';
+    syncHomePhotos();
+    done();
+  });
+  steps.push(function (done) { // refreshes run for the home photos alone, and stop when both switches are Off
+    reset(); state.ambient = 'off'; state.homePhotos = 'on'; state.unsplashKey = 'k';
+    var calls = []; window.fetch = fakeFetch(200, '49', calls);
+    ambientRefresh(true);
+    function randomCalls(list) { return list.filter(function (c) { return c.url.indexOf('/photos/random') !== -1; }).length; }
+    setTimeout(function () {
+      eq('home refresh calls', randomCalls(calls), 5); // the home layer also pings the first photo it shows
+      state.homePhotos = 'off';
+      syncHomePhotos();
+      reset();
+      var calls2 = []; window.fetch = fakeFetch(200, '49', calls2);
+      ambientRefresh(true);
+      setTimeout(function () {
+        eq('both off refresh', randomCalls(calls2), 0);
+        state.ambient = 'on';
+        done();
+      }, 200);
+    }, 400);
   });
 
   (function run(i) {

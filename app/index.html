@@ -979,6 +979,46 @@
         }
 
         .screensaver-credit:empty { display: none; }
+
+        /* Home-screen photos: a dimmed full-screen layer under the dashboard (.container is z-index 10). */
+        .home-photos {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .home-photos.active {
+            display: block;
+        }
+
+        .home-photos:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%);
+        }
+
+        .home-photo-credit {
+            position: fixed;
+            left: 54px;
+            bottom: 10px;
+            z-index: 11;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.35);
+            pointer-events: none;
+        }
+
+        .home-photo-credit:empty { display: none; }
     </style>
     <script>
         (function() {
@@ -994,6 +1034,11 @@
 </head>
 <body>
     <div class="ambient-glow" id="ambientGlow"></div>
+    <div class="home-photos" id="homePhotos" aria-hidden="true">
+        <img class="ss-photo" id="hpPhotoA" alt="">
+        <img class="ss-photo" id="hpPhotoB" alt="">
+    </div>
+    <div class="home-photo-credit" id="homePhotoCredit"></div>
     <div class="toast-msg" id="toastMsg" role="status" aria-live="polite">Launching...</div>
 
     <div class="container">
@@ -1174,6 +1219,13 @@
                             <option value="kenburns">Ken Burns (zoom &amp; drift)</option>
                             <option value="drift">Drift only</option>
                             <option value="none">None</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Photos on Home Screen</label>
+                        <select class="field-input modal-nav" id="cfgHomePhotos">
+                            <option value="off">Off</option>
+                            <option value="on">On</option>
                         </select>
                     </div>
                     <div class="field-group" style="grid-column: span 2;">
@@ -1373,6 +1425,7 @@
             ambient: localStorage.getItem('fmtv_ambient') || 'on',
             ambientSecs: localStorage.getItem('fmtv_ambient_secs') || '90',
             ambientMotion: localStorage.getItem('fmtv_ambient_motion') || 'kenburns',
+            homePhotos: localStorage.getItem('fmtv_home_photos') || 'off',
             catalog: DEFAULT_CATALOG.slice(),
             picksTab: 'movies',
             hourlyForecast: [],
@@ -1406,7 +1459,7 @@
                 'Screensaver Starts After': 'Protetor de Tela Inicia Após', '1 minute': '1 minuto', '3 minutes': '3 minutos', '5 minutes': '5 minutos', '10 minutes': '10 minutos', '30 minutes': '30 minutos',
                 'Ambient Photo Screensaver': 'Protetor de Tela com Fotos', 'Off': 'Desligado', 'Photo Duration': 'Duração da Foto', '30 seconds': '30 segundos', '90 seconds': '90 segundos',
                 'Photo Motion': 'Movimento da Foto', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom e deslize)', 'Drift only': 'Só deslize', 'None': 'Nenhum',
-                'Unsplash Access Key (Optional)': 'Chave de Acesso Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para o protetor de fotos', 'Photo by %s on Unsplash': 'Foto de %s no Unsplash', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma da TV)',
+                'Unsplash Access Key (Optional)': 'Chave de Acesso Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para o protetor de fotos', 'Photo by %s on Unsplash': 'Foto de %s no Unsplash', 'Photos on Home Screen': 'Fotos na Tela Inicial', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma da TV)',
                 'Text Size (weather & clock)': 'Tamanho do texto (clima e relógio)', 'Normal': 'Normal', 'Large': 'Grande', 'Extra large': 'Extra grande',
                 'Reset Defaults': 'Restaurar Padrões', 'Save & Apply': 'Salvar e Aplicar',
                 'Weather & Sun': 'Clima e Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Nascer do Sol', 'Sunset': 'Pôr do Sol', 'Close': 'Fechar',
@@ -1470,7 +1523,7 @@
                 'Screensaver Starts After': 'El Protector de Pantalla Inicia Tras', '1 minute': '1 minuto', '3 minutes': '3 minutos', '5 minutes': '5 minutos', '10 minutes': '10 minutos', '30 minutes': '30 minutos',
                 'Ambient Photo Screensaver': 'Protector de Pantalla con Fotos', 'Off': 'Desactivado', 'Photo Duration': 'Duración de la Foto', '30 seconds': '30 segundos', '90 seconds': '90 segundos',
                 'Photo Motion': 'Movimiento de la Foto', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom y desplazamiento)', 'Drift only': 'Solo desplazamiento', 'None': 'Ninguno',
-                'Unsplash Access Key (Optional)': 'Clave de acceso de Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para el protector con fotos', 'Photo by %s on Unsplash': 'Foto de %s en Unsplash', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma del TV)',
+                'Unsplash Access Key (Optional)': 'Clave de acceso de Unsplash (Opcional)', 'Optional for photo screensaver': 'Opcional para el protector con fotos', 'Photo by %s on Unsplash': 'Foto de %s en Unsplash', 'Photos on Home Screen': 'Fotos en la Pantalla de Inicio', 'Language': 'Idioma', 'Auto (TV language)': 'Auto (idioma del TV)',
                 'Text Size (weather & clock)': 'Tamaño del texto (clima y reloj)', 'Normal': 'Normal', 'Large': 'Grande', 'Extra large': 'Extra grande',
                 'Reset Defaults': 'Restablecer', 'Save & Apply': 'Guardar y Aplicar',
                 'Weather & Sun': 'Clima y Sol', 'Next Hours': 'Próximas Horas', 'Sunrise': 'Amanecer', 'Sunset': 'Atardecer', 'Close': 'Cerrar',
@@ -1534,7 +1587,7 @@
                 'Screensaver Starts After': 'Bildschirmschoner startet nach', '1 minute': '1 Minute', '3 minutes': '3 Minuten', '5 minutes': '5 Minuten', '10 minutes': '10 Minuten', '30 minutes': '30 Minuten',
                 'Ambient Photo Screensaver': 'Foto-Bildschirmschoner', 'Off': 'Aus', 'Photo Duration': 'Fotodauer', '30 seconds': '30 Sekunden', '90 seconds': '90 Sekunden',
                 'Photo Motion': 'Fotobewegung', 'Ken Burns (zoom & drift)': 'Ken Burns (Zoom & Drift)', 'Drift only': 'Nur Drift', 'None': 'Keine',
-                'Unsplash Access Key (Optional)': 'Unsplash-Zugriffsschlüssel (optional)', 'Optional for photo screensaver': 'Optional für den Foto-Bildschirmschoner', 'Photo by %s on Unsplash': 'Foto von %s auf Unsplash', 'Language': 'Sprache', 'Auto (TV language)': 'Auto (TV-Sprache)',
+                'Unsplash Access Key (Optional)': 'Unsplash-Zugriffsschlüssel (optional)', 'Optional for photo screensaver': 'Optional für den Foto-Bildschirmschoner', 'Photo by %s on Unsplash': 'Foto von %s auf Unsplash', 'Photos on Home Screen': 'Fotos auf dem Startbildschirm', 'Language': 'Sprache', 'Auto (TV language)': 'Auto (TV-Sprache)',
                 'Text Size (weather & clock)': 'Textgröße (Wetter & Uhr)', 'Normal': 'Normal', 'Large': 'Groß', 'Extra large': 'Sehr groß',
                 'Reset Defaults': 'Zurücksetzen', 'Save & Apply': 'Speichern & Anwenden',
                 'Weather & Sun': 'Wetter & Sonne', 'Next Hours': 'Nächste Stunden', 'Sunrise': 'Sonnenaufgang', 'Sunset': 'Sonnenuntergang', 'Close': 'Schließen',
@@ -1598,7 +1651,7 @@
                 'Screensaver Starts After': 'Écran de veille après', '1 minute': '1 minute', '3 minutes': '3 minutes', '5 minutes': '5 minutes', '10 minutes': '10 minutes', '30 minutes': '30 minutes',
                 'Ambient Photo Screensaver': 'Écran de veille photo', 'Off': 'Désactivé', 'Photo Duration': 'Durée de la photo', '30 seconds': '30 secondes', '90 seconds': '90 secondes',
                 'Photo Motion': 'Mouvement de la photo', 'Ken Burns (zoom & drift)': 'Ken Burns (zoom et dérive)', 'Drift only': 'Dérive seule', 'None': 'Aucun',
-                'Unsplash Access Key (Optional)': 'Clé d’accès Unsplash (Facultatif)', 'Optional for photo screensaver': 'Facultatif pour l’écran de veille photo', 'Photo by %s on Unsplash': 'Photo de %s sur Unsplash', 'Language': 'Langue', 'Auto (TV language)': 'Auto (langue de la TV)',
+                'Unsplash Access Key (Optional)': 'Clé d’accès Unsplash (Facultatif)', 'Optional for photo screensaver': 'Facultatif pour l’écran de veille photo', 'Photo by %s on Unsplash': 'Photo de %s sur Unsplash', 'Photos on Home Screen': 'Photos sur l’écran d’accueil', 'Language': 'Langue', 'Auto (TV language)': 'Auto (langue de la TV)',
                 'Text Size (weather & clock)': 'Taille du texte (météo et horloge)', 'Normal': 'Normal', 'Large': 'Grand', 'Extra large': 'Très grand',
                 'Reset Defaults': 'Réinitialiser', 'Save & Apply': 'Enregistrer et Appliquer',
                 'Weather & Sun': 'Météo et Soleil', 'Next Hours': 'Prochaines Heures', 'Sunrise': 'Lever du Soleil', 'Sunset': 'Coucher du Soleil', 'Close': 'Fermer',
@@ -2494,6 +2547,7 @@
             document.getElementById('cfgAmbient').value = state.ambient;
             document.getElementById('cfgAmbientSecs').value = state.ambientSecs;
             document.getElementById('cfgAmbientMotion').value = state.ambientMotion;
+            document.getElementById('cfgHomePhotos').value = state.homePhotos;
             document.getElementById('cfgUnsplashKey').value = state.unsplashKey;
 
             renderAppSelectorGrid();
@@ -2748,7 +2802,7 @@
 
         // One random-30 call per theme (about 150 photos). Keeps the old cache unless at least 20 photos came back.
         function ambientRefresh(force) {
-            if (ambientRefreshing || state.ambient !== 'on' || !state.unsplashKey || typeof fetch !== 'function') return;
+            if (ambientRefreshing || (state.ambient !== 'on' && state.homePhotos !== 'on') || !state.unsplashKey || typeof fetch !== 'function') return;
             var cache = ambientRead('fmtv_ambient_cache', null);
             if (!force && cache && cache.photos && cache.photos.length >= AMBIENT_MIN_CACHED && Date.now() - cache.at < AMBIENT_REFRESH_MS) return;
             ambientRefreshing = true;
@@ -2758,6 +2812,7 @@
                 ambientRefreshing = false;
                 if (photos.length >= AMBIENT_MIN_CACHED) {
                     try { localStorage.setItem('fmtv_ambient_cache', JSON.stringify({ photos: photos, at: Date.now() })); } catch (e) {}
+                    syncHomePhotos();
                 }
             }
 
@@ -2781,9 +2836,14 @@
         }
 
         // --- Ambient (Unsplash) screensaver: photo layer ---
-        function ambientReady() {
+        // Photos can be shown: the engine has fetch, a key is set and the cache has photos.
+        function ambientCacheReady() {
             var cache = ambientRead('fmtv_ambient_cache', null);
-            return typeof fetch === 'function' && state.ambient === 'on' && !!state.unsplashKey && !!cache && !!cache.photos && cache.photos.length > 0;
+            return typeof fetch === 'function' && !!state.unsplashKey && !!cache && !!cache.photos && cache.photos.length > 0;
+        }
+
+        function ambientReady() {
+            return state.ambient === 'on' && ambientCacheReady();
         }
 
         // Slow zoom and drift (Ken Burns), drift only, or still. Only transform and opacity animate.
@@ -2888,6 +2948,24 @@
         function ambientStart() { screensaverPhotos.start(); }
         function ambientStop() { screensaverPhotos.stop(); }
 
+        // Photos behind the home screen dashboard: dimmer than the screensaver, paused while the screensaver shows.
+        var homePhotoPlayer = ambientPlayer({
+            a: 'hpPhotoA', b: 'hpPhotoB', credit: 'homePhotoCredit', dimScale: 0.55, secs: ambientSecs,
+            onStart: function() { document.getElementById('homePhotos').classList.add('active'); },
+            onStop: function() { document.getElementById('homePhotos').classList.remove('active'); }
+        });
+
+        function homePhotosWanted() {
+            return state.homePhotos === 'on' && ambientCacheReady() && !screensaverOn;
+        }
+
+        // Start or stop the home photos so they match the settings and the screensaver state.
+        function syncHomePhotos() {
+            var wanted = homePhotosWanted();
+            if (wanted && !homePhotoPlayer.on) homePhotoPlayer.start();
+            else if (!wanted && homePhotoPlayer.on) homePhotoPlayer.stop();
+        }
+
         // --- OLED-Safe Idle Screensaver ---
         function idleTimeoutMs() {
             var mins = parseInt(state.idleMins, 10);
@@ -2910,6 +2988,7 @@
 
         function enterScreensaver() {
             screensaverOn = true;
+            syncHomePhotos();
             screensaverOverlay.classList.add('active');
             if (ambientReady()) ambientStart();
             shiftScreensaverClock();
@@ -2918,6 +2997,7 @@
 
         function exitScreensaver() {
             screensaverOn = false;
+            syncHomePhotos();
             screensaverOverlay.classList.remove('active');
             clearInterval(pixelShiftTimer);
             ambientStop();
@@ -2938,6 +3018,7 @@
 
         // Refresh the photo cache in the background (never from inside the screensaver).
         setTimeout(function() { ambientRefresh(false); }, 20000);
+        setTimeout(syncHomePhotos, 2000);
         setInterval(function() { if (!screensaverOn) ambientRefresh(false); }, 30 * 60 * 1000);
 
         document.getElementById('closeModalBtn').addEventListener('click', closeSettingsModal);
@@ -2957,6 +3038,7 @@
             document.getElementById('cfgAmbient').value = 'on';
             document.getElementById('cfgAmbientSecs').value = '90';
             document.getElementById('cfgAmbientMotion').value = 'kenburns';
+            document.getElementById('cfgHomePhotos').value = 'off';
             document.getElementById('cfgUnsplashKey').value = '';
             renderAppSelectorGrid();
             refreshModalNavList();
@@ -2980,6 +3062,7 @@
             state.ambient = document.getElementById('cfgAmbient').value;
             state.ambientSecs = document.getElementById('cfgAmbientSecs').value;
             state.ambientMotion = document.getElementById('cfgAmbientMotion').value;
+            state.homePhotos = document.getElementById('cfgHomePhotos').value;
             state.unsplashKey = document.getElementById('cfgUnsplashKey').value.trim();
 
             localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites));
@@ -2995,6 +3078,7 @@
             localStorage.setItem('fmtv_ambient', state.ambient);
             localStorage.setItem('fmtv_ambient_secs', state.ambientSecs);
             localStorage.setItem('fmtv_ambient_motion', state.ambientMotion);
+            localStorage.setItem('fmtv_home_photos', state.homePhotos);
             localStorage.setItem('fmtv_unsplash_key', state.unsplashKey);
 
             applyStaticTranslations();
@@ -3010,6 +3094,7 @@
                 localStorage.removeItem('fmtv_ambient_pause');
             }
             ambientRefresh(false);
+            syncHomePhotos();
             closeSettingsModal();
             showToast(t('Saved & Applied!'));
         });
