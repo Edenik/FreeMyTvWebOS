@@ -654,9 +654,13 @@ setTimeout(function () {
     var extraKeys = ['fmtv_ambient_cache', 'fmtv_ambient_pause'];
     var extra = {};
     extraKeys.forEach(function (k) { extra[k] = localStorage.getItem(k); });
+    function flushNet() { if (typeof flushSettingsNetwork === 'function') flushSettingsNetwork(); }
+    function count(n) { return seen.filter(function (s) { return s === n; }).length; }
+    eq('engine has flushSettingsNetwork', typeof flushSettingsNetwork, 'function');
     function called(label, id, value, expected) {
       seen.length = 0;
       setSettingValue(findSetting(id), value);
+      flushNet();
       expected.forEach(function (n) { eq('engine ' + label + ' calls ' + n, seen.indexOf(n) !== -1, true); });
     }
     try {
@@ -676,6 +680,7 @@ setTimeout(function () {
 
       seen.length = 0;
       setSettingValue(findSetting('city'), 'Haifa');
+      flushNet();
       eq('engine city state', state.city, 'Haifa');
       eq('engine city weather', seen.indexOf('fetchWeather') !== -1, true);
 
@@ -711,8 +716,26 @@ setTimeout(function () {
       eq('engine fav full', toggleFavorite('x'), 'full');
       eq('engine fav full unchanged', state.favorites.length, 8);
 
-      called('lang', 'lang', 'en', ['applyStaticTranslations', 'renderAppsShelf', 'updateClock', 'fetchWeather', 'fetchTrendingPicks']);
-      called('perfMode', 'perfMode', 'high', ['applyPerfMode', 'applyHomePhotosSettings']);
+      called('lang', 'lang', 'en', ['applyStaticTranslations', 'renderAppsShelf', 'updateClock', 'applyTheme', 'fetchWeather', 'fetchTrendingPicks']);
+      called('perfMode', 'perfMode', 'high', ['applyPerfMode', 'applyHomePhotosSettings', 'applyTheme']);
+      called('ipLocate', 'ipLocate', 'on', ['fetchWeather']);
+      called('tmdbKey', 'tmdbKey', 'tmdb-test', ['fetchTrendingPicks']);
+
+      seen.length = 0;
+      for (var r = 0; r < 5; r++) cycleSetting(findSetting('lang'), 1);
+      eq('engine rapid lang: no weather before flush', count('fetchWeather'), 0);
+      eq('engine rapid lang: no picks before flush', count('fetchTrendingPicks'), 0);
+      flushNet();
+      eq('engine rapid lang: weather once', count('fetchWeather'), 1);
+      eq('engine rapid lang: picks once', count('fetchTrendingPicks'), 1);
+      flushNet();
+      eq('engine flush twice runs nothing more', count('fetchWeather') + count('fetchTrendingPicks'), 2);
+      seen.length = 0;
+      setSettingValue(findSetting('city'), 'Debounce');
+      eq('engine city weather waits', count('fetchWeather'), 0);
+      flushNet();
+      eq('engine city weather after flush', count('fetchWeather'), 1);
+      eq('engine city fetches no picks', count('fetchTrendingPicks'), 0);
       called('textSize', 'textSize', 'large', ['applyTextSize']);
       called('clockFormat', 'clockFormat', '12h', ['updateClock']);
       called('homePhotos', 'homePhotos', 'on', ['ambientRefresh', 'applyHomePhotosSettings']);
@@ -734,6 +757,7 @@ setTimeout(function () {
     } catch (e) {
       fails.push('engine threw: ' + e);
     } finally {
+      flushNet(); // nothing pending may fire after the spies are gone
       names.forEach(function (n) { window[n] = real[n]; });
       Object.keys(saved).forEach(function (f) { state[f] = saved[f]; });
       Object.keys(savedStore).forEach(function (k) {
@@ -789,6 +813,11 @@ setTimeout(function () {
     eq('no wrap past Close', settingsUi.catFocus, 5);
     press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp');
     eq('no wrap above first', settingsUi.catFocus, 0);
+    eq('fr key hint feminine', I18N.fr['For the photos. Stored on this TV only'].indexOf('Stockée uniquement sur cette TV') !== -1, true);
+    eq('es shelf apps says estante', I18N.es['Shelf apps'].indexOf('estante') !== -1 && I18N.es['Shelf apps'].indexOf('estantería') === -1, true);
+    eq('es keep one says estante', I18N.es['Keep at least one app on the shelf.'].indexOf('estante') !== -1 && I18N.es['Keep at least one app on the shelf.'].indexOf('estantería') === -1, true);
+    eq('de not set', I18N.de['Not set'], 'Nicht festgelegt');
+    eq('de confirm', I18N.de['Press OK again to confirm'], 'Zum Bestätigen erneut OK drücken');
     press('ArrowLeft');
     eq('left in categories is a no-op', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:0');
     eq('cats hints', document.getElementById('settingsHints').textContent.indexOf(t('OK or Right: open')) !== -1, true);
@@ -887,6 +916,23 @@ setTimeout(function () {
     closeSettingsModal();
     done();
   });
+  steps.push(function (done) { // background renders (shelf, picks) do not steal focus from an open editor
+    var keepCity = state.city;
+    openSettingsModal();
+    settingsUi.cat = 2; settingsUi.catFocus = 2; renderSettings(); press('Enter'); // first setting: City
+    press('Enter');
+    var input = document.getElementById('settingsEditInput');
+    eq('city editor open', !!input && settingsUi.zone === 'edit', true);
+    input.value = 'Half-typ';
+    renderAppsShelf();
+    renderPicks(FALLBACK_MOVIES);
+    eq('editor survives background renders', settingsUi.zone, 'edit');
+    eq('editor keeps DOM focus', document.activeElement && document.activeElement.id, 'settingsEditInput');
+    eq('half-typed text not committed', state.city, keepCity);
+    press('Escape');
+    closeSettingsModal();
+    done();
+  });
   steps.push(function (done) { // long lists scroll to keep the focused row in view (Photos & Screensaver has 7 rows, taller than the list at 1080p)
     openSettingsModal();
     settingsUi.cat = 3; settingsUi.catFocus = 3; renderSettings(); press('Enter');
@@ -945,6 +991,8 @@ setTimeout(function () {
     var keepCat = state.catalog, keepFav = state.favorites.slice(), big = state.catalog.slice(), k;
     for (k = 0; big.length < 60; k++) big.push({ id: 'test.dummy' + k, title: 'Dummy ' + k });
     state.catalog = big;
+    eq('no settings apps grid while the page is closed', document.querySelectorAll('#settingsAppsGrid').length, 0);
+    eq('home shelf grid id stays single', document.querySelectorAll('#appsGrid').length, 1);
     openSettingsModal();
     press('Enter'); press('Enter'); // category 0, then "Shelf apps"
     var grid = document.getElementById('settingsAppsGrid'), guard = 80, okDown = true, okUp = true, node;
@@ -980,6 +1028,25 @@ setTimeout(function () {
 
     state.catalog = keepCat; state.favorites = keepFav;
     closeSettingsModal();
+    done();
+  });
+  steps.push(function (done) { // apps found while the apps page is open keep Done focused and appear at once
+    var keepCat = state.catalog.slice();
+    openSettingsModal();
+    press('Enter'); press('Enter'); // category 0, then "Shelf apps"
+    var oldLen = state.catalog.length;
+    settingsUi.appIdx = oldLen; paintFocus();
+    eq('focus on Done before growth', modalEl().querySelector('.sf') === document.getElementById('appsDone'), true);
+    addLaunchPoints([{ appId: 'test.grow.one', title: 'Grow One' }, { appId: 'test.grow.two', title: 'Grow Two' }]);
+    eq('catalog grew', state.catalog.length, oldLen + 2);
+    eq('Done index follows the growth', settingsUi.appIdx, state.catalog.length);
+    eq('new tiles shown', !!modalEl().querySelector('.apps-tile[data-i="' + oldLen + '"]'), true);
+    paintFocus();
+    eq('one focus mark after growth', sfCount(), 1);
+    eq('Done still focused after growth', modalEl().querySelector('.sf') === document.getElementById('appsDone'), true);
+    state.catalog = keepCat;
+    closeSettingsModal();
+    renderAppsShelf();
     done();
   });
   steps.push(function (done) { // an HDMI row changes its device with Right and saves at once
@@ -1043,6 +1110,7 @@ setTimeout(function () {
     eq('click enters the category', settingsUi.zone, 'rows');
     eq('click selected category', settingsUi.cat, 2);
     closeSettingsModal();
+    if (typeof flushSettingsNetwork === 'function') flushSettingsNetwork(); // no debounced fetch fires after the stubs are restored
     ['fetchWeather', 'fetchTrendingPicks', 'ambientRefresh'].forEach(function (n) { window[n] = uiReal[n]; });
     done();
   });

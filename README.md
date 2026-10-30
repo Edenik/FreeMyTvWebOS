@@ -135,7 +135,7 @@ Choose **Reorder** on the main shelf. Select a tile and press OK to pick it up, 
 
 Launch messages use the app or console name and report unavailable apps, failures, or no response after eight seconds. Repeated presses are ignored while a launch is pending; browser previews explain that launching requires an LG TV.
 
-Under **HDMI Devices**, press a port to cycle through HDMI, PS5, PS4, Xbox, Nintendo Switch, and Gaming PC, then choose **Save & Apply**. These are manual, per-port choices; connected consoles are not automatically detected. The tile keeps launching the same HDMI input. Cancel discards pending changes, and Reset Defaults clears device choices when saved.
+Each HDMI input is a row under **Shelf & Inputs**, right after **Shelf apps**: Left/Right (or OK) cycles the port through HDMI, PS5, PS4, Xbox, Nintendo Switch, and Gaming PC, and every change is saved at once. These are manual, per-port choices; connected consoles are not automatically detected. The tile keeps launching the same HDMI input. There is no Save, Cancel or Reset Defaults button: **Reset to defaults** is a row under **Accounts & Keys** that needs a second OK to confirm, and it also clears the device choices.
 
 The shelf displays larger artwork with bundled brand logos for PS5, PS4, Xbox, Nintendo Switch, and the streaming apps in the default catalog (including Netflix). These logos work offline. Other installed apps use icons supplied by webOS when accessible; missing or unreadable icons fall back to a readable app name.
 
@@ -342,6 +342,8 @@ python scripts/install.py
 ## ⚙️ Deixe do Seu Jeito (Personalização na TV)
 
 Clique no botão **⚙️ Customize** no canto superior direito do painel usando o controle remoto:
+
+Cada entrada HDMI é uma linha em **Prateleira e Entradas**, logo depois de **Apps da prateleira**: Esquerda/Direita (ou OK) alterna a porta entre HDMI, PS5, PS4, Xbox, Nintendo Switch e PC Gamer, e cada mudança é salva na hora. São escolhas manuais, por porta; consoles conectados não são detectados automaticamente. O bloco continua abrindo a mesma entrada HDMI. Não há botões Salvar, Cancelar ou Restaurar Padrões: **Restaurar padrões** é uma linha em **Contas e Chaves** que pede um segundo OK para confirmar, e também limpa as escolhas de dispositivo.
 
 **Usando a tela Personalizar com o controle remoto:** escolha uma categoria à esquerda (Cima/Baixo, depois Direita ou OK) e percorra os ajustes com Cima/Baixo. Em um ajuste, Esquerda/Direita muda o valor (ou OK avança); OK em um ajuste de texto abre o teclado. **Apps da prateleira** abre uma página em que Cima/Baixo movem uma linha inteira de apps e OK adiciona ou remove um (até 8). Cada mudança é salva na hora, por isso não há botão Salvar; Voltar sai um nível por vez. As chaves (Unsplash, TMDB) nunca aparecem na tela, só pontos.
 

@@ -743,7 +743,7 @@
             background: rgba(255, 255, 255, 0.16);
         }
 
-        .apps-done.sf { background: var(--accent); }
+        .apps-done.sf { background: var(--accent); box-shadow: 0 0 0 4px #ffffff; }
 
         .apps-page { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
         .apps-head { display: flex; align-items: center; gap: 16px; }
@@ -785,8 +785,10 @@
         }
 
         .apps-tile .at-name { flex: 1; min-width: 0; }
+        .at-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .apps-tile.on { background: rgba(10, 132, 255, 0.28); border-color: #0a84ff; }
-        .apps-done { align-self: flex-start; padding: 16px 40px; border-radius: 16px; border: 0; background: var(--accent); color: #ffffff; font-size: 24px; font-weight: 600; font-family: inherit; cursor: pointer; }
+        .apps-tile.on.sf { box-shadow: 0 0 0 4px #ffffff; }
+        .apps-done { align-self: flex-start; padding: 16px 40px; border-radius: 16px; border: 0; background: rgba(255, 255, 255, 0.12); color: #ffffff; font-size: 24px; font-weight: 600; font-family: inherit; cursor: pointer; }
 
         .settings-foot { font-size: 20px; color: var(--text-secondary); min-height: 28px; }
 
@@ -1543,13 +1545,13 @@
                 'Defaults restored': 'Valores restablecidos', 'Saved & Applied!': '¡Guardado y aplicado!',
                 'Shelf & Inputs': 'Estante y Entradas', 'Look & Feel': 'Aspecto', 'Weather & Location': 'Clima y Ubicación',
                 'Photos & Screensaver': 'Fotos y Salvapantallas', 'Accounts & Keys': 'Cuentas y Claves', 'Categories': 'Categorías',
-                'Shelf apps': 'Apps de la estantería', 'OK to edit': 'OK para editar', 'OK to open': 'OK para abrir',
+                'Shelf apps': 'Apps del estante', 'OK to edit': 'OK para editar', 'OK to open': 'OK para abrir',
                 'Not set': 'Sin definir', 'Saved': 'Guardado', 'Reset to defaults': 'Restablecer valores',
                 'Press OK again to confirm': 'Pulsa OK otra vez para confirmar', 'Up / Down: move': 'Arriba / Abajo: mover', 'Left / Right: change value': 'Izquierda / Derecha: cambiar valor',
                 'OK: select or edit': 'OK: elegir o editar', 'Back: close': 'Atrás: cerrar', 'Changes apply instantly': 'Los cambios se aplican al instante',
                 'Up / Down: move one row': 'Arriba / Abajo: mover una fila', 'OK: add or remove': 'OK: añadir o quitar', 'Back: return': 'Atrás: volver',
                 'Enter: save': 'Enter: guardar', 'Back: cancel': 'Atrás: cancelar', '%s of 8 selected': '%s de 8 seleccionadas',
-                'Keep at least one app on the shelf.': 'Deja al menos una app en la estantería.', 'Previous value': 'Valor anterior', 'Next value': 'Valor siguiente',
+                'Keep at least one app on the shelf.': 'Deja al menos una app en el estante.', 'Previous value': 'Valor anterior', 'Next value': 'Valor siguiente',
                 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Photos behind the clock when the TV is idle': 'Fotos tras el reloj cuando la TV está inactiva', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
                 'For the photos. Stored on this TV only': 'Para las fotos. Se guarda solo en esta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para las películas y series en tendencia de la semana', 'Back: categories': 'Atrás: categorías',
                 'OK or Right: open': 'OK o Derecha: abrir'
@@ -1620,8 +1622,8 @@
                 'Shelf & Inputs': 'Leiste & Eingänge', 'Look & Feel': 'Aussehen', 'Weather & Location': 'Wetter & Standort',
                 'Photos & Screensaver': 'Fotos & Bildschirmschoner', 'Accounts & Keys': 'Konten & Schlüssel', 'Categories': 'Kategorien',
                 'Shelf apps': 'Apps in der Leiste', 'OK to edit': 'OK zum Bearbeiten', 'OK to open': 'OK zum Öffnen',
-                'Not set': 'Nicht gesetzt', 'Saved': 'Gespeichert', 'Reset to defaults': 'Auf Standard zurücksetzen',
-                'Press OK again to confirm': 'OK erneut drücken zum Bestätigen', 'Up / Down: move': 'Auf / Ab: bewegen', 'Left / Right: change value': 'Links / Rechts: Wert ändern',
+                'Not set': 'Nicht festgelegt', 'Saved': 'Gespeichert', 'Reset to defaults': 'Auf Standard zurücksetzen',
+                'Press OK again to confirm': 'Zum Bestätigen erneut OK drücken', 'Up / Down: move': 'Auf / Ab: bewegen', 'Left / Right: change value': 'Links / Rechts: Wert ändern',
                 'OK: select or edit': 'OK: auswählen oder bearbeiten', 'Back: close': 'Zurück: schließen', 'Changes apply instantly': 'Änderungen gelten sofort',
                 'Up / Down: move one row': 'Auf / Ab: eine Zeile bewegen', 'OK: add or remove': 'OK: hinzufügen oder entfernen', 'Back: return': 'Zurück: zurückkehren',
                 'Enter: save': 'Enter: speichern', 'Back: cancel': 'Zurück: abbrechen', '%s of 8 selected': '%s von 8 ausgewählt',
@@ -1703,7 +1705,7 @@
                 'Enter: save': 'Entrée : enregistrer', 'Back: cancel': 'Retour : annuler', '%s of 8 selected': '%s sur 8 sélectionnées',
                 'Keep at least one app on the shelf.': 'Gardez au moins une appli sur l’étagère.', 'Previous value': 'Valeur précédente', 'Next value': 'Valeur suivante',
                 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Photos behind the clock when the TV is idle': 'Photos derrière l’horloge quand la TV est inactive', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
-                'For the photos. Stored on this TV only': 'Pour les photos. Stocké uniquement sur cette TV', 'Optional, for weekly trending movies and shows': 'Facultatif, pour les films et séries tendance de la semaine', 'Back: categories': 'Retour : catégories',
+                'For the photos. Stored on this TV only': 'Pour les photos. Stockée uniquement sur cette TV', 'Optional, for weekly trending movies and shows': 'Facultatif, pour les films et séries tendance de la semaine', 'Back: categories': 'Retour : catégories',
                 'OK or Right: open': 'OK ou Droite : ouvrir'
             }
         };
@@ -2118,6 +2120,7 @@
 
         // --- Discover Installed Apps from LG webOS ---
         function addLaunchPoints(launchPoints) {
+            var oldLength = state.catalog.length;
             launchPoints.forEach(function(lp) {
                 var appId = lp.appId || lp.id;
                 if (!appId) return;
@@ -2139,6 +2142,14 @@
                 }
             });
             renderAppsShelf();
+            catalogGrew(oldLength);
+        }
+
+        // New apps arrived: an open apps page shows them, and focus on Done stays on Done.
+        function catalogGrew(oldLength) {
+            if (!modalOpen || settingsUi.zone !== 'apps' || state.catalog.length === oldLength) return;
+            if (settingsUi.appIdx >= oldLength) settingsUi.appIdx = state.catalog.length;
+            renderSettings();
         }
 
         function discoverTVApps() {
@@ -2478,7 +2489,9 @@
             if (!item || (shelfEdit && !item.closest('.shelf-wrapper'))) return;
             document.querySelectorAll('.nav-item.focused').forEach(function(i) { i.classList.remove('focused'); });
             item.classList.add('focused');
-            item.focus({ preventScroll: true });
+            // While the Customize screen is open, background renders (shelf, picks, new apps) only move the class:
+            // a DOM focus() would blur its inline editor and commit half-typed text.
+            if (!modalOpen) item.focus({ preventScroll: true });
             curIndex = mainNavItems.indexOf(item);
 
             heroTag.textContent = t(item.dataset.tag || 'Selection');
@@ -2550,16 +2563,16 @@
               apply: function() { applyTextSize(); } },
             { id: 'perfMode', cat: 1, type: 'choice', field: 'perfMode', store: 'fmtv_perf_mode', def: 'standard', label: 'Performance Mode',
               options: [['standard', 'Standard (Glass & Glow)'], ['high', 'High Performance (60 FPS Boost)']],
-              apply: function() { applyPerfMode(); applyHomePhotosSettings(); } },
+              apply: function() { applyPerfMode(); applyHomePhotosSettings(); applyTheme(); } },
             { id: 'lang', cat: 1, type: 'choice', field: 'lang', store: 'fmtv_lang', def: 'auto', label: 'Language',
               options: [['auto', 'Auto (TV language)'], ['en', 'English'], ['pt', 'Português (Brasil)'], ['es', 'Español'], ['de', 'Deutsch'], ['fr', 'Français']],
-              apply: function() { applyStaticTranslations(); renderAppsShelf(); updateClock(); fetchWeather(); fetchTrendingPicks(); } },
+              apply: function() { applyStaticTranslations(); renderAppsShelf(); updateClock(); applyTheme(); scheduleSettingsNetwork(true, true); } },
             { id: 'city', cat: 2, type: 'text', field: 'city', store: 'fmtv_city', def: '', label: 'City Name (or leave Auto)',
               placeholder: 'e.g. Sao Paulo, Lisbon, NYC',
-              apply: function() { fetchWeather(); } },
+              apply: function() { scheduleSettingsNetwork(true, false); } },
             { id: 'ipLocate', cat: 2, type: 'choice', field: 'ipLocate', store: 'fmtv_ip_locate', def: 'off', label: 'Auto-locate by IP (sends your IP to ipapi.co)',
               options: [['off', 'Off (use the city above)'], ['on', 'On']],
-              apply: function() { fetchWeather(); } },
+              apply: function() { scheduleSettingsNetwork(true, false); } },
             { id: 'homePhotos', cat: 3, type: 'choice', field: 'homePhotos', store: 'fmtv_home_photos', def: 'off', label: 'Photos on Home Screen',
               hint: 'Dimmed, slowly moving photos behind the dashboard',
               options: [['off', 'Off'], ['on', 'On']],
@@ -2590,9 +2603,32 @@
               } },
             { id: 'tmdbKey', cat: 4, type: 'text', secret: true, field: 'tmdbKey', store: 'fmtv_tmdb_key', def: '', label: 'TMDB API Key (Optional)',
               hint: 'Optional, for weekly trending movies and shows',
-              apply: function() { fetchTrendingPicks(); } },
+              apply: function() { scheduleSettingsNetwork(false, true); } },
             { id: 'reset', cat: 4, type: 'action', label: 'Reset to defaults' }
         ];
+
+        // Settings that hit the network wait 700 ms after the last change, so holding Right on Language
+        // runs the weather and trending fetches once instead of once per step.
+        var settingsNetTimer = null;
+        var settingsNetPending = { weather: false, picks: false };
+
+        function scheduleSettingsNetwork(weather, picks) {
+            if (weather) settingsNetPending.weather = true;
+            if (picks) settingsNetPending.picks = true;
+            clearTimeout(settingsNetTimer);
+            settingsNetTimer = setTimeout(flushSettingsNetwork, 700);
+        }
+
+        // Run any pending network work now (also used by the tests).
+        function flushSettingsNetwork() {
+            clearTimeout(settingsNetTimer);
+            settingsNetTimer = null;
+            var weather = settingsNetPending.weather, picks = settingsNetPending.picks;
+            settingsNetPending.weather = false;
+            settingsNetPending.picks = false;
+            if (weather) fetchWeather();
+            if (picks) fetchTrendingPicks();
+        }
 
         function findSetting(id) {
             return arrFind(SETTINGS, function(def) { return def.id === id; });
