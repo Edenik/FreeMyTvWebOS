@@ -96,7 +96,7 @@ setTimeout(function () {
   }
   eq('state ambient', state.ambient, 'on');
   eq('state secs', state.ambientSecs, '90');
-  eq('state motion', state.ambientMotion, 'kenburns');
+  eq('state motion', state.ambientMotion, 'drift');
   eq('state idle', state.idleMins, '3');
   eq('state key', state.unsplashKey, '');
   if (need('idleTimeoutMs')) {
@@ -271,7 +271,7 @@ setTimeout(function () {
   window.ambientPhotoUrl = function (raw) { return raw; }; // load the local test asset as-is
 
   steps.push(function (done) { // ambient shows a photo, the credit, and pings the download endpoint once
-    seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'kenburns'; state.perfMode = 'standard';
+    seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'drift'; state.perfMode = 'standard';
     var calls = []; window.fetch = fakeFetch(200, '49', calls);
     enterScreensaver();
     setTimeout(function () {
@@ -309,7 +309,7 @@ setTimeout(function () {
       var img = document.getElementById('ssPhotoB');
       eq('none transform', img.style.transform, 'translate(0%, 0%) scale(1.06)');
       exitScreensaver();
-      state.ambientMotion = 'kenburns'; state.perfMode = 'high';
+      state.ambientMotion = 'drift'; state.perfMode = 'high';
       enterScreensaver();
       setTimeout(function () {
         var other = document.getElementById('ssPhotoB');
@@ -347,8 +347,47 @@ setTimeout(function () {
       done();
     }, 400);
   });
-  steps.push(function (done) { // Ken Burns zooms and keeps drifting in legs within 8%
+  steps.push(function (done) { // Ken Burns makes one zoom-and-pan per photo and starts no drift legs
     seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'kenburns';
+    window.fetch = fakeFetch(200, '49', []);
+    enterScreensaver();
+    setTimeout(function () {
+      var shown = document.getElementById('ssPhotoA').style.opacity === '0.85' ? document.getElementById('ssPhotoA') : document.getElementById('ssPhotoB');
+      eq('kenburns end scale', /scale\(1\.22\)/.test(shown.style.transform), true);
+      eq('kenburns one move', /transform 94s/.test(shown.style.transition), true);
+      eq('kenburns no leg timer', !!shown._moveTimer, false);
+      exitScreensaver();
+      state.ambientMotion = 'drift';
+      done();
+    }, 400);
+  });
+  steps.push(function (done) { // Sliding panels: six strips slide away to reveal the next photo, then are removed
+    seedMany([photo('p1', 'Ann'), photo('p2', 'Bob')]);
+    state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'panels'; state.ambientBright = 'normal';
+    window.fetch = fakeFetch(200, '49', []);
+    enterScreensaver();
+    setTimeout(function () {
+      var box = document.getElementById('screensaverPhotos');
+      eq('panels none first', box.querySelectorAll('.pn-strips').length, 0);
+      eq('panels still transform', document.getElementById('ssPhotoA').style.transform === 'none' || document.getElementById('ssPhotoB').style.transform === 'none', true);
+      ambientShow();
+      setTimeout(function () {
+        eq('panels strips', box.querySelectorAll('.pn-strip').length, 6);
+        eq('panels strips sliding', box.querySelector('.pn-strip').style.transform, 'translateY(-101%)');
+        setTimeout(function () {
+          eq('panels strips removed', box.querySelectorAll('.pn-strips').length, 0);
+          var a = document.getElementById('ssPhotoA').style.opacity, b = document.getElementById('ssPhotoB').style.opacity;
+          eq('panels next shown', (a === '0.85') !== (b === '0.85'), true);
+          exitScreensaver();
+          eq('panels cleaned on stop', box.querySelectorAll('.pn-strips').length, 0);
+          state.ambientMotion = 'drift';
+          done();
+        }, 3500);
+      }, 300);
+    }, 500);
+  });
+  steps.push(function (done) { // Continuous drift zooms and keeps gliding in legs within 8%
+    seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'drift';
     window.fetch = fakeFetch(200, '49', []);
     enterScreensaver();
     setTimeout(function () {
@@ -487,7 +526,7 @@ setTimeout(function () {
       exitScreensaver();
       eq('src cleared A', document.getElementById('ssPhotoA').getAttribute('src'), null);
       eq('src cleared B', document.getElementById('ssPhotoB').getAttribute('src'), null);
-      state.ambientMotion = 'kenburns';
+      state.ambientMotion = 'drift';
       done();
     }, 600);
   });

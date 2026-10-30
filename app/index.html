@@ -1065,6 +1065,33 @@
             will-change: opacity, transform;
         }
 
+        /* Sliding panels: six strips, each showing its slice of the photo, slide up to reveal the next one. */
+        .pn-strips {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .pn-strip {
+            position: relative;
+            flex: 1 1 0;
+            overflow: hidden;
+            will-change: transform;
+        }
+
+        .pn-strip img {
+            position: absolute;
+            top: 0;
+            width: 600%;
+            max-width: none;
+            height: 100%;
+            object-fit: cover;
+        }
+
         .screensaver-credit {
             font-size: 16px;
             letter-spacing: 1px;
@@ -1396,7 +1423,7 @@
             unsplashKey: localStorage.getItem('fmtv_unsplash_key') || '',
             ambient: localStorage.getItem('fmtv_ambient') || 'on',
             ambientSecs: localStorage.getItem('fmtv_ambient_secs') || '90',
-            ambientMotion: localStorage.getItem('fmtv_ambient_motion') || 'kenburns',
+            ambientMotion: localStorage.getItem('fmtv_ambient_motion') || 'drift',
             homePhotos: localStorage.getItem('fmtv_home_photos') || 'off',
             keepAwake: localStorage.getItem('fmtv_keep_awake') || 'on',
             ambientBright: localStorage.getItem('fmtv_ambient_bright') || 'normal',
@@ -1490,7 +1517,7 @@
                 'Up / Down: move one row': 'Cima / Baixo: mover uma linha', 'OK: add or remove': 'OK: adicionar ou remover', 'Back: return': 'Voltar: retornar',
                 'Enter: save': 'Enter: salvar', 'Back: cancel': 'Voltar: cancelar', '%s of 8 selected': '%s de 8 selecionados',
                 'Keep at least one app on the shelf.': 'Mantenha pelo menos um app na prateleira.', 'Previous value': 'Valor anterior', 'Next value': 'Próximo valor',
-                'Motion Speed': 'Velocidade do Movimento', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posição do Relógio', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Photo Brightness': 'Brilho das Fotos', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Photos behind the clock when the TV is idle': 'Fotos atrás do relógio quando a TV está ociosa', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
+                'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posição do Relógio', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Photo Brightness': 'Brilho das Fotos', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Photos behind the clock when the TV is idle': 'Fotos atrás do relógio quando a TV está ociosa', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
                 'For the photos. Stored on this TV only': 'Para as fotos. Guardada só nesta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para filmes e séries em alta da semana', 'Back: categories': 'Voltar: categorias',
                 'OK or Right: open': 'OK ou Direita: abrir'
             },
@@ -1566,7 +1593,7 @@
                 'Up / Down: move one row': 'Arriba / Abajo: mover una fila', 'OK: add or remove': 'OK: añadir o quitar', 'Back: return': 'Atrás: volver',
                 'Enter: save': 'Enter: guardar', 'Back: cancel': 'Atrás: cancelar', '%s of 8 selected': '%s de 8 seleccionadas',
                 'Keep at least one app on the shelf.': 'Deja al menos una app en el estante.', 'Previous value': 'Valor anterior', 'Next value': 'Valor siguiente',
-                'Motion Speed': 'Velocidad del Movimiento', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posición del Reloj', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Photo Brightness': 'Brillo de las Fotos', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Photos behind the clock when the TV is idle': 'Fotos tras el reloj cuando la TV está inactiva', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
+                'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posición del Reloj', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Photo Brightness': 'Brillo de las Fotos', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Photos behind the clock when the TV is idle': 'Fotos tras el reloj cuando la TV está inactiva', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
                 'For the photos. Stored on this TV only': 'Para las fotos. Se guarda solo en esta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para las películas y series en tendencia de la semana', 'Back: categories': 'Atrás: categorías',
                 'OK or Right: open': 'OK o Derecha: abrir'
             },
@@ -1642,7 +1669,7 @@
                 'Up / Down: move one row': 'Auf / Ab: eine Zeile bewegen', 'OK: add or remove': 'OK: hinzufügen oder entfernen', 'Back: return': 'Zurück: zurückkehren',
                 'Enter: save': 'Enter: speichern', 'Back: cancel': 'Zurück: abbrechen', '%s of 8 selected': '%s von 8 ausgewählt',
                 'Keep at least one app on the shelf.': 'Mindestens eine App in der Leiste behalten.', 'Previous value': 'Vorheriger Wert', 'Next value': 'Nächster Wert',
-                'Motion Speed': 'Bewegungstempo', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Clock Position': 'Uhrposition', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Photo Brightness': 'Fotohelligkeit', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Photos behind the clock when the TV is idle': 'Fotos hinter der Uhr, wenn der Fernseher ruht', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
+                'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Clock Position': 'Uhrposition', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Photo Brightness': 'Fotohelligkeit', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Photos behind the clock when the TV is idle': 'Fotos hinter der Uhr, wenn der Fernseher ruht', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
                 'For the photos. Stored on this TV only': 'Für die Fotos. Nur auf diesem Fernseher gespeichert', 'Optional, for weekly trending movies and shows': 'Optional, für wöchentlich angesagte Filme und Serien', 'Back: categories': 'Zurück: Kategorien',
                 'OK or Right: open': 'OK oder Rechts: öffnen'
             },
@@ -1718,7 +1745,7 @@
                 'Up / Down: move one row': 'Haut / Bas : déplacer d’une ligne', 'OK: add or remove': 'OK : ajouter ou retirer', 'Back: return': 'Retour : revenir',
                 'Enter: save': 'Entrée : enregistrer', 'Back: cancel': 'Retour : annuler', '%s of 8 selected': '%s sur 8 sélectionnées',
                 'Keep at least one app on the shelf.': 'Gardez au moins une appli sur l’étagère.', 'Previous value': 'Valeur précédente', 'Next value': 'Valeur suivante',
-                'Motion Speed': 'Vitesse du mouvement', 'Slow': 'Lente', 'Fast': 'Rapide', 'Clock Position': 'Position de l’horloge', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Photo Brightness': 'Luminosité des photos', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Photos behind the clock when the TV is idle': 'Photos derrière l’horloge quand la TV est inactive', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
+                'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Clock Position': 'Position de l’horloge', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Photo Brightness': 'Luminosité des photos', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Photos behind the clock when the TV is idle': 'Photos derrière l’horloge quand la TV est inactive', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
                 'For the photos. Stored on this TV only': 'Pour les photos. Stockée uniquement sur cette TV', 'Optional, for weekly trending movies and shows': 'Facultatif, pour les films et séries tendance de la semaine', 'Back: categories': 'Retour : catégories',
                 'OK or Right: open': 'OK ou Droite : ouvrir'
             }
@@ -2600,10 +2627,10 @@
             { id: 'ambientSecs', cat: 3, type: 'choice', field: 'ambientSecs', store: 'fmtv_ambient_secs', def: '90', label: 'Photo Duration',
               options: [['30', '30 seconds'], ['90', '90 seconds'], ['300', '5 minutes']],
               apply: function() { applyHomePhotosSettings(); } },
-            { id: 'ambientMotion', cat: 3, type: 'choice', field: 'ambientMotion', store: 'fmtv_ambient_motion', def: 'kenburns', label: 'Photo Motion',
-              options: [['kenburns', 'Ken Burns (zoom & drift)'], ['drift', 'Drift only'], ['none', 'None']],
+            { id: 'ambientMotion', cat: 3, type: 'choice', field: 'ambientMotion', store: 'fmtv_ambient_motion', def: 'drift', label: 'Photo Motion',
+              options: [['drift', 'Continuous drift'], ['kenburns', 'Ken Burns'], ['panels', 'Sliding panels'], ['none', 'None']],
               apply: function() { applyHomePhotosSettings(); } },
-            { id: 'ambientSpeed', cat: 3, type: 'choice', field: 'ambientSpeed', store: 'fmtv_ambient_speed', def: 'normal', label: 'Motion Speed',
+            { id: 'ambientSpeed', cat: 3, type: 'choice', field: 'ambientSpeed', store: 'fmtv_ambient_speed', def: 'normal', label: 'Drift Speed',
               options: [['slow', 'Slow'], ['normal', 'Normal'], ['fast', 'Fast']],
               apply: function() { applyHomePhotosSettings(); } },
             { id: 'ambientBright', cat: 3, type: 'choice', field: 'ambientBright', store: 'fmtv_ambient_bright', def: 'normal', label: 'Photo Brightness',
@@ -3351,17 +3378,27 @@
             img._moveTimer = null;
         }
 
-        // Continuous zoom and drift (Ken Burns), drift only, or still: the photo glides to a new random spot every
-        // leg and keeps going for as long as it shows. Only transform and opacity animate.
-        function ambientMove(img) {
+        // Photo Motion: 'drift' glides to a new random spot every leg for as long as the photo shows; 'kenburns' makes
+        // one slow zoom-and-pan per photo (secs long); 'panels' and 'none' leave the photo still (panels animate the
+        // change between photos instead). Only transform and opacity animate.
+        function ambientMove(img, secs) {
             ambientMoveStop(img);
-            var still = state.ambientMotion === 'none';
+            var mode = state.ambientMotion;
+            var still = mode === 'none' || mode === 'panels';
             img.style.transition = 'none';
-            img.style.transform = 'translate(0%, 0%) scale(1.06)';
+            img.style.transform = mode === 'panels' ? 'none' : 'translate(0%, 0%) scale(1.06)';
             void img.offsetWidth;
             img.style.transition = 'opacity 4s linear';
             if (still) return;
-            var scale = state.ambientMotion === 'drift' ? 1.1 : 1.2;
+            if (mode === 'kenburns') {
+                var sx = Math.round((Math.random() * 2 - 1) * 40) / 10, sy = Math.round((Math.random() * 2 - 1) * 30) / 10;
+                img.style.transform = 'translate(' + sx + '%, ' + sy + '%) scale(1.02)';
+                void img.offsetWidth;
+                img.style.transition = 'opacity 4s linear, transform ' + ((secs || 90) + 4) + 's linear';
+                img.style.transform = 'translate(' + (-sx) + '%, ' + (-sy) + '%) scale(1.22)';
+                return;
+            }
+            var scale = 1.2;
             var maxPan = (scale - 1) * 40; // % of the photo size; stays inside the zoom margin so no edge shows
             var cx = 0, cy = 0;
             function leg() {
@@ -3389,6 +3426,40 @@
             ambientApi(p.dl, AMBIENT_PING_CAP, function() {});
         }
 
+        // Sliding panels: the visible photo is cut into six vertical strips that slide up one after another and
+        // reveal the next photo, which `next` already shows underneath. `done` runs when the strips are gone.
+        var PANEL_COUNT = 6;
+        var PANEL_SECS = 1.3;
+        var PANEL_STAGGER = 0.18;
+
+        function ambientPanels(container, cur, next, opacity, done) {
+            var box = document.createElement('div');
+            box.className = 'pn-strips';
+            box.style.opacity = opacity;
+            var strips = [];
+            for (var i = 0; i < PANEL_COUNT; i++) {
+                var strip = document.createElement('div');
+                strip.className = 'pn-strip';
+                var img = document.createElement('img');
+                img.alt = '';
+                img.src = cur.src;
+                img.style.left = (-i * 100) + '%';
+                strip.appendChild(img);
+                box.appendChild(strip);
+                strips.push(strip);
+            }
+            container.appendChild(box);
+            void box.offsetWidth;
+            strips.forEach(function(strip, i) {
+                strip.style.transition = 'transform ' + PANEL_SECS + 's cubic-bezier(0.65, 0, 0.35, 1) ' + (i * PANEL_STAGGER) + 's';
+                strip.style.transform = 'translateY(-101%)';
+            });
+            return setTimeout(function() {
+                if (box.parentNode) box.parentNode.removeChild(box);
+                done();
+            }, (PANEL_SECS + (PANEL_COUNT - 1) * PANEL_STAGGER) * 1000 + 150);
+        }
+
         // One photo layer: two stacked images that crossfade, a rotation timer and a run counter so a late image
         // load from an earlier start/stop cycle is ignored. cfg: a, b = ids of the two <img>; credit = id of the
         // credit element; dimScale multiplies ambientDim(); secs() = seconds per photo; onStart/onStop optional.
@@ -3396,6 +3467,11 @@
             var player = { on: false, timer: null, pos: 0, failures: 0, front: cfg.a, run: 0 };
 
             function el(id) { return document.getElementById(id); }
+
+            function removePanels() {
+                var boxes = el(cfg.a).parentNode.querySelectorAll('.pn-strips');
+                for (var i = 0; i < boxes.length; i++) boxes[i].parentNode.removeChild(boxes[i]);
+            }
 
             player.show = function() {
                 var cache = ambientRead('fmtv_ambient_cache', null);
@@ -3409,11 +3485,23 @@
                 pre.onload = function() {
                     if (!player.on || run !== player.run) return;
                     player.failures = 0;
+                    var opacity = String(Math.min(1, Math.round(ambientDim(photo.color) * cfg.dimScale * ambientBrightness() * 100) / 100));
+                    clearTimeout(player.panelTimer);
+                    removePanels();
                     next.src = pre.src;
-                    ambientMove(next);
-                    setTimeout(function() { if (cur.style.opacity === '0') ambientMoveStop(cur); }, 4500);
-                    next.style.opacity = String(Math.min(1, Math.round(ambientDim(photo.color) * cfg.dimScale * ambientBrightness() * 100) / 100));
-                    cur.style.opacity = '0';
+                    ambientMove(next, cfg.secs());
+                    if (state.ambientMotion === 'panels' && cur.getAttribute('src') && cur.style.opacity !== '0') {
+                        next.style.transition = 'none'; // sits fully shown under the strips
+                        next.style.opacity = opacity;
+                        var shown = cur.style.opacity;
+                        cur.style.transition = 'none';
+                        cur.style.opacity = '0';
+                        player.panelTimer = ambientPanels(cur.parentNode, cur, next, shown, function() { player.panelTimer = null; });
+                    } else {
+                        setTimeout(function() { if (cur.style.opacity === '0') ambientMoveStop(cur); }, 4500);
+                        next.style.opacity = opacity;
+                        cur.style.opacity = '0';
+                    }
                     player.front = next.id;
                     el(cfg.credit).textContent = t('Photo by %s on Unsplash', photo.name);
                     ambientPing(photo);
@@ -3441,6 +3529,8 @@
                 player.run++;
                 player.on = false;
                 clearInterval(player.timer);
+                clearTimeout(player.panelTimer);
+                removePanels();
                 if (cfg.onStop) cfg.onStop();
                 [cfg.a, cfg.b].forEach(function(id) {
                     var img = el(id);
