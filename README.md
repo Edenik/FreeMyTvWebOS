@@ -54,11 +54,25 @@ Modern LG webOS (especially webOS 6, 22, 23, and 24) replaced the classic, snapp
 - **🌅 Dynamic Sunset & OLED Themes.** Connects to Open-Meteo to show live local weather and automatically shifts your background from *Daylight Blue* to *Sunset Amber* to *Deep Midnight* (plus a *Pure OLED Black* mode).
 - **🎬 Movies & Shows Trending Tabs.** Separate tabs for trending movies and TV shows—TMDB-ranked with your optional key, or our built-in zero-key live feed (TVMaze for Shows, curated picks for Movies).
 - **🌤️ Weather & Sun Drawer.** Click the weather widget for an hourly forecast and exact sunrise/sunset times, powered by Open-Meteo.
-- **🌍 Multi-Language.** English, Português (Brasil), Español, Deutsch and Français, following your TV's language or picked in Customize → Language.
+- **🌍 Multi-Language.** English, Português (Brasil), Español, Deutsch and Français, following your TV's language or picked in Customize → Language & Location.
 - **🌑 OLED-Safe Idle Screensaver.** After the idle time you choose (1 to 30 minutes), a dimmed, slowly moving [Unsplash](https://unsplash.com) night-sky, aurora and landscape photo fades in behind a floating clock that shifts position to avoid burn-in. Without an Unsplash key it is a pure-black floating clock. Dismissed by any key or remote movement.
 - **🎮 Full Magic Remote & D-Pad Support.** Point and click with the LG Magic Remote cursor, or fly across tiles with the directional arrow keys and scroll wheel.
 - **💻 100% Onboard & Independent.** Installed as a native `.ipk` package on your TV. Your computer does **not** need to stay on.
 - **🛡️ Safe & Reversible.** Works on stock unrooted TVs via official LG Developer Mode (or Homebrew Channel). Your factory home screen is untouched.
+
+---
+
+## 🆕 What's New in 1.5.0
+
+- **👋 A Greeting by Name.** The home screen greets you by name ("Good evening, Noa") with the weather and sunset time underneath.
+- **▶️ Pick Up Where You Left Off.** A compact row above the shelf with the apps you opened last, ordered by the time of day you usually open them.
+- **🎬 Scenes.** One-press Movie night, Game on and Background music chips. They open apps and change the look of Free My TV only; they do not control the TV's picture or sound settings.
+- **🪄 First-Run Setup.** A short wizard on a fresh install (name and city, apps, look, screensaver photos). Every step can be skipped and **Run setup again** is in Customize.
+- **👨‍👩‍👧 People & Kids Lock.** Profiles for a shared TV, each with its own name, city, shelf and look. A Kids profile hides the Customize and TV Settings buttons.
+- **🌙 Night Dimming.** The photo screensaver gets dimmer after sunset and much dimmer after 23:00. Turn it off with **Dim Photos at Night**.
+- **⚪ One White Focus Ring.** Everything you can select, on the shelf and in Customize, shows the same clear white ring.
+- **🔒 An Honest Privacy Line.** "No ads. No account. Your settings stay on this TV." See [Network Requests](#-network-requests-this-app-makes) for the services the app does contact.
+- **🗂️ Reorganised Customize.** Seven categories (Home screen, Look & Feel, People, Language & Location, Photos & Screensaver, Accounts & Keys, Reset & About), plus **Reset settings** and **Erase everything on this TV**.
 
 ---
 
@@ -135,13 +149,13 @@ Choose **Reorder** on the main shelf. Select a tile and press OK to pick it up, 
 
 Launch messages use the app or console name and report unavailable apps, failures, or no response after eight seconds. Repeated presses are ignored while a launch is pending; browser previews explain that launching requires an LG TV.
 
-Each HDMI input is a row under **Shelf & Inputs**, right after **Shelf apps**: Left/Right (or OK) cycles the port through HDMI, PS5, PS4, Xbox, Nintendo Switch, and Gaming PC, and every change is saved at once. These are manual, per-port choices; connected consoles are not automatically detected. The tile keeps launching the same HDMI input. There is no Save, Cancel or Reset Defaults button: **Reset to defaults** is a row under **Accounts & Keys** that needs a second OK to confirm, and it also clears the device choices.
+Each HDMI input is a row on the **Shelf apps** page (**Home screen**): Left/Right (or OK) cycles the port through HDMI, PS5, PS4, Xbox, Nintendo Switch, and Gaming PC, and every change is saved at once. These are manual, per-port choices; connected consoles are not automatically detected. The tile keeps launching the same HDMI input. There is no Save or Cancel button. Under **Reset & About**, **Reset settings** puts every setting, the shelf and the device choices back to defaults (people and history stay), and **Erase everything on this TV** deletes every person, setting, key and history and starts the first-run setup. Both need a second OK to confirm.
 
 The shelf displays larger artwork with bundled brand logos for PS5, PS4, Xbox, Nintendo Switch, and the streaming apps in the default catalog (including Netflix). These logos work offline. Other installed apps use icons supplied by webOS when accessible; missing or unreadable icons fall back to a readable app name.
 
 Some newer webOS releases block Developer Mode apps from listing installed apps. On those TVs, a one-time on-screen prompt asks to allow Free My TV; accept it so your installed apps appear in Customize.
 
-**Using the Customize screen with the remote:** pick a category on the left (Up/Down, then Right or OK), then move through its settings with Up/Down. On a setting, Left/Right changes its value (or OK cycles it); OK on a text setting opens the keyboard. **Shelf apps** opens a page where Up/Down move a whole row of apps and OK adds or removes one (up to 8). Every change is saved the moment you make it, so there is no Save button; Back steps out one level at a time. Keys (Unsplash, TMDB) are never shown on screen, only dots.
+**Using the Customize screen with the remote:** the categories on the left are Home screen, Look & Feel, People, Language & Location, Photos & Screensaver, Accounts & Keys and Reset & About. Pick one (Up/Down, then Right or OK), then move through its settings with Up/Down. On a setting, Left/Right changes its value (or OK cycles it); OK on a text setting opens the keyboard. **Shelf apps** opens a page where Up/Down move a whole row of apps and OK adds or removes one (up to 8). Every change is saved the moment you make it, so there is no Save button; Back steps out one level at a time. Keys (Unsplash, TMDB) are never shown on screen, only dots.
 
 | Setting | What It Does |
 |---|---|
@@ -151,6 +165,7 @@ Some newer webOS releases block Developer Mode apps from listing installed apps.
 | **Theme Mode** | Choose `Auto (Follows Sunset)`, `Deep Midnight`, `Pure OLED Black`, or `Daylight Blue`. |
 | **Clock Format** | Toggle between `24-Hour (20:30)` and `12-Hour (8:30 PM)` display. |
 | **Trending This Week** | `On` (default) or `Off`. Hides the movies and shows row on the home screen; the row is skipped by the remote and stops fetching. |
+| **Pick-up Row** | `On` (default) or `Off`. "Pick up where you left off": the apps you opened last, shown above the shelf and ordered by the time of day you usually open them. |
 | **Scenes** | `On` (default) or `Off`. Three one-press chips under the greeting: Movie night (opens your last-used streaming app, Pure OLED Black, home photos off), Game on (opens the first HDMI input you named as a console or PC) and Background music (opens Spotify). Back in Free My TV, the look returns as it was. |
 | **Run setup again** | Opens the first-run setup (welcome, name and city, apps, look, screensaver photos). It appears by itself only on a fresh install, every step can be skipped, and every choice stays editable in Customize. |
 | **Switch person / Add person / Remove this person / Ask who is watching** | Profiles for a shared TV. *Add person* runs the setup for a new person (name, city, shelf, look, screensaver photos) and can mark them as a Kids profile that hides the Customize and TV Settings buttons; *Switch person* (or the person button in the header, shown when there are two or more people) opens "Who is watching?"; *Remove this person* asks for a second OK; *Ask who is watching* shows the picker when the app opens. Profiles are stored only on this TV and are not accounts. |
@@ -163,8 +178,10 @@ Some newer webOS releases block Developer Mode apps from listing installed apps.
 | **Photos on Home Screen** | `Off` (default) or `On`. Shows the same Unsplash photos, slowly moving and dimmed, behind the home screen, with a small "Photo by NAME on Unsplash" credit in the bottom-left corner. Needs the Unsplash key; it pauses while the screensaver is showing. Needs a TV with `fetch` support (webOS 4 or newer). With Motion set to `None`, or in High Performance mode, the photo stays still. |
 | **Drift Speed** | `Slow`, `Normal` (default) or `Fast`: how often `Continuous drift` glides to a new spot (every 40, 22 or 12 seconds). |
 | **Photo Brightness** | `Soft`, `Normal` (default) or `Bright`: how strongly the photos show behind the clock. |
+| **Dim Photos at Night** | `On` (default) or `Off`. The screensaver photo is a little dimmer after sunset and much dimmer after 23:00. |
 | **Clock Position** | `Bottom Left` (default), `Bottom Right`, `Top Left`, `Top Right` or `Center (drifts slowly)`. In the corners the clock moves only a few pixels (OLED care); in the center it drifts further. |
 | **Keep LG Screensaver Away** | `On` (default) or `Off`. While the app is open, a tiny hidden muted video plays so LG's own screensaver does not cover it (LG's timer can fire before ours). It may also stop the TV's own auto-sleep while Free My TV is open, so turn it `Off` if you prefer the TV to sleep normally. Older webOS versions without this video feature skip it. |
+| **Reset settings / Erase everything on this TV** | Under **Reset & About**, next to the app version. *Reset settings* restores defaults but keeps people and history; *Erase everything* wipes this app's data on the TV and starts first-run setup. Each asks for a second OK. |
 
 ---
 
@@ -286,6 +303,20 @@ O webOS moderno da LG (especialmente webOS 6, 22, 23 e 24) substituiu a clássic
 
 ---
 
+## 🆕 Novidades da 1.5.0
+
+- **👋 Saudação com o seu nome.** A tela inicial cumprimenta você pelo nome ("Boa noite, Noa") com o clima e o horário do pôr do sol embaixo.
+- **▶️ Continue de onde parou.** Uma linha compacta acima da prateleira com os apps que você abriu por último, ordenados pelo horário do dia em que costuma abri-los.
+- **🎬 Cenas.** Botões de um toque: Noite de filme, Hora do jogo e Música de fundo. Eles abrem apps e mudam o visual do Free My TV; não controlam imagem ou som da TV.
+- **🪄 Configuração inicial.** Um assistente curto em instalação nova (nome e cidade, apps, visual, fotos do protetor de tela). Qualquer passo pode ser pulado e **Repetir a configuração** fica em Personalizar.
+- **👨‍👩‍👧 Pessoas e bloqueio infantil.** Perfis para uma TV compartilhada, cada um com nome, cidade, prateleira e visual próprios. Um perfil infantil oculta os botões Personalizar e Config. da TV.
+- **🌙 Escurecimento noturno.** A foto do protetor de tela fica mais escura depois do pôr do sol e bem mais escura depois das 23:00. Desligue em **Escurecer Fotos à Noite**.
+- **⚪ Um único anel branco de foco.** Tudo o que pode ser selecionado, na prateleira e em Personalizar, mostra o mesmo anel branco.
+- **🔒 Uma frase de privacidade honesta.** "Sem anúncios. Sem conta. Suas configurações ficam nesta TV." Veja as Conexões de Rede abaixo para os serviços que o app contata.
+- **🗂️ Personalizar reorganizado.** Sete categorias (Tela inicial, Visual, Pessoas, Idioma e local, Fotos e Protetor de Tela, Contas e Chaves, Redefinir e sobre), mais **Redefinir configurações** e **Apagar tudo nesta TV**.
+
+---
+
 ## 📊 LG webOS de Fábrica vs. Free My TV
 
 | Métrica / Recurso | LG webOS 24 de Fábrica | Free My TV (webOS) |
@@ -355,9 +386,9 @@ python scripts/install.py
 
 Clique no botão **⚙️ Customize** no canto superior direito do painel usando o controle remoto:
 
-**Usando a tela Personalizar com o controle remoto:** escolha uma categoria à esquerda (Cima/Baixo, depois Direita ou OK) e percorra os ajustes com Cima/Baixo. Em um ajuste, Esquerda/Direita muda o valor (ou OK avança); OK em um ajuste de texto abre o teclado. **Apps da prateleira** abre uma página em que Cima/Baixo movem uma linha inteira de apps e OK adiciona ou remove um (até 8). Cada mudança é salva na hora, por isso não há botão Salvar; Voltar sai um nível por vez. As chaves (Unsplash, TMDB) nunca aparecem na tela, só pontos.
+**Usando a tela Personalizar com o controle remoto:** as categorias à esquerda são Tela inicial, Visual, Pessoas, Idioma e local, Fotos e Protetor de Tela, Contas e Chaves e Redefinir e sobre. Escolha uma (Cima/Baixo, depois Direita ou OK) e percorra os ajustes com Cima/Baixo. Em um ajuste, Esquerda/Direita muda o valor (ou OK avança); OK em um ajuste de texto abre o teclado. **Apps da prateleira** abre uma página em que Cima/Baixo movem uma linha inteira de apps e OK adiciona ou remove um (até 8). Cada mudança é salva na hora, por isso não há botão Salvar; Voltar sai um nível por vez. As chaves (Unsplash, TMDB) nunca aparecem na tela, só pontos.
 
-Cada entrada HDMI é uma linha em **Prateleira e Entradas**, logo depois de **Apps da prateleira**: Esquerda/Direita (ou OK) alterna a porta entre HDMI, PS5, PS4, Xbox, Nintendo Switch e Gaming PC, e cada mudança é salva na hora. São escolhas manuais, por porta; consoles conectados não são detectados automaticamente. O bloco continua abrindo a mesma entrada HDMI. Não há botões Salvar, Cancelar ou Restaurar Padrões: **Restaurar padrões** é uma linha em **Contas e Chaves** que pede um segundo OK para confirmar, e também limpa as escolhas de dispositivo.
+Cada entrada HDMI é uma linha na página **Apps da prateleira** (**Tela inicial**): Esquerda/Direita (ou OK) alterna a porta entre HDMI, PS5, PS4, Xbox, Nintendo Switch e Gaming PC, e cada mudança é salva na hora. São escolhas manuais, por porta; consoles conectados não são detectados automaticamente. O bloco continua abrindo a mesma entrada HDMI. Não há botões Salvar ou Cancelar. Em **Redefinir e sobre**, **Redefinir configurações** volta todas as configurações, a prateleira e as escolhas de dispositivo ao padrão (pessoas e histórico ficam), e **Apagar tudo nesta TV** apaga todas as pessoas, configurações, chaves e histórico e abre a configuração inicial. Os dois pedem um segundo OK.
 
 | Configuração | O Que Faz |
 |---|---|
@@ -365,6 +396,7 @@ Cada entrada HDMI é uma linha em **Prateleira e Entradas**, logo depois de **Ap
 | **Nome da Cidade** | Digite qualquer cidade (ex.: `São Paulo`, `Lisboa`, `Nova York`) para clima ao vivo via Open-Meteo e horários precisos de pôr do sol, ou deixe em branco para São Paulo, ou ative *Localizar por IP* para achar sua cidade pelo seu endereço IP. |
 | **Modo de Tema** | Escolha entre `Automático (Segue o Pôr do Sol)`, `Meia-Noite Profunda`, `Preto OLED Puro`, ou `Azul Diurno`. |
 | **Formato do Relógio** | Alterne entre exibição em `24 Horas (20:30)` ou `12 Horas (8:30 PM)`. |
+| **Linha Continuar** | `Ligado` (padrão) ou `Desligado`. "Continue de onde parou": os apps que você abriu por último, acima da prateleira, ordenados pelo horário do dia em que você costuma abri-los. |
 | **Cenas** | `Ligado` (padrão) ou `Desligado`. Três botões de um toque sob a saudação: Noite de filme (abre seu último app de streaming, Preto OLED Puro, fotos da tela inicial desligadas), Hora do jogo (abre a primeira entrada HDMI que você nomeou como console ou PC) e Música de fundo (abre o Spotify). Ao voltar ao Free My TV, o visual volta como era. |
 | **Repetir a configuração** | Abre a configuração inicial (boas-vindas, nome e cidade, apps, visual, fotos do protetor de tela). Ela aparece sozinha apenas em uma instalação nova, qualquer passo pode ser pulado e tudo continua editável em Personalizar. |
 | **Trocar de pessoa / Adicionar pessoa / Remover esta pessoa / Perguntar quem está assistindo** | Perfis para uma TV compartilhada. *Adicionar pessoa* abre a configuração para uma nova pessoa (nome, cidade, prateleira, visual, fotos do protetor de tela) e pode marcá-la como perfil infantil, que oculta os botões Personalizar e Config. da TV; *Trocar de pessoa* (ou o botão da pessoa no cabeçalho, exibido quando há duas ou mais pessoas) abre "Quem está assistindo?"; *Remover esta pessoa* pede um segundo OK; *Perguntar quem está assistindo* mostra a escolha ao abrir o app. Os perfis ficam guardados só nesta TV e não são contas. |
@@ -373,7 +405,9 @@ Cada entrada HDMI é uma linha em **Prateleira e Entradas**, logo depois de **Ap
 | **Protetor de Tela Inicia Após** | Tempo parado antes do protetor de tela: 1, 3, 5, 10 ou 30 minutos. |
 | **Protetor de Tela com Fotos** | `Ligado` ou `Desligado`, com duração (30 s, 90 s ou 5 min) e movimento (Ken Burns, só deslize ou nenhum). Precisa de uma chave de acesso do [Unsplash](https://unsplash.com/developers) (50 requisições por hora). |
 | **Fotos na Tela Inicial** | `Desligado` (padrão) ou `Ligado`. Mostra as mesmas fotos do Unsplash, em movimento lento e escurecidas, atrás da tela inicial, com o crédito "Foto de NOME no Unsplash" no canto inferior esquerdo. Precisa da chave do Unsplash e pausa enquanto o protetor de tela aparece. Precisa de uma TV com suporte a `fetch` (webOS 4 ou mais novo). Com Movimento em `Nenhum`, ou no modo de Alta Performance, a foto fica parada. |
+| **Escurecer Fotos à Noite** | `Ligado` (padrão) ou `Desligado`. A foto do protetor de tela fica um pouco mais escura depois do pôr do sol e bem mais escura depois das 23:00. |
 | **Evitar o Protetor de Tela da LG** | `Ligado` (padrão) ou `Desligado`. Enquanto o protetor de tela do Free My TV aparece, um vídeo minúsculo, mudo e invisível toca para que o protetor da própria LG não o cubra. Pode impedir também o desligamento automático da TV nesse período; desligue se preferir o comportamento normal. Versões antigas do webOS sem esse recurso de vídeo o ignoram. |
+| **Redefinir configurações / Apagar tudo nesta TV** | Em **Redefinir e sobre**, junto da versão do app. *Redefinir configurações* restaura os padrões e mantém pessoas e histórico; *Apagar tudo* apaga os dados do app nesta TV e abre a configuração inicial. Cada um pede um segundo OK. |
 
 ---
 
