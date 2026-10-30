@@ -1665,6 +1665,7 @@ setTimeout(function () {
   steps.push(function (done) { // Add person: own wizard, Back cancels without a trace, Skip keeps defaults, Kids locks, Remove asks twice
     localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
     var keepSetup = localStorage.getItem('fmtv_setup_done');
+    var orig = snapshotProfile(); // the harness state, put back at the end
     var base = snapshotProfile();
     base.userName = 'Noa'; base.theme = 'night'; base.city = 'Lisbon'; base.favorites = ['netflix', 'youtube.leanback.v4'];
     applyProfile(base);
@@ -1711,8 +1712,12 @@ setTimeout(function () {
     settingsUi.zone = 'rows'; settingsUi.cat = 1;
     var rows = settingsRowsFor(1);
     settingsUi.row = rows.map(function (d) { return d.id; }).indexOf('removePerson');
+    eq('remove defaults to another person', removeTargetProfile().id !== activeProfileId(), true);
+    cyclePick(1);
+    eq('remove can pick the active person', removeTargetProfile().id, activeProfileId());
     activateRow(settingDef('removePerson'));
     eq('remove asks first', settingsUi.confirmReset, true);
+    eq('remove confirm names the person', document.querySelector('#settingsRows .settings-row[data-id="removePerson"] .sr-value').textContent, t('Press OK again to remove %s', removeTargetProfile().name));
     eq('remove asks and keeps the people', readProfiles().length, 2);
     activateRow(settingDef('removePerson'));
     eq('remove deletes the person', readProfiles().length, 0);
@@ -1753,17 +1758,120 @@ setTimeout(function () {
     eq('picker OK closes', picker.open, false);
     eq('picker OK restores the first person exactly', JSON.stringify(snapshotProfile()), before);
     eq('picker OK unlocks', document.getElementById('customizeBtn').offsetParent !== null, true);
+    // an unlocked person removes the locked Kids person with the pick row
+    var kidId = readProfiles()[1].id;
+    eq('remove offers the locked person first', removeTargets()[0].id, kidId);
+    openSettingsModal();
+    settingsUi.zone = 'rows'; settingsUi.cat = 1;
+    settingsUi.row = settingsRowsFor(1).map(function (d) { return d.id; }).indexOf('removePerson');
+    eq('remove targets the locked person by default', removeTargetProfile().id, kidId);
+    activateRow(settingDef('removePerson'));
+    eq('remove confirm names the Kids person', document.querySelector('#settingsRows .settings-row[data-id="removePerson"] .sr-value').textContent, t('Press OK again to remove %s', 'Kid'));
+    activateRow(settingDef('removePerson'));
+    eq('remove deletes the locked person', readProfiles().length, 0);
+    eq('remove keeps the active person untouched', JSON.stringify(snapshotProfile()), before);
+    eq('remove leaves no profile list', localStorage.getItem('fmtv_profiles'), null);
+    closeSettingsModal();
+    // the row is hidden while a locked person is active
+    saveProfiles([{ id: 'p1', name: 'Noa', color: '#2a7de1', data: JSON.parse(before) }, { id: 'p2', name: 'Kid', color: '#ff9f43', data: JSON.parse(before) }]);
+    localStorage.setItem('fmtv_active_profile', 'p1');
+    eq('remove row offered to an unlocked person', settingsRowsFor(1).some(function (d) { return d.id === 'removePerson'; }), true);
+    state.locked = true;
+    eq('remove row hidden while locked', settingsRowsFor(1).some(function (d) { return d.id === 'removePerson'; }), false);
+    state.locked = false;
+    // three people: remove the active one, then a non-active one
+    function personData(name, locked) { var d = JSON.parse(before); d.userName = name; d.locked = !!locked; return d; }
+    saveProfiles([{ id: 'a', name: 'A', color: '#2a7de1', data: personData('A') }, { id: 'b', name: 'B', color: '#1fa05a', data: personData('B') }, { id: 'c', name: 'C', color: '#ff9f43', data: personData('C', true) }]);
+    localStorage.setItem('fmtv_active_profile', 'a');
+    applyProfile(personData('A'));
+    removeProfileById('b');
+    eq('non-active removal keeps the active person', activeProfileId() + state.userName, 'aA');
+    eq('non-active removal leaves two', readProfiles().length, 2);
+    saveProfiles([{ id: 'a', name: 'A', color: '#2a7de1', data: personData('A') }, { id: 'b', name: 'B', color: '#1fa05a', data: personData('B') }, { id: 'c', name: 'C', color: '#ff9f43', data: personData('C', true) }]);
+    removeProfileById('a');
+    eq('active removal makes the first remaining active', activeProfileId(), 'b');
+    eq('active removal applies their settings', state.userName, 'B');
+    eq('active removal leaves two', readProfiles().length, 2);
+    removeProfileById('c');
+    eq('removing down to one drops the list', localStorage.getItem('fmtv_profiles'), null);
     // removing the owner while a locked person is left must not leave the TV locked
+    saveProfiles([{ id: 'a', name: 'A', color: '#2a7de1', data: personData('A') }, { id: 'c', name: 'C', color: '#ff9f43', data: personData('C', true) }]);
+    localStorage.setItem('fmtv_active_profile', 'a');
+    applyProfile(personData('A'));
     removeActiveProfile();
-    eq('removing the owner leaves the other person', state.userName, 'Kid');
+    eq('removing the owner leaves the other person', state.userName, 'C');
     eq('a lone person is never locked', state.locked, false);
     eq('a lone person gets Customize back', document.getElementById('customizeBtn').offsetParent !== null, true);
     eq('a lone person leaves no profile list', localStorage.getItem('fmtv_profiles'), null);
     // clean up
     localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
-    applyProfile(JSON.parse(before));
+    applyProfile(orig);
     eq('cleanup hides the pill', document.getElementById('profileBtn').offsetParent, null);
     if (keepSetup === null) localStorage.removeItem('fmtv_setup_done'); else localStorage.setItem('fmtv_setup_done', keepSetup);
+    done();
+  });
+
+  steps.push(function (done) { // boot with profiles, an unknown active id, hdmi isolation, numeric lat/lon
+    var orig = snapshotProfile(), keepBoot = wizardAtBoot;
+    function person(name, locked, extra) { var d = JSON.parse(JSON.stringify(orig)); d.userName = name; d.locked = !!locked; for (var k in extra) d[k] = extra[k]; return d; }
+    function two(da, db) { saveProfiles([{ id: 'a', name: 'A', color: '#2a7de1', data: da }, { id: 'b', name: 'B', color: '#1fa05a', data: db }]); }
+    two(person('A'), person('B', true));
+    localStorage.setItem('fmtv_active_profile', 'zzz');
+    wizardAtBoot = true; bootProfiles();
+    eq('boot never opens the picker over the wizard', picker.open, false);
+    eq('boot repairs an unknown active id', activeProfileId(), 'a');
+    eq('boot lock follows an unlocked person', state.locked, false);
+    localStorage.setItem('fmtv_active_profile', 'b');
+    wizardAtBoot = false; bootProfiles();
+    eq('boot opens the picker', picker.open, true);
+    eq('boot lock follows the locked person', state.locked, true);
+    eq('boot keeps a valid active id', activeProfileId(), 'b');
+    closePicker();
+    localStorage.removeItem('fmtv_active_profile');
+    bootProfiles(); closePicker();
+    eq('boot repairs a missing active id', activeProfileId(), 'a');
+    eq('boot lock after repair', state.locked, false);
+    // an unknown active id saves nobody
+    two(person('A'), person('B'));
+    localStorage.setItem('fmtv_active_profile', 'zzz');
+    state.userName = 'Stranger';
+    saveCurrentProfile();
+    eq('unknown active id does not overwrite the first person', readProfiles()[0].data.userName, 'A');
+    eq('unknown active id does not rename anybody', (syncProfileName(), readProfiles()[0].name), 'A');
+    // hdmi devices are not shared between people
+    two(person('A', false, { hdmiDevices: { 'com.webos.app.hdmi1': 'ps5' } }), person('B', false, { hdmiDevices: {} }));
+    localStorage.setItem('fmtv_active_profile', 'a');
+    applyProfile(person('A', false, { hdmiDevices: { 'com.webos.app.hdmi1': 'ps5' } }));
+    switchProfile('b');
+    eq('hdmi devices follow the person', JSON.stringify(state.hdmiDevices), '{}');
+    state.hdmiDevices['com.webos.app.hdmi2'] = 'xbox';
+    switchProfile('a');
+    eq('hdmi devices come back', JSON.stringify(state.hdmiDevices), JSON.stringify({ 'com.webos.app.hdmi1': 'ps5' }));
+    eq('hdmi devices of the other person were saved', JSON.stringify(readProfiles()[1].data.hdmiDevices), JSON.stringify({ 'com.webos.app.hdmi2': 'xbox' }));
+    // lat and lon stay numbers through a profile round trip
+    two(person('A', false, { lat: 38.72, lon: -9.14 }), person('B'));
+    localStorage.setItem('fmtv_active_profile', 'b');
+    switchProfile('a');
+    eq('lat is a number', typeof state.lat + state.lat, 'number38.72');
+    eq('lon is a number', typeof state.lon + state.lon, 'number-9.14');
+    eq('lat is stored', localStorage.getItem('fmtv_lat'), '38.72');
+    switchProfile('b');
+    switchProfile('a');
+    eq('lat survives a round trip', snapshotProfile().lat, 38.72);
+    // reset follows into the profile name
+    localStorage.setItem('fmtv_active_profile', 'a');
+    state.userName = 'Zed'; syncProfileName();
+    eq('profile name follows the typed name', readProfiles()[0].name, 'Zed');
+    var keepSet = {}; SETTINGS.forEach(function (d) { if (d.field) keepSet[d.field] = state[d.field]; });
+    var keepFavs = state.favorites.slice(), keepHdmi = JSON.stringify(state.hdmiDevices);
+    resetAllSettings();
+    eq('reset renames the stored person', readProfiles()[0].name, t('Person') + ' 1');
+    SETTINGS.forEach(function (d) { if (d.field) { state[d.field] = keepSet[d.field]; try { localStorage.setItem(d.store, keepSet[d.field]); } catch (e) {} } });
+    state.favorites = keepFavs; state.hdmiDevices = JSON.parse(keepHdmi); applyStaticTranslations();
+    // clean up
+    wizardAtBoot = keepBoot;
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    applyProfile(orig);
     done();
   });
 
