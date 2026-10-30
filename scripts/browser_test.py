@@ -114,7 +114,27 @@ setTimeout(function () {
     localStorage.removeItem('fmtv_setup_done');
     eq('wizard fresh again', wizardNeeded(), true);
     eq('wizard boot flag is a boolean', typeof wizardAtBoot, 'boolean');
+    // The harness seeds fmtv_lang and fmtv_setup_done before the app starts, so this profile counts as an existing install.
+    eq('wizard not shown at boot for a seeded profile', wizardAtBoot, false);
     Object.keys(savedKeys).forEach(function (key) { localStorage.setItem(key, savedKeys[key]); });
+  }
+  if (need('snapshotProfile') && need('applyProfile')) {
+    var before = JSON.stringify(snapshotProfile());
+    var snap = snapshotProfile();
+    snap.userName = 'Kid'; snap.theme = 'day'; snap.favorites = ['youtube.leanback.v4'];
+    applyProfile(snap);
+    eq('profile name', state.userName, 'Kid');
+    eq('profile theme', state.theme, 'day');
+    eq('profile shelf', state.favorites.join(','), 'youtube.leanback.v4');
+    eq('profile persisted', localStorage.getItem('fmtv_theme'), 'day');
+    applyProfile(JSON.parse(before));
+    eq('profile restored', JSON.stringify(snapshotProfile()), before);
+    applyProfile({ userName: 'Only' });
+    eq('profile applies only the fields present', state.theme + '|' + state.favorites.join(','), JSON.parse(before).theme + '|' + JSON.parse(before).favorites.join(','));
+    applyProfile(JSON.parse(before));
+    eq('profile restored again', JSON.stringify(snapshotProfile()), before);
+    eq('profile fields', PROFILE_FIELDS.join(','), 'userName,theme,city,lat,lon,ambient,homePhotos');
+    eq('profile snapshot has the lock', typeof snapshotProfile().locked, 'boolean');
   }
   if (need('recordLaunch') && need('recentApps') && need('relativeWhen')) {
     localStorage.removeItem('fmtv_launch_hist');
@@ -1574,7 +1594,6 @@ setTimeout(function () {
     localStorage.removeItem('fmtv_setup_done');
     var keepCat = state.catalog, keepFav = state.favorites.slice();
     state.catalog = keepCat.slice(0, 6); state.favorites = [state.catalog[0].id];
-    wizardGo(2); // wizard is closed here; reopen
     openWizard(); wizardGo(2);
     eq('wizard grid count', wizard.gridCount, 6);
     wizard.focus = 1; key('ArrowDown');
@@ -1601,6 +1620,149 @@ setTimeout(function () {
     state.theme = oldTheme; state.userName = oldName; state.ambient = oldAmbient; state.favorites = oldFavs;
     try { localStorage.setItem('fmtv_theme', oldTheme); localStorage.setItem('fmtv_user_name', oldName); localStorage.setItem('fmtv_ambient', oldAmbient); localStorage.setItem('fmtv_favorites', JSON.stringify(oldFavs)); } catch (e) {}
     applyTheme(); renderAppsShelf(); updateGreeting();
+    if (keepSetup === null) localStorage.removeItem('fmtv_setup_done'); else localStorage.setItem('fmtv_setup_done', keepSetup);
+    done();
+  });
+
+  steps.push(function (done) { // profiles swap shelf, look and name; a locked profile hides the settings buttons
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    var base = snapshotProfile();
+    var kid = snapshotProfile(); kid.userName = 'Kid'; kid.theme = 'day'; kid.favorites = ['youtube.leanback.v4']; kid.locked = true;
+    function two() { saveProfiles([{ id: 'p1', name: 'Noa', color: '#2a7de1', data: base }, { id: 'p2', name: 'Kid', color: '#ff9f43', data: kid }]); }
+    two();
+    eq('profiles read', readProfiles().length, 2);
+    localStorage.setItem('fmtv_profiles', '{nope');
+    eq('profiles garbage tolerated', readProfiles().length, 0);
+    localStorage.setItem('fmtv_profiles', '{"a":1}');
+    eq('profiles non-array tolerated', readProfiles().length, 0);
+    two();
+    localStorage.setItem('fmtv_active_profile', 'p1');
+    switchProfile('p2');
+    eq('profile switched name', state.userName, 'Kid');
+    eq('profile switched shelf', state.favorites.join(','), 'youtube.leanback.v4');
+    eq('locked hides Customize', document.getElementById('customizeBtn').offsetParent, null);
+    eq('locked hides TV Settings', document.getElementById('tvSettingsBtn').offsetParent, null);
+    eq('locked leaves nav', mainNavItems.indexOf(document.getElementById('customizeBtn')), -1);
+    eq('pill shows for two people', document.getElementById('profileBtn').offsetParent !== null, true);
+    eq('pill is in the nav even when locked', mainNavItems.indexOf(document.getElementById('profileBtn')) !== -1, true);
+    eq('pill names the active person', document.getElementById('profileBtn').textContent.indexOf('Kid') !== -1, true);
+    eq('active profile saved', localStorage.getItem('fmtv_active_profile'), 'p2');
+    switchProfile('p1');
+    eq('profile switched back', state.userName, base.userName);
+    eq('unlocked shows Customize', document.getElementById('customizeBtn').offsetParent !== null, true);
+    eq('picker needs two profiles', shouldAskWho(), true);
+    state.askWho = 'off';
+    eq('picker can be turned off', shouldAskWho(), false);
+    state.askWho = 'on';
+    saveProfiles([{ id: 'p1', name: 'Noa', color: '#2a7de1', data: base }]);
+    eq('picker hidden for one profile', shouldAskWho(), false);
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    applyProfile(base);
+    eq('pill hidden without profiles', document.getElementById('profileBtn').offsetParent, null);
+    done();
+  });
+
+  steps.push(function (done) { // Add person: own wizard, Back cancels without a trace, Skip keeps defaults, Kids locks, Remove asks twice
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    var keepSetup = localStorage.getItem('fmtv_setup_done');
+    var base = snapshotProfile();
+    base.userName = 'Noa'; base.theme = 'night'; base.city = 'Lisbon'; base.favorites = ['netflix', 'youtube.leanback.v4'];
+    applyProfile(base);
+    var before = JSON.stringify(snapshotProfile());
+    function key(k) { handleWizardKey({ key: k, keyCode: 0, preventDefault: function () {} }); }
+    function itemByText(text) { for (var i = 0; i < wizard.items.length; i++) if (wizard.items[i].textContent.indexOf(text) === 0) return i; return -1; }
+    // cancel
+    startAddPerson();
+    eq('add opens the wizard', wizard.open && !document.getElementById('wizardOverlay').hidden, true);
+    eq('add starts on who', WIZARD_STEPS[wizard.step], 'who');
+    eq('add creates two people', readProfiles().length, 2);
+    eq('add first person keeps their name', readProfiles()[0].name, 'Noa');
+    eq('add new person starts from the default shelf', state.favorites.join(','), DEFAULT_FAVORITES.join(','));
+    eq('add new person has no name', state.userName, '');
+    eq('add new person has the default look', state.theme, settingDef('theme').def);
+    eq('add new person has no city', state.city, '');
+    eq('add new person is active', activeProfileId() !== readProfiles()[0].id, true);
+    eq('add has a kids toggle', itemByText(t('Kids profile (hides settings)')) !== -1, true);
+    eq('add hides the welcome row', document.querySelectorAll('#wizardRail .wz-rail-row').length, 4);
+    eq('add pill shows', document.getElementById('profileBtn').offsetParent !== null, true);
+    key('Escape');
+    eq('add Back on who closes', wizard.open, false);
+    eq('add cancel leaves no profiles', readProfiles().length, 0);
+    eq('add cancel leaves no active key', localStorage.getItem('fmtv_active_profile'), null);
+    eq('add cancel restores everything', JSON.stringify(snapshotProfile()), before);
+    eq('add cancel hides the pill', document.getElementById('profileBtn').offsetParent, null);
+    // Back from a later step goes back first
+    startAddPerson(); wizardGo(2); key('Escape');
+    eq('add Back from apps returns to who', wizard.open && WIZARD_STEPS[wizard.step], 'who');
+    key('Escape');
+    eq('add then cancel again', readProfiles().length, 0);
+    // Skip keeps the person with defaults and a numbered name
+    startAddPerson();
+    wizard.focus = itemByText(t('Skip setup'));
+    key('Enter');
+    eq('add skip closes', wizard.open, false);
+    eq('add skip keeps two people', readProfiles().length, 2);
+    eq('add skip names the person', readProfiles()[1].name, t('Person') + ' 2');
+    eq('add skip leaves the new person active', activeProfileId(), readProfiles()[1].id);
+    eq('add skip is not locked', state.locked, false);
+    eq('remove row is offered', settingsRowsFor(1).some(function (d) { return d.id === 'removePerson'; }), true);
+    // remove asks twice, then returns to the first person exactly
+    openSettingsModal();
+    settingsUi.zone = 'rows'; settingsUi.cat = 1;
+    var rows = settingsRowsFor(1);
+    settingsUi.row = rows.map(function (d) { return d.id; }).indexOf('removePerson');
+    activateRow(settingDef('removePerson'));
+    eq('remove asks first', settingsUi.confirmReset, true);
+    eq('remove asks and keeps the people', readProfiles().length, 2);
+    activateRow(settingDef('removePerson'));
+    eq('remove deletes the person', readProfiles().length, 0);
+    eq('remove returns to the first person exactly', JSON.stringify(snapshotProfile()), before);
+    eq('remove leaves no active key', localStorage.getItem('fmtv_active_profile'), null);
+    eq('remove hides the pill', document.getElementById('profileBtn').offsetParent, null);
+    eq('remove row hidden again', settingsRowsFor(1).some(function (d) { return d.id === 'removePerson'; }), false);
+    closeSettingsModal();
+    // Kids profile: typed name, lock, no remove row, settings buttons hidden
+    startAddPerson();
+    var nameInput = document.getElementById('wzName');
+    nameInput.value = 'Kid'; nameInput.dispatchEvent(new Event('input'));
+    wizard.focus = itemByText(t('Kids profile (hides settings)')); key('Enter');
+    eq('kids toggle locks', state.locked, true);
+    eq('kids toggle hides Customize', document.getElementById('customizeBtn').offsetParent, null);
+    wizard.focus = itemByText(t('Skip setup')); key('Enter');
+    eq('kids profile kept', readProfiles().length, 2);
+    eq('kids profile named', readProfiles()[1].name, 'Kid');
+    eq('kids profile saved locked', readProfiles()[1].data.locked, true);
+    eq('kids profile hides TV Settings', document.getElementById('tvSettingsBtn').offsetParent, null);
+    eq('kids profile has no remove row', settingsRowsFor(1).some(function (d) { return d.id === 'removePerson'; }), false);
+    eq('kids profile can still switch', settingsRowsFor(1).some(function (d) { return d.id === 'switchPerson'; }), true);
+    // the picker: keys route to it, Right/Enter pick, Back keeps the person
+    function press(k) { document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true })); }
+    openPicker();
+    eq('picker open', picker.open && !document.getElementById('profileOverlay').hidden, true);
+    eq('picker lists everyone', document.querySelectorAll('#profileCards .profile-card').length, 2);
+    eq('picker starts on the active person', picker.focus, 1);
+    eq('picker is above the home screen', parseInt(getComputedStyle(document.getElementById('profileOverlay')).zIndex, 10) >= 2500, true);
+    eq('picker focus ring', getComputedStyle(document.querySelector('.profile-card.focused')).outlineStyle, 'solid');
+    press('ArrowLeft');
+    eq('picker Left moves', picker.focus, 0);
+    press('Escape');
+    eq('picker Back closes', picker.open, false);
+    eq('picker Back keeps the person', state.userName, 'Kid');
+    openPicker(); press('ArrowLeft'); press('Enter');
+    eq('picker OK switches', state.userName, 'Noa');
+    eq('picker OK closes', picker.open, false);
+    eq('picker OK restores the first person exactly', JSON.stringify(snapshotProfile()), before);
+    eq('picker OK unlocks', document.getElementById('customizeBtn').offsetParent !== null, true);
+    // removing the owner while a locked person is left must not leave the TV locked
+    removeActiveProfile();
+    eq('removing the owner leaves the other person', state.userName, 'Kid');
+    eq('a lone person is never locked', state.locked, false);
+    eq('a lone person gets Customize back', document.getElementById('customizeBtn').offsetParent !== null, true);
+    eq('a lone person leaves no profile list', localStorage.getItem('fmtv_profiles'), null);
+    // clean up
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    applyProfile(JSON.parse(before));
+    eq('cleanup hides the pill', document.getElementById('profileBtn').offsetParent, null);
     if (keepSetup === null) localStorage.removeItem('fmtv_setup_done'); else localStorage.setItem('fmtv_setup_done', keepSetup);
     done();
   });
