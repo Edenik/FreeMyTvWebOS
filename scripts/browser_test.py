@@ -736,6 +736,12 @@ setTimeout(function () {
       flushNet();
       eq('engine city weather after flush', count('fetchWeather'), 1);
       eq('engine city fetches no picks', count('fetchTrendingPicks'), 0);
+      seen.length = 0;
+      cycleSetting(findSetting('lang'), 1); // debounce pending
+      resetAllSettings();
+      flushNet();
+      eq('engine reset drops pending weather', count('fetchWeather'), 1);
+      eq('engine reset drops pending picks', count('fetchTrendingPicks'), 1);
       called('textSize', 'textSize', 'large', ['applyTextSize']);
       called('clockFormat', 'clockFormat', '12h', ['updateClock']);
       called('homePhotos', 'homePhotos', 'on', ['ambientRefresh', 'applyHomePhotosSettings']);
@@ -989,6 +995,7 @@ setTimeout(function () {
   });
   steps.push(function (done) { // a long apps grid keeps the focused tile fully visible going down and back up; partial last rows and empty catalogs
     var keepCat = state.catalog, keepFav = state.favorites.slice(), big = state.catalog.slice(), k;
+    big.unshift({ id: 'test.longtitle', title: 'Amazon Prime Video Live TV Channel Network' });
     for (k = 0; big.length < 60; k++) big.push({ id: 'test.dummy' + k, title: 'Dummy ' + k });
     state.catalog = big;
     eq('no settings apps grid while the page is closed', document.querySelectorAll('#settingsAppsGrid').length, 0);
@@ -999,6 +1006,9 @@ setTimeout(function () {
     eq('home shelf grid id is unique', document.querySelectorAll('#appsGrid').length, 1);
     eq('settings apps grid id is unique', document.querySelectorAll('#settingsAppsGrid').length, 1);
     eq('apps grid overflows', !!grid && grid.scrollHeight > grid.clientHeight, true);
+    eq('long title does not widen the grid', !!grid && grid.scrollWidth <= grid.clientWidth, true);
+    var firstRow = Array.prototype.slice.call(grid.querySelectorAll('.apps-tile'), 0, 5).map(function (n) { return n.getBoundingClientRect().width; });
+    eq('first row tiles equal width', firstRow.length === 5 && firstRow.every(function (w) { return Math.abs(w - firstRow[0]) < 2; }), true);
     function check() { node = grid.querySelector('.apps-tile.sf'); return !!node && inView(node, grid); }
     while (settingsUi.appIdx < big.length - 5 && guard--) { press('ArrowDown'); if (!check()) okDown = false; }
     while (settingsUi.appIdx < big.length - 1 && guard--) { press('ArrowRight'); if (!check()) okDown = false; }

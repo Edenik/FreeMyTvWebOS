@@ -343,9 +343,9 @@ python scripts/install.py
 
 Clique no botão **⚙️ Customize** no canto superior direito do painel usando o controle remoto:
 
-Cada entrada HDMI é uma linha em **Prateleira e Entradas**, logo depois de **Apps da prateleira**: Esquerda/Direita (ou OK) alterna a porta entre HDMI, PS5, PS4, Xbox, Nintendo Switch e PC Gamer, e cada mudança é salva na hora. São escolhas manuais, por porta; consoles conectados não são detectados automaticamente. O bloco continua abrindo a mesma entrada HDMI. Não há botões Salvar, Cancelar ou Restaurar Padrões: **Restaurar padrões** é uma linha em **Contas e Chaves** que pede um segundo OK para confirmar, e também limpa as escolhas de dispositivo.
-
 **Usando a tela Personalizar com o controle remoto:** escolha uma categoria à esquerda (Cima/Baixo, depois Direita ou OK) e percorra os ajustes com Cima/Baixo. Em um ajuste, Esquerda/Direita muda o valor (ou OK avança); OK em um ajuste de texto abre o teclado. **Apps da prateleira** abre uma página em que Cima/Baixo movem uma linha inteira de apps e OK adiciona ou remove um (até 8). Cada mudança é salva na hora, por isso não há botão Salvar; Voltar sai um nível por vez. As chaves (Unsplash, TMDB) nunca aparecem na tela, só pontos.
+
+Cada entrada HDMI é uma linha em **Prateleira e Entradas**, logo depois de **Apps da prateleira**: Esquerda/Direita (ou OK) alterna a porta entre HDMI, PS5, PS4, Xbox, Nintendo Switch e Gaming PC, e cada mudança é salva na hora. São escolhas manuais, por porta; consoles conectados não são detectados automaticamente. O bloco continua abrindo a mesma entrada HDMI. Não há botões Salvar, Cancelar ou Restaurar Padrões: **Restaurar padrões** é uma linha em **Contas e Chaves** que pede um segundo OK para confirmar, e também limpa as escolhas de dispositivo.
 
 | Configuração | O Que Faz |
 |---|---|

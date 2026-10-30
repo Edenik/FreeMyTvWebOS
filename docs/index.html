@@ -760,7 +760,7 @@
             display: flex;
             flex-wrap: wrap;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 12px;
             align-content: start;
         }
@@ -772,6 +772,7 @@
             min-height: 84px;
             /* Flex fallback width (Grid ignores flex-basis); no margin fallback, a margin would change the Grid spacing. */
             flex: 0 0 calc((100% - 48px) / 5);
+            min-width: 0;
             box-sizing: border-box;
             padding: 0 18px;
             border-radius: 16px;
@@ -2715,6 +2716,11 @@
 
         // Put every setting, the shelf and the HDMI device names back to their defaults, then re-apply once.
         function resetAllSettings() {
+            // Drop any debounced fetch: the reset fetches once itself below.
+            clearTimeout(settingsNetTimer);
+            settingsNetTimer = null;
+            settingsNetPending.weather = false;
+            settingsNetPending.picks = false;
             SETTINGS.forEach(function(def) {
                 if (!def.field) return;
                 state[def.field] = def.def;
