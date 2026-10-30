@@ -453,7 +453,7 @@
             outline-offset: 3px;
         }
 
-        .wizard { position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; z-index: 2500; display: flex; gap: 84px; padding: 72px 96px 60px; box-sizing: border-box; background: #04060a var(--bg-gradient); color: #f2f5fb; }
+        .wizard { position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; z-index: 2500; display: flex; flex-direction: column; align-items: center; padding: 72px 96px 60px; box-sizing: border-box; background: #04060a var(--bg-gradient); color: #f2f5fb; }
         .wizard[hidden] { display: none; }
         .profile-overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; z-index: 2500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 56px; padding: 64px; background: #04060a var(--bg-gradient); color: #f2f5fb; }
         .profile-overlay[hidden] { display: none; }
@@ -463,59 +463,54 @@
         .profile-card.focused { transform: scale(1.08); background: rgba(255, 255, 255, 0.08); }
         .profile-avatar { width: 170px; height: 170px; border-radius: 36px; display: flex; align-items: center; justify-content: center; font-size: 76px; font-weight: 700; color: #fff; }
         .profile-name { font-size: 24px; font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .wz-rail { width: 390px; flex: none; display: flex; flex-direction: column; gap: 33px; }
-        .wz-brand { display: flex; align-items: center; gap: 18px; }
-        .wz-brand-tile { width: 48px; height: 48px; border-radius: 12px; background: #2a7de1; display: flex; align-items: center; justify-content: center; }
-        .wz-brand-name { font-size: 28px; font-weight: 600; }
-        .wz-minute { font-size: 19px; letter-spacing: 0.12em; text-transform: uppercase; color: #8fb8ff; font-weight: 600; }
-        .wz-steps { display: flex; flex-direction: column; gap: 6px; }
-        .wz-rail-row { display: flex; align-items: center; gap: 18px; height: 69px; font-size: 25px; color: #aeb8d0; box-sizing: border-box; }
-        .wz-rail-row.done { color: #8c97ae; }
-        .wz-rail-row.current { padding: 0 18px; margin: 0 -18px; border-radius: 15px; background: rgba(77,163,255,0.16); font-weight: 600; color: #fff; }
-        .wz-dot { width: 36px; height: 36px; flex: none; border-radius: 18px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 700; border: 3px solid #46536e; color: #aeb8d0; }
-        .wz-rail-row.done .wz-dot { background: #1f6b4b; border: 0; }
-        .wz-rail-row.current .wz-dot { background: #2a7de1; border: 0; color: #fff; }
-        .wz-note { margin-top: auto; font-size: 21px; line-height: 1.5; color: #98a3bb; }
-        .wz-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 30px; }
-        .wz-head { display: flex; flex-direction: column; gap: 9px; }
-        .wz-eyebrow { font-size: 19px; letter-spacing: 0.12em; text-transform: uppercase; color: #ffbd7a; font-weight: 600; }
+        .wz-main { width: 100%; max-width: 960px; flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 30px; }
+        .wizard.wide .wz-main { max-width: 1440px; }
+        .wz-bars { display: flex; gap: 9px; flex: none; }
+        .wz-bar { width: 42px; height: 9px; border-radius: 5px; background: #3A414E; }
+        .wz-bar.done { background: #6B7385; }
+        .wz-bar.cur { background: #fff; }
+        .wz-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; flex: none; }
+        .wz-head-text { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
         .wz-title { overflow-wrap: anywhere; font-size: 66px; font-weight: 700; line-height: 1.05; }
         .wz-lead { font-size: 27px; color: #b3bdd3; max-width: 1200px; }
-        .wz-fields { display: flex; flex-direction: column; gap: 24px; max-width: 900px; }
+        .wz-count { flex: none; font-size: 27px; font-weight: 600; color: #b3bdd3; }
+        .wz-fields { display: flex; flex-direction: column; gap: 24px; }
         .wz-field { display: flex; flex-direction: column; gap: 9px; }
         .wz-label { font-size: 21px; color: #aeb8d0; font-weight: 600; }
+        .wz-hint { font-size: 21px; line-height: 1.4; color: #98a3bb; }
         .wz-input { width: 100%; height: 96px; padding: 0 36px; border-radius: 24px; border: 2px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.08); color: inherit; font-size: 30px; font-family: inherit; box-sizing: border-box; }
         .wz-input::placeholder { color: #7f8aa3; }
-        .wz-toggle { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: 100%; max-width: 900px; min-height: 96px; padding: 0 36px; border-radius: 24px; border: 0; background: rgba(255,255,255,0.06); color: inherit; font-size: 27px; font-weight: 600; font-family: inherit; text-align: left; box-sizing: border-box; }
+        .wz-toggle { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: 100%; min-height: 96px; padding: 0 36px; border-radius: 24px; border: 0; background: rgba(255,255,255,0.06); color: inherit; font-size: 27px; font-weight: 600; font-family: inherit; text-align: left; box-sizing: border-box; flex: none; }
         .wz-pill { flex: none; min-width: 84px; height: 48px; padding: 0 24px; border-radius: 24px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 600; border: 2px solid #46536e; color: #aeb8d0; }
         .wz-toggle.on .wz-pill { background: #2a7de1; border-color: #2a7de1; color: #fff; }
         .wz-grid { display: flex; flex-wrap: wrap; display: grid; gap: 24px; }
-        .wz-apps { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
-        .wz-looks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .wz-tile { display: flex; align-items: center; gap: 15px; min-height: 84px; border-radius: 21px; border: 0; padding: 12px 27px; background: rgba(255,255,255,0.06); color: inherit; font-size: 26px; font-family: inherit; text-align: left; }
-        .wz-tile.on { background: rgba(77,163,255,0.2); }
-        .wz-check svg, .wz-dot svg { display: block; }
-        .wz-tile-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .wz-check { flex: none; width: 30px; height: 30px; border-radius: 15px; background: #2a7de1; display: flex; align-items: center; justify-content: center; }
-        .wz-look { position: relative; display: flex; align-items: center; gap: 21px; border-radius: 21px; border: 3px solid transparent; padding: 15px; background: rgba(255,255,255,0.06); color: inherit; font-family: inherit; text-align: left; }
+        .wz-apps { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 18px; }
+        .wz-looks { grid-template-columns: repeat(4, minmax(0, 1fr)); flex: none; }
+        @supports not (display: grid) {
+            .wz-apps .wz-tile { width: calc((100% - 90px) / 6); margin: 0 18px 18px 0; }
+            .wz-apps .wz-tile:nth-child(6n) { margin-right: 0; }
+            .wz-looks .wz-look { width: calc((100% - 72px) / 4); margin-right: 24px; }
+            .wz-looks .wz-look:nth-child(4n) { margin-right: 0; }
+        }
+        .wz-tile { position: relative; display: flex; height: 156px; padding: 0; overflow: hidden; border-radius: 24px; border: 0; background: rgba(255,255,255,0.06); color: inherit; font-family: inherit; opacity: 0.55; }
+        .wz-tile.on, .wz-tile.focused { opacity: 1; }
+        .wz-tile .app-icon { border-radius: 0; }
+        .wz-check svg, .wz-sel svg { display: block; }
+        .wz-check { position: absolute; top: 12px; right: 12px; z-index: 2; width: 36px; height: 36px; border-radius: 18px; background: #fff; display: flex; align-items: center; justify-content: center; }
+        .wz-more { display: flex; align-items: center; justify-content: center; width: 100%; height: 78px; margin-top: 18px; border: 0; border-radius: 24px; background: rgba(255,255,255,0.06); color: #d6deee; font-size: 25px; font-weight: 600; font-family: inherit; }
+        .wz-look { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 18px; border-radius: 21px; border: 3px solid transparent; padding: 15px 15px 21px; background: rgba(255,255,255,0.06); color: inherit; font-family: inherit; text-align: left; }
         .wz-look.on { background: rgba(77,163,255,0.16); border-color: #4da3ff; }
-        .wz-sel { position: absolute; top: 12px; right: 14px; display: flex; align-items: center; gap: 9px; height: 36px; padding: 0 15px 0 6px; border-radius: 18px; background: #2a7de1; color: #fff; font-size: 19px; font-weight: 600; }
-        .wz-sel svg { display: block; }
+        .wz-sel { position: absolute; z-index: 2; top: 24px; right: 26px; display: flex; align-items: center; gap: 9px; height: 36px; padding: 0 15px 0 6px; border-radius: 18px; background: #2a7de1; color: #fff; font-size: 19px; font-weight: 600; }
         .wz-scroll { flex: 1; min-height: 0; position: relative; overflow: hidden; padding: 10px; margin: -10px; }
-        .wz-thumb { width: 225px; height: 132px; flex: none; border-radius: 12px; position: relative; box-sizing: border-box; }
+        .wz-thumb { width: 100%; height: 150px; flex: none; border-radius: 12px; position: relative; box-sizing: border-box; }
         .wz-thumb-bar { position: absolute; left: 15px; top: 15px; width: 90px; height: 12px; border-radius: 6px; background: rgba(255,255,255,0.8); }
         .wz-thumb-tiles { position: absolute; left: 15px; bottom: 15px; display: flex; gap: 9px; }
         .wz-thumb-tiles span { width: 42px; height: 42px; border-radius: 8px; }
-        .wz-look-text { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-        .wz-look-name { font-size: 30px; font-weight: 600; }
-        .wz-look-desc { font-size: 21px; color: #b3bdd3; line-height: 1.35; }
-        .wz-footer { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
-        .wz-hints { display: flex; gap: 33px; font-size: 21px; color: #aeb8d0; }
-        .wz-hints b { color: #e6ebf6; font-weight: 600; }
-        .wz-actions { display: flex; align-items: center; gap: 18px; }
-        .wz-primary, .wz-skip { display: flex; align-items: center; height: 78px; border-radius: 39px; font-size: 27px; font-weight: 600; font-family: inherit; color: #fff; box-sizing: border-box; }
-        .wz-primary { padding: 0 42px; border: 0; background: #2a7de1; }
-        .wz-skip { padding: 0 36px; font-size: 24px; background: transparent; border: 2px solid rgba(255,255,255,0.28); color: #aeb8d0; }
+        .wz-look-name { font-size: 30px; font-weight: 600; padding: 0 6px; }
+        .wz-footer { margin-top: auto; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+        .wz-primary, .wz-second { display: flex; align-items: center; height: 78px; border-radius: 39px; font-size: 27px; font-weight: 600; font-family: inherit; color: #fff; box-sizing: border-box; }
+        .wz-primary { padding: 0 54px; border: 0; background: #2a7de1; }
+        .wz-second { padding: 0 30px; background: transparent; border: 0; color: #aeb8d0; }
         .wz-item.focused { outline: none; box-shadow: 0 0 0 6px #ffffff, 0 0 57px rgba(77,163,255,0.4); }
 
         .pick-poster {
@@ -1322,7 +1317,6 @@
 
     <!-- First-run setup wizard -->
     <div class="wizard" id="wizardOverlay" hidden>
-        <aside class="wz-rail" id="wizardRail"></aside>
         <section class="wz-main" id="wizardMain"></section>
     </div>
 
@@ -1580,7 +1574,6 @@
                 'Personalize': 'Personalizar', 'Customize Shelf & Settings': 'Personalizar Prateleira e Ajustes',
                 'Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.': 'Escolha quais apps da TV aparecem na prateleira, a cidade do clima e a chave do TMDB.',
                 'Live Forecast': 'Previsão ao Vivo', 'Local Weather & Sunset': 'Clima Local e Pôr do Sol', 'Live temperature and sky conditions powered by Open-Meteo.': 'Temperatura e condições do céu ao vivo via Open-Meteo.',
-                
                 'Trending': 'Em Alta',
                 "Switch the row below to this week's trending movies.": 'Mostra os filmes em alta da semana na linha abaixo.',
                 "Switch the row below to this week's trending TV shows.": 'Mostra as séries em alta da semana na linha abaixo.',
@@ -1614,17 +1607,31 @@
                 'Could not confirm %s opened. Please try again.': 'Não foi possível confirmar a abertura de %s. Tente novamente.',
                 'No response opening %s. Please try again.': 'Sem resposta ao abrir %s. Tente novamente.',
                 
-                
                 'Could not save the order. Please try again.': 'Não foi possível salvar a ordem. Tente novamente.',
                 'Tile order saved': 'Ordem salva', 'Max 8 apps on shelf': 'Máximo de 8 apps na prateleira',
                 'Defaults restored': 'Padrões restaurados', 'Saved & Applied!': 'Salvo e aplicado!',
-                
                 'Not set': 'Não definido', 'Saved': 'Salvo', 
                 'Press OK again to confirm': 'Pressione OK de novo para confirmar', 
                 'Up / Down: move one row': 'Cima / Baixo: mover uma linha', 'OK: add or remove': 'OK: adicionar ou remover', 'Back: return': 'Voltar: retornar',
                 'Enter: save': 'Enter: salvar', 'Back: cancel': 'Voltar: cancelar', '%s of 8 selected': '%s de 8 selecionados',
                 'Keep at least one app on the shelf.': 'Mantenha pelo menos um app na prateleira.', 
-                'Show the movies and shows row on the home screen': 'Mostrar a linha de filmes e séries na tela inicial', 'Good morning': 'Bom dia', 'Good afternoon': 'Boa tarde', 'Good evening': 'Boa noite', 'Good night': 'Boa noite', 'e.g. Noa': 'ex.: Noa', 'Used in the greeting on the home screen': 'Usado na saudação da tela inicial', 'Pick up where you left off': 'Continue de onde parou', 'A little dimmer after sunset, much dimmer after 23:00': 'Um pouco mais escuro após o pôr do sol, bem mais após 23:00', 'No ads. No account. Your settings stay on this TV.': 'Sem anúncios. Sem conta. Suas configurações ficam nesta TV.', 'Movie night': 'Noite de filme', 'Game on': 'Hora do jogo', 'Background music': 'Música de fundo', 'Scenes': 'Cenas', 'Scene': 'Cena', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Abre o app certo e ajusta o visual. De volta a este app, tudo volta como era.', 'Name a device on an HDMI input in Customize first': 'Primeiro nomeie um dispositivo em uma entrada HDMI em Personalizar', 'Welcome to Free My TV': 'Bem-vindo ao Free My TV', 'A quiet home screen with no ads. This takes about a minute and every choice can be changed later in Customize.': 'Uma tela inicial tranquila, sem anúncios. Leva cerca de um minuto e tudo pode ser mudado depois em Personalizar.', 'Start': 'Começar', 'Continue': 'Continuar', 'Finish': 'Concluir', 'Skip setup': 'Pular configuração', 'Open my home screen': 'Abrir minha tela inicial', 'Welcome': 'Boas-vindas', 'Your name and city': 'Seu nome e cidade', 'Used for the greeting and the weather. Leave it empty to use São Paulo, or turn on Auto-locate by IP in Customize.': 'Usados na saudação e no clima. Deixe vazio para usar São Paulo ou ative a localização automática por IP em Personalizar.', 'Your apps': 'Seus apps', 'Pick up to 8 for your shelf.': 'Escolha até 8 para a prateleira.', 'Your look': 'Seu visual', 'How should it look?': 'Como deve ficar?', 'Pick one. The whole screen changes as you move over it.': 'Escolha um. A tela inteira muda ao passar por ele.', 'Follow the sun': 'Seguir o sol', 'Light by day, warm at sunset, dark at night.': 'Claro de dia, quente no pôr do sol, escuro à noite.', 'Deep Midnight': 'Meia-noite Profunda', 'Blue-black, easy on eyes in a dark room.': 'Azul-escuro, confortável em ambiente escuro.', 'Pure Black': 'Preto Puro', 'True black for movies and OLED panels.': 'Preto real para filmes e telas OLED.', 'Bright and airy for a sunny living room.': 'Claro e arejado para uma sala ensolarada.', 'Screensaver photos': 'Fotos do protetor de tela', 'When the TV is idle it shows photos behind the clock. You can add your free Unsplash key later in Customize.': 'Com a TV parada, mostra fotos atrás do relógio. Você pode adicionar sua chave Unsplash gratuita depois em Personalizar.', 'Photo screensaver: On': 'Protetor de fotos: Ligado', 'Photo screensaver: Off': 'Protetor de fotos: Desligado', 'Your TV is ready': 'Sua TV está pronta', 'Your settings stay on this TV. Change anything later in Customize.': 'Suas configurações ficam nesta TV. Mude o que quiser depois em Personalizar.', 'Run setup again': 'Repetir a configuração', 'Who is watching?': 'Quem está assistindo?', 'Add person': 'Adicionar pessoa', 'Switch person': 'Trocar de pessoa', 'Ask who is watching': 'Perguntar quem está assistindo', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Um perfil é uma prateleira, um visual, uma cidade e um protetor de tela. Não é uma conta e fica guardado só nesta TV.', 'Shows the person picker when the app opens, if there is more than one person': 'Mostra a escolha de pessoa ao abrir o app, se houver mais de uma', 'You': 'Você', 'Person': 'Pessoa', 'Remove this person': 'Remover esta pessoa', 'Kids profile (hides settings)': 'Perfil infantil (oculta os ajustes)', 'Press OK again to remove %s': 'Pressione OK de novo para remover %s', 'Step %s of %s': 'Passo %s de %s', 'About a minute': 'Cerca de um minuto', 'Nothing here needs an account. You can change every choice later in Customize.': 'Nada aqui exige uma conta. Você pode mudar cada escolha depois em Personalizar.', 'How should it look, %s?': 'Como deve ficar, %s?', 'Your name': 'Seu nome', 'Your city': 'Sua cidade', 'Arrows': 'Setas', 'choose': 'escolher', 'continue': 'continuar', 'previous step': 'passo anterior', 'Photo screensaver': 'Protetor de fotos', 'OK': 'OK', 'Back': 'Voltar', 'Selected': 'Selecionado', 'People': 'Pessoas', 'Reset settings': 'Redefinir configurações', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Volta todas as configurações e a prateleira ao padrão. Pessoas e histórico ficam.', 'Erase everything on this TV': 'Apagar tudo nesta TV', 'Deletes every person, setting, key and history, then starts first-run setup': 'Apaga todas as pessoas, configurações, chaves e o histórico, e inicia a configuração inicial', 'Press OK again to erase everything': 'Pressione OK novamente para apagar tudo', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'O Free My TV é um app independente, sem afiliação com a LG. Sem anúncios. Sem conta. Suas configurações ficam nesta TV.', 'About': 'Sobre', 'Keep at least one grown-up profile': 'Mantenha pelo menos um perfil de adulto', 'Settings': 'Ajustes', '%s, opened at %s': '%s, aberto às %s', '%s, opened %s': '%s, aberto em %s', 'More options': 'Mais opções', 'Back close': 'Voltar fecha', '%s apps': '%s apps', '1 app': '1 app', 'Apps on Home': 'Apps no Início', 'Auto-locate by IP': 'Localizar por IP', 'Back cancel': 'Voltar cancela', 'Back groups': 'Voltar vai aos grupos', 'Back return': 'Voltar retorna', 'Brightness': 'Brilho', 'City': 'Cidade', 'Clock format': 'Formato do relógio', 'Clock position': 'Posição do relógio', 'Continue where you left off': 'Continue de onde parou', 'Dimmer at night': 'Mais escuro à noite', 'HDMI names': 'Nomes dos HDMI', 'Home': 'Início', 'Keep LG screensaver away': 'Evitar o protetor de tela da LG', 'LG TV settings': 'Config. da TV LG', 'Left / Right change': 'Esquerda / Direita muda', 'Look': 'Visual', 'Motion': 'Movimento', 'Motion speed': 'Velocidade do movimento', 'Movie night, Game on, Music': 'Noite de filme, Hora do jogo, Música', 'OK confirm': 'OK confirma', 'OK edit': 'OK edita', 'OK open': 'OK abre', 'OK switch': 'OK alterna', 'Performance mode': 'Modo de desempenho', 'Photo length': 'Duração da foto', 'Photos and the clock when the TV is idle': 'Fotos e o relógio quando a TV está parada', 'Photos from': 'Fotos de', 'Photos on Home': 'Fotos no Início', 'Screensaver': 'Protetor de tela', 'Starts after': 'Inicia após', 'TMDB key': 'Chave TMDB', 'Text size': 'Tamanho do texto', 'The apps you opened last, first in the row': 'Os apps abertos por último, primeiro na linha', 'Trending this week': 'Em alta na semana', 'Unsplash, connected': 'Unsplash, conectado', 'You and this TV': 'Você e esta TV', 'Off uses your city. On sends your IP to ipapi.co.': 'Desligado usa sua cidade. Ligado envia seu IP ao ipapi.co.', 'Your Unsplash key, kept on this TV only': 'Sua chave do Unsplash, guardada só nesta TV', 'Arrange your apps': 'Organize seus apps', 'Hold OK on any app on Home to get here.': 'Segure OK em qualquer app na tela inicial para chegar aqui.', 'Moving': 'Movendo', 'Add app': 'Adicionar app', 'Removed %s from Home': '%s removido da tela inicial', 'Left / Right move · Down remove · OK done': 'Esquerda / Direita mover · Baixo remover · OK concluir', 'Arrange on Home': 'Organizar na tela inicial', 'OK start': 'OK iniciar', 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
+                'Show the movies and shows row on the home screen': 'Mostrar a linha de filmes e séries na tela inicial', 'Good morning': 'Bom dia', 'Good afternoon': 'Boa tarde', 'Good evening': 'Boa noite', 'Good night': 'Boa noite', 'e.g. Noa': 'ex.: Noa', 'Used in the greeting on the home screen': 'Usado na saudação da tela inicial', 'Pick up where you left off': 'Continue de onde parou', 'A little dimmer after sunset, much dimmer after 23:00': 'Um pouco mais escuro após o pôr do sol, bem mais após 23:00', 'No ads. No account. Your settings stay on this TV.': 'Sem anúncios. Sem conta. Suas configurações ficam nesta TV.', 'Movie night': 'Noite de filme', 'Game on': 'Hora do jogo', 'Background music': 'Música de fundo', 'Scenes': 'Cenas', 'Scene': 'Cena', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Abre o app certo e ajusta o visual. De volta a este app, tudo volta como era.', 'Name a device on an HDMI input in Customize first': 'Primeiro nomeie um dispositivo em uma entrada HDMI em Personalizar','Continue': 'Continuar', 'Finish': 'Concluir', 'Skip setup': 'Pular configuração','How should it look?': 'Como deve ficar?','Photo screensaver: On': 'Protetor de fotos: Ligado', 'Photo screensaver: Off': 'Protetor de fotos: Desligado','Run setup again': 'Repetir a configuração', 'Who is watching?': 'Quem está assistindo?', 'Add person': 'Adicionar pessoa', 'Switch person': 'Trocar de pessoa', 'Ask who is watching': 'Perguntar quem está assistindo', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Um perfil é uma prateleira, um visual, uma cidade e um protetor de tela. Não é uma conta e fica guardado só nesta TV.', 'Shows the person picker when the app opens, if there is more than one person': 'Mostra a escolha de pessoa ao abrir o app, se houver mais de uma', 'You': 'Você', 'Person': 'Pessoa', 'Remove this person': 'Remover esta pessoa', 'Kids profile (hides settings)': 'Perfil infantil (oculta os ajustes)', 'Press OK again to remove %s': 'Pressione OK de novo para remover %s', 'Step %s of %s': 'Passo %s de %s','How should it look, %s?': 'Como deve ficar, %s?', 'Your name': 'Seu nome','Photo screensaver': 'Protetor de fotos', 'OK': 'OK', 'Back': 'Voltar', 'Selected': 'Selecionado', 'People': 'Pessoas', 'Reset settings': 'Redefinir configurações', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Volta todas as configurações e a prateleira ao padrão. Pessoas e histórico ficam.', 'Erase everything on this TV': 'Apagar tudo nesta TV', 'Deletes every person, setting, key and history, then starts first-run setup': 'Apaga todas as pessoas, configurações, chaves e o histórico, e inicia a configuração inicial', 'Press OK again to erase everything': 'Pressione OK novamente para apagar tudo', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'O Free My TV é um app independente, sem afiliação com a LG. Sem anúncios. Sem conta. Suas configurações ficam nesta TV.', 'About': 'Sobre', 'Keep at least one grown-up profile': 'Mantenha pelo menos um perfil de adulto', 'Settings': 'Ajustes', '%s, opened at %s': '%s, aberto às %s', '%s, opened %s': '%s, aberto em %s', 'More options': 'Mais opções', 'Back close': 'Voltar fecha', '%s apps': '%s apps', '1 app': '1 app', 'Apps on Home': 'Apps no Início', 'Auto-locate by IP': 'Localizar por IP', 'Back cancel': 'Voltar cancela', 'Back groups': 'Voltar vai aos grupos', 'Back return': 'Voltar retorna', 'Brightness': 'Brilho', 'City': 'Cidade', 'Clock format': 'Formato do relógio', 'Clock position': 'Posição do relógio', 'Continue where you left off': 'Continue de onde parou', 'Dimmer at night': 'Mais escuro à noite', 'HDMI names': 'Nomes dos HDMI', 'Home': 'Início', 'Keep LG screensaver away': 'Evitar o protetor de tela da LG', 'LG TV settings': 'Config. da TV LG', 'Left / Right change': 'Esquerda / Direita muda', 'Look': 'Visual', 'Motion': 'Movimento', 'Motion speed': 'Velocidade do movimento', 'Movie night, Game on, Music': 'Noite de filme, Hora do jogo, Música', 'OK confirm': 'OK confirma', 'OK edit': 'OK edita', 'OK open': 'OK abre', 'OK switch': 'OK alterna', 'Performance mode': 'Modo de desempenho', 'Photo length': 'Duração da foto', 'Photos and the clock when the TV is idle': 'Fotos e o relógio quando a TV está parada', 'Photos from': 'Fotos de', 'Photos on Home': 'Fotos no Início', 'Screensaver': 'Protetor de tela', 'Starts after': 'Inicia após', 'TMDB key': 'Chave TMDB', 'Text size': 'Tamanho do texto', 'The apps you opened last, first in the row': 'Os apps abertos por último, primeiro na linha', 'Trending this week': 'Em alta na semana', 'Unsplash, connected': 'Unsplash, conectado', 'You and this TV': 'Você e esta TV', 'Off uses your city. On sends your IP to ipapi.co.': 'Desligado usa sua cidade. Ligado envia seu IP ao ipapi.co.', 'Your Unsplash key, kept on this TV only': 'Sua chave do Unsplash, guardada só nesta TV', 'Arrange your apps': 'Organize seus apps', 'Hold OK on any app on Home to get here.': 'Segure OK em qualquer app na tela inicial para chegar aqui.', 'Moving': 'Movendo', 'Add app': 'Adicionar app', 'Removed %s from Home': '%s removido da tela inicial', 'Left / Right move · Down remove · OK done': 'Esquerda / Direita mover · Baixo remover · OK concluir', 'Arrange on Home': 'Organizar na tela inicial', 'OK start': 'OK iniciar', 'Hi. What should we call you?': 'Oi. Como devemos chamar você?',
+                'Used for the greeting. You can change it later.': 'Usado na saudação. Você pode mudar depois.',
+                'City, for the weather': 'Cidade, para o clima',
+                'Leave it empty to use São Paulo, or turn on Auto-locate by IP in Settings.': 'Deixe vazio para usar São Paulo ou ative a localização automática por IP em Ajustes.',
+                'Pick your apps': 'Escolha seus apps',
+                'Up to 8. They go on Home in this order.': 'Até 8. Eles vão para o Início nesta ordem.',
+                '%s picked': '%s escolhidos',
+                'Show all %s apps and inputs': 'Mostrar todos os %s apps e entradas',
+                'The screen changes as you move. OK picks.': 'A tela muda enquanto você se move. OK escolhe.',
+                'Follows the sun': 'Segue o sol',
+                'Midnight': 'Meia-noite',
+                'Pure black': 'Preto puro',
+                'Show photos when the TV is idle': 'Mostrar fotos quando a TV está parada',
+                'All set, %s': 'Tudo pronto, %s',
+                'All set': 'Tudo pronto',
+                'Who is this?': 'Quem é?',
+                'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
                 'Optional, for weekly trending movies and shows': 'Opcional, para filmes e séries em alta da semana', 
             },
             es: {
@@ -1650,7 +1657,6 @@
                 'Personalize': 'Personalizar', 'Customize Shelf & Settings': 'Personalizar Estante y Ajustes',
                 'Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.': 'Elige qué apps del TV aparecen en el estante, la ciudad del clima y la clave de TMDB.',
                 'Live Forecast': 'Pronóstico en Vivo', 'Local Weather & Sunset': 'Clima Local y Atardecer', 'Live temperature and sky conditions powered by Open-Meteo.': 'Temperatura y cielo en vivo con Open-Meteo.',
-                
                 'Trending': 'Tendencias',
                 "Switch the row below to this week's trending movies.": 'Muestra las películas en tendencia de la semana en la fila de abajo.',
                 "Switch the row below to this week's trending TV shows.": 'Muestra las series en tendencia de la semana en la fila de abajo.',
@@ -1684,17 +1690,31 @@
                 'Could not confirm %s opened. Please try again.': 'No se pudo confirmar que %s se abrió. Inténtalo de nuevo.',
                 'No response opening %s. Please try again.': 'Sin respuesta al abrir %s. Inténtalo de nuevo.',
                 
-                
                 'Could not save the order. Please try again.': 'No se pudo guardar el orden. Inténtalo de nuevo.',
                 'Tile order saved': 'Orden guardado', 'Max 8 apps on shelf': 'Máximo 8 apps en el estante',
                 'Defaults restored': 'Valores restablecidos', 'Saved & Applied!': '¡Guardado y aplicado!',
-                
                 'Not set': 'Sin definir', 'Saved': 'Guardado', 
                 'Press OK again to confirm': 'Pulsa OK otra vez para confirmar', 
                 'Up / Down: move one row': 'Arriba / Abajo: mover una fila', 'OK: add or remove': 'OK: añadir o quitar', 'Back: return': 'Atrás: volver',
                 'Enter: save': 'Enter: guardar', 'Back: cancel': 'Atrás: cancelar', '%s of 8 selected': '%s de 8 seleccionadas',
                 'Keep at least one app on the shelf.': 'Deja al menos una app en el estante.', 
-                'Show the movies and shows row on the home screen': 'Mostrar la fila de películas y series en la pantalla de inicio', 'Good morning': 'Buenos días', 'Good afternoon': 'Buenas tardes', 'Good evening': 'Buenas noches', 'Good night': 'Buenas noches', 'e.g. Noa': 'p. ej. Noa', 'Used in the greeting on the home screen': 'Se usa en el saludo de la pantalla de inicio', 'Pick up where you left off': 'Sigue donde lo dejaste', 'A little dimmer after sunset, much dimmer after 23:00': 'Algo más tenue tras la puesta de sol, mucho más tras las 23:00', 'No ads. No account. Your settings stay on this TV.': 'Sin anuncios. Sin cuenta. Tus ajustes se quedan en este TV.', 'Movie night': 'Noche de cine', 'Game on': 'A jugar', 'Background music': 'Música de fondo', 'Scenes': 'Escenas', 'Scene': 'Escena', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Abre la app adecuada y ajusta el aspecto. Al volver a esta app, todo queda como estaba.', 'Name a device on an HDMI input in Customize first': 'Primero nombra un dispositivo en una entrada HDMI en Personalizar', 'Welcome to Free My TV': 'Te damos la bienvenida a Free My TV', 'A quiet home screen with no ads. This takes about a minute and every choice can be changed later in Customize.': 'Una pantalla de inicio tranquila y sin anuncios. Tarda un minuto y todo se puede cambiar luego en Personalizar.', 'Start': 'Empezar', 'Continue': 'Continuar', 'Finish': 'Terminar', 'Skip setup': 'Omitir configuración', 'Open my home screen': 'Abrir mi pantalla de inicio', 'Welcome': 'Bienvenida', 'Your name and city': 'Tu nombre y ciudad', 'Used for the greeting and the weather. Leave it empty to use São Paulo, or turn on Auto-locate by IP in Customize.': 'Se usan para el saludo y el tiempo. Déjala vacía para usar São Paulo o activa la ubicación automática por IP en Personalizar.', 'Your apps': 'Tus apps', 'Pick up to 8 for your shelf.': 'Elige hasta 8 para tu estante.', 'Your look': 'Tu aspecto', 'How should it look?': '¿Cómo quieres que se vea?', 'Pick one. The whole screen changes as you move over it.': 'Elige uno. Toda la pantalla cambia al pasar sobre él.', 'Follow the sun': 'Seguir al sol', 'Light by day, warm at sunset, dark at night.': 'Claro de día, cálido al atardecer, oscuro de noche.', 'Deep Midnight': 'Medianoche Profunda', 'Blue-black, easy on eyes in a dark room.': 'Azul oscuro, suave a la vista en una sala oscura.', 'Pure Black': 'Negro Puro', 'True black for movies and OLED panels.': 'Negro real para películas y paneles OLED.', 'Bright and airy for a sunny living room.': 'Luminoso y aireado para un salón soleado.', 'Screensaver photos': 'Fotos del protector', 'When the TV is idle it shows photos behind the clock. You can add your free Unsplash key later in Customize.': 'Con la TV en reposo muestra fotos tras el reloj. Puedes añadir tu clave gratuita de Unsplash luego en Personalizar.', 'Photo screensaver: On': 'Protector con fotos: Activado', 'Photo screensaver: Off': 'Protector con fotos: Desactivado', 'Your TV is ready': 'Tu TV está lista', 'Your settings stay on this TV. Change anything later in Customize.': 'Tus ajustes se quedan en este TV. Cambia lo que quieras luego en Personalizar.', 'Run setup again': 'Repetir la configuración', 'Who is watching?': '¿Quién está viendo?', 'Add person': 'Añadir persona', 'Switch person': 'Cambiar de persona', 'Ask who is watching': 'Preguntar quién está viendo', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Un perfil es un estante, un aspecto, una ciudad y un protector. No es una cuenta y se guarda solo en este TV.', 'Shows the person picker when the app opens, if there is more than one person': 'Muestra la elección de persona al abrir la app, si hay más de una', 'You': 'Tú', 'Person': 'Persona', 'Remove this person': 'Quitar a esta persona', 'Kids profile (hides settings)': 'Perfil infantil (oculta los ajustes)', 'Press OK again to remove %s': 'Pulsa OK otra vez para quitar a %s', 'Step %s of %s': 'Paso %s de %s', 'About a minute': 'Cerca de un minuto', 'Nothing here needs an account. You can change every choice later in Customize.': 'Nada aquí necesita una cuenta. Puedes cambiar cada elección luego en Personalizar.', 'How should it look, %s?': '¿Cómo quieres que se vea, %s?', 'Your name': 'Tu nombre', 'Your city': 'Tu ciudad', 'Arrows': 'Flechas', 'choose': 'elegir', 'continue': 'continuar', 'previous step': 'paso anterior', 'Photo screensaver': 'Protector con fotos', 'OK': 'OK', 'Back': 'Atrás', 'Selected': 'Seleccionado', 'People': 'Personas', 'Reset settings': 'Restablecer ajustes', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Devuelve todos los ajustes y la estantería a los valores por defecto. Las personas y el historial se conservan.', 'Erase everything on this TV': 'Borrar todo en este televisor', 'Deletes every person, setting, key and history, then starts first-run setup': 'Borra todas las personas, ajustes, claves y el historial, y inicia la configuración inicial', 'Press OK again to erase everything': 'Pulsa OK de nuevo para borrar todo', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'Free My TV es una app independiente, sin afiliación con LG. Sin anuncios. Sin cuenta. Tus ajustes se quedan en este televisor.', 'About': 'Acerca de', 'Keep at least one grown-up profile': 'Mantén al menos un perfil de adulto', 'Settings': 'Ajustes', '%s, opened at %s': '%s, abierto a las %s', '%s, opened %s': '%s, abierto el %s', 'More options': 'Más opciones', 'Back close': 'Atrás cierra', '%s apps': '%s apps', '1 app': '1 app', 'Apps on Home': 'Apps en Inicio', 'Auto-locate by IP': 'Ubicar por IP', 'Back cancel': 'Atrás cancela', 'Back groups': 'Atrás va a los grupos', 'Back return': 'Atrás vuelve', 'Brightness': 'Brillo', 'City': 'Ciudad', 'Clock format': 'Formato del reloj', 'Clock position': 'Posición del reloj', 'Continue where you left off': 'Sigue donde lo dejaste', 'Dimmer at night': 'Más tenue de noche', 'HDMI names': 'Nombres de HDMI', 'Home': 'Inicio', 'Keep LG screensaver away': 'Evitar el protector de pantalla de LG', 'LG TV settings': 'Ajustes del TV LG', 'Left / Right change': 'Izquierda / Derecha cambia', 'Look': 'Aspecto', 'Motion': 'Movimiento', 'Motion speed': 'Velocidad del movimiento', 'Movie night, Game on, Music': 'Noche de cine, A jugar, Música', 'OK confirm': 'OK confirma', 'OK edit': 'OK edita', 'OK open': 'OK abre', 'OK switch': 'OK cambia', 'Performance mode': 'Modo de rendimiento', 'Photo length': 'Duración de la foto', 'Photos and the clock when the TV is idle': 'Fotos y el reloj cuando el TV está inactivo', 'Photos from': 'Fotos de', 'Photos on Home': 'Fotos en el inicio', 'Screensaver': 'Protector de pantalla', 'Starts after': 'Inicia tras', 'TMDB key': 'Clave de TMDB', 'Text size': 'Tamaño del texto', 'The apps you opened last, first in the row': 'Las apps que abriste por última vez, primero en la fila', 'Trending this week': 'Tendencias de la semana', 'Unsplash, connected': 'Unsplash, conectado', 'You and this TV': 'Tú y este televisor', 'Off uses your city. On sends your IP to ipapi.co.': 'Desactivado usa tu ciudad. Activado envía tu IP a ipapi.co.', 'Your Unsplash key, kept on this TV only': 'Tu clave de Unsplash, guardada solo en este televisor', 'Arrange your apps': 'Organiza tus apps', 'Hold OK on any app on Home to get here.': 'Mantén OK en cualquier app de Inicio para llegar aquí.', 'Moving': 'Moviendo', 'Add app': 'Añadir app', 'Removed %s from Home': 'Se quitó %s de Inicio', 'Left / Right move · Down remove · OK done': 'Izquierda / Derecha mover · Abajo quitar · OK listo', 'Arrange on Home': 'Organizar en Inicio', 'OK start': 'OK iniciar', 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
+                'Show the movies and shows row on the home screen': 'Mostrar la fila de películas y series en la pantalla de inicio', 'Good morning': 'Buenos días', 'Good afternoon': 'Buenas tardes', 'Good evening': 'Buenas noches', 'Good night': 'Buenas noches', 'e.g. Noa': 'p. ej. Noa', 'Used in the greeting on the home screen': 'Se usa en el saludo de la pantalla de inicio', 'Pick up where you left off': 'Sigue donde lo dejaste', 'A little dimmer after sunset, much dimmer after 23:00': 'Algo más tenue tras la puesta de sol, mucho más tras las 23:00', 'No ads. No account. Your settings stay on this TV.': 'Sin anuncios. Sin cuenta. Tus ajustes se quedan en este TV.', 'Movie night': 'Noche de cine', 'Game on': 'A jugar', 'Background music': 'Música de fondo', 'Scenes': 'Escenas', 'Scene': 'Escena', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Abre la app adecuada y ajusta el aspecto. Al volver a esta app, todo queda como estaba.', 'Name a device on an HDMI input in Customize first': 'Primero nombra un dispositivo en una entrada HDMI en Personalizar','Continue': 'Continuar', 'Finish': 'Terminar', 'Skip setup': 'Omitir configuración','How should it look?': '¿Cómo quieres que se vea?','Photo screensaver: On': 'Protector con fotos: Activado', 'Photo screensaver: Off': 'Protector con fotos: Desactivado','Run setup again': 'Repetir la configuración', 'Who is watching?': '¿Quién está viendo?', 'Add person': 'Añadir persona', 'Switch person': 'Cambiar de persona', 'Ask who is watching': 'Preguntar quién está viendo', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Un perfil es un estante, un aspecto, una ciudad y un protector. No es una cuenta y se guarda solo en este TV.', 'Shows the person picker when the app opens, if there is more than one person': 'Muestra la elección de persona al abrir la app, si hay más de una', 'You': 'Tú', 'Person': 'Persona', 'Remove this person': 'Quitar a esta persona', 'Kids profile (hides settings)': 'Perfil infantil (oculta los ajustes)', 'Press OK again to remove %s': 'Pulsa OK otra vez para quitar a %s', 'Step %s of %s': 'Paso %s de %s','How should it look, %s?': '¿Cómo quieres que se vea, %s?', 'Your name': 'Tu nombre','Photo screensaver': 'Protector con fotos', 'OK': 'OK', 'Back': 'Atrás', 'Selected': 'Seleccionado', 'People': 'Personas', 'Reset settings': 'Restablecer ajustes', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Devuelve todos los ajustes y la estantería a los valores por defecto. Las personas y el historial se conservan.', 'Erase everything on this TV': 'Borrar todo en este televisor', 'Deletes every person, setting, key and history, then starts first-run setup': 'Borra todas las personas, ajustes, claves y el historial, y inicia la configuración inicial', 'Press OK again to erase everything': 'Pulsa OK de nuevo para borrar todo', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'Free My TV es una app independiente, sin afiliación con LG. Sin anuncios. Sin cuenta. Tus ajustes se quedan en este televisor.', 'About': 'Acerca de', 'Keep at least one grown-up profile': 'Mantén al menos un perfil de adulto', 'Settings': 'Ajustes', '%s, opened at %s': '%s, abierto a las %s', '%s, opened %s': '%s, abierto el %s', 'More options': 'Más opciones', 'Back close': 'Atrás cierra', '%s apps': '%s apps', '1 app': '1 app', 'Apps on Home': 'Apps en Inicio', 'Auto-locate by IP': 'Ubicar por IP', 'Back cancel': 'Atrás cancela', 'Back groups': 'Atrás va a los grupos', 'Back return': 'Atrás vuelve', 'Brightness': 'Brillo', 'City': 'Ciudad', 'Clock format': 'Formato del reloj', 'Clock position': 'Posición del reloj', 'Continue where you left off': 'Sigue donde lo dejaste', 'Dimmer at night': 'Más tenue de noche', 'HDMI names': 'Nombres de HDMI', 'Home': 'Inicio', 'Keep LG screensaver away': 'Evitar el protector de pantalla de LG', 'LG TV settings': 'Ajustes del TV LG', 'Left / Right change': 'Izquierda / Derecha cambia', 'Look': 'Aspecto', 'Motion': 'Movimiento', 'Motion speed': 'Velocidad del movimiento', 'Movie night, Game on, Music': 'Noche de cine, A jugar, Música', 'OK confirm': 'OK confirma', 'OK edit': 'OK edita', 'OK open': 'OK abre', 'OK switch': 'OK cambia', 'Performance mode': 'Modo de rendimiento', 'Photo length': 'Duración de la foto', 'Photos and the clock when the TV is idle': 'Fotos y el reloj cuando el TV está inactivo', 'Photos from': 'Fotos de', 'Photos on Home': 'Fotos en el inicio', 'Screensaver': 'Protector de pantalla', 'Starts after': 'Inicia tras', 'TMDB key': 'Clave de TMDB', 'Text size': 'Tamaño del texto', 'The apps you opened last, first in the row': 'Las apps que abriste por última vez, primero en la fila', 'Trending this week': 'Tendencias de la semana', 'Unsplash, connected': 'Unsplash, conectado', 'You and this TV': 'Tú y este televisor', 'Off uses your city. On sends your IP to ipapi.co.': 'Desactivado usa tu ciudad. Activado envía tu IP a ipapi.co.', 'Your Unsplash key, kept on this TV only': 'Tu clave de Unsplash, guardada solo en este televisor', 'Arrange your apps': 'Organiza tus apps', 'Hold OK on any app on Home to get here.': 'Mantén OK en cualquier app de Inicio para llegar aquí.', 'Moving': 'Moviendo', 'Add app': 'Añadir app', 'Removed %s from Home': 'Se quitó %s de Inicio', 'Left / Right move · Down remove · OK done': 'Izquierda / Derecha mover · Abajo quitar · OK listo', 'Arrange on Home': 'Organizar en Inicio', 'OK start': 'OK iniciar', 'Hi. What should we call you?': 'Hola. ¿Cómo te llamamos?',
+                'Used for the greeting. You can change it later.': 'Se usa para el saludo. Puedes cambiarlo después.',
+                'City, for the weather': 'Ciudad, para el tiempo',
+                'Leave it empty to use São Paulo, or turn on Auto-locate by IP in Settings.': 'Déjala vacía para usar São Paulo o activa la ubicación automática por IP en Ajustes.',
+                'Pick your apps': 'Elige tus apps',
+                'Up to 8. They go on Home in this order.': 'Hasta 8. Van al Inicio en este orden.',
+                '%s picked': '%s elegidas',
+                'Show all %s apps and inputs': 'Mostrar las %s apps y entradas',
+                'The screen changes as you move. OK picks.': 'La pantalla cambia al moverte. OK elige.',
+                'Follows the sun': 'Sigue al sol',
+                'Midnight': 'Medianoche',
+                'Pure black': 'Negro puro',
+                'Show photos when the TV is idle': 'Mostrar fotos cuando la tele está inactiva',
+                'All set, %s': 'Todo listo, %s',
+                'All set': 'Todo listo',
+                'Who is this?': '¿Quién es?',
+                'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
                 'Optional, for weekly trending movies and shows': 'Opcional, para las películas y series en tendencia de la semana', 
             },
             de: {
@@ -1720,7 +1740,6 @@
                 'Personalize': 'Anpassen', 'Customize Shelf & Settings': 'Leiste & Einstellungen anpassen',
                 'Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.': 'Wählen Sie, welche TV-Apps in der Leiste erscheinen, die Wetterstadt und den TMDB-Schlüssel.',
                 'Live Forecast': 'Live-Vorhersage', 'Local Weather & Sunset': 'Lokales Wetter & Sonnenuntergang', 'Live temperature and sky conditions powered by Open-Meteo.': 'Live-Temperatur und Himmelslage über Open-Meteo.',
-                
                 'Trending': 'Trends',
                 "Switch the row below to this week's trending movies.": 'Zeigt unten die Film-Trends der Woche.',
                 "Switch the row below to this week's trending TV shows.": 'Zeigt unten die Serien-Trends der Woche.',
@@ -1754,17 +1773,31 @@
                 'Could not confirm %s opened. Please try again.': 'Das Öffnen von %s konnte nicht bestätigt werden. Bitte erneut versuchen.',
                 'No response opening %s. Please try again.': 'Keine Antwort beim Öffnen von %s. Bitte erneut versuchen.',
                 
-                
                 'Could not save the order. Please try again.': 'Reihenfolge konnte nicht gespeichert werden. Bitte erneut versuchen.',
                 'Tile order saved': 'Reihenfolge gespeichert', 'Max 8 apps on shelf': 'Maximal 8 Apps in der Leiste',
                 'Defaults restored': 'Standardwerte wiederhergestellt', 'Saved & Applied!': 'Gespeichert & angewendet!',
-                
                 'Not set': 'Nicht festgelegt', 'Saved': 'Gespeichert', 
                 'Press OK again to confirm': 'Zum Bestätigen erneut OK drücken', 
                 'Up / Down: move one row': 'Auf / Ab: eine Zeile bewegen', 'OK: add or remove': 'OK: hinzufügen oder entfernen', 'Back: return': 'Zurück: zurückkehren',
                 'Enter: save': 'Enter: speichern', 'Back: cancel': 'Zurück: abbrechen', '%s of 8 selected': '%s von 8 ausgewählt',
                 'Keep at least one app on the shelf.': 'Mindestens eine App in der Leiste behalten.', 
-                'Show the movies and shows row on the home screen': 'Die Zeile mit Filmen und Serien auf dem Startbildschirm zeigen', 'Good morning': 'Guten Morgen', 'Good afternoon': 'Guten Tag', 'Good evening': 'Guten Abend', 'Good night': 'Gute Nacht', 'e.g. Noa': 'z. B. Noa', 'Used in the greeting on the home screen': 'Wird in der Begrüßung auf dem Startbildschirm verwendet', 'Pick up where you left off': 'Dort weitermachen, wo du aufgehört hast', 'A little dimmer after sunset, much dimmer after 23:00': 'Nach Sonnenuntergang etwas dunkler, nach 23:00 viel dunkler', 'No ads. No account. Your settings stay on this TV.': 'Keine Werbung. Kein Konto. Deine Einstellungen bleiben auf diesem Fernseher.', 'Movie night': 'Filmabend', 'Game on': 'Spielzeit', 'Background music': 'Hintergrundmusik', 'Scenes': 'Szenen', 'Scene': 'Szene', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Öffnet die passende App und stellt das Aussehen ein. Zurück in dieser App ist alles wie vorher.', 'Name a device on an HDMI input in Customize first': 'Benenne zuerst in Anpassen ein Gerät an einem HDMI-Eingang', 'Welcome to Free My TV': 'Willkommen bei Free My TV', 'A quiet home screen with no ads. This takes about a minute and every choice can be changed later in Customize.': 'Ein ruhiger Startbildschirm ohne Werbung. Das dauert etwa eine Minute und alles lässt sich später in Anpassen ändern.', 'Start': 'Los geht’s', 'Continue': 'Weiter', 'Finish': 'Fertig', 'Skip setup': 'Einrichtung überspringen', 'Open my home screen': 'Meinen Startbildschirm öffnen', 'Welcome': 'Willkommen', 'Your name and city': 'Dein Name und Ort', 'Used for the greeting and the weather. Leave it empty to use São Paulo, or turn on Auto-locate by IP in Customize.': 'Für Begrüßung und Wetter. Leer lassen für São Paulo oder in Anpassen die automatische Ortung per IP einschalten.', 'Your apps': 'Deine Apps', 'Pick up to 8 for your shelf.': 'Wähle bis zu 8 für deine Leiste.', 'Your look': 'Dein Look', 'How should it look?': 'Wie soll es aussehen?', 'Pick one. The whole screen changes as you move over it.': 'Wähle einen. Der ganze Bildschirm ändert sich, sobald du darüber gehst.', 'Follow the sun': 'Der Sonne folgen', 'Light by day, warm at sunset, dark at night.': 'Hell am Tag, warm bei Sonnenuntergang, dunkel in der Nacht.', 'Deep Midnight': 'Tiefe Mitternacht', 'Blue-black, easy on eyes in a dark room.': 'Blauschwarz, schonend für die Augen im dunklen Raum.', 'Pure Black': 'Reines Schwarz', 'True black for movies and OLED panels.': 'Echtes Schwarz für Filme und OLED-Displays.', 'Bright and airy for a sunny living room.': 'Hell und luftig für ein sonniges Wohnzimmer.', 'Screensaver photos': 'Bildschirmschoner-Fotos', 'When the TV is idle it shows photos behind the clock. You can add your free Unsplash key later in Customize.': 'Im Leerlauf zeigt der Fernseher Fotos hinter der Uhr. Deinen kostenlosen Unsplash-Schlüssel kannst du später in Anpassen eintragen.', 'Photo screensaver: On': 'Foto-Bildschirmschoner: An', 'Photo screensaver: Off': 'Foto-Bildschirmschoner: Aus', 'Your TV is ready': 'Dein Fernseher ist bereit', 'Your settings stay on this TV. Change anything later in Customize.': 'Deine Einstellungen bleiben auf diesem Fernseher. Ändere später alles in Anpassen.', 'Run setup again': 'Einrichtung erneut starten', 'Who is watching?': 'Wer schaut gerade?', 'Add person': 'Person hinzufügen', 'Switch person': 'Person wechseln', 'Ask who is watching': 'Fragen, wer schaut', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Ein Profil ist eine Leiste, ein Look, ein Ort und ein Bildschirmschoner. Es ist kein Konto und wird nur auf diesem Fernseher gespeichert.', 'Shows the person picker when the app opens, if there is more than one person': 'Zeigt die Personenauswahl beim Start, wenn es mehr als eine Person gibt', 'You': 'Du', 'Person': 'Person', 'Remove this person': 'Diese Person entfernen', 'Kids profile (hides settings)': 'Kinderprofil (blendet Einstellungen aus)', 'Press OK again to remove %s': 'Zum Entfernen von %s erneut OK drücken', 'Step %s of %s': 'Schritt %s von %s', 'About a minute': 'Etwa eine Minute', 'Nothing here needs an account. You can change every choice later in Customize.': 'Hier ist kein Konto nötig. Du kannst jede Wahl später in Anpassen ändern.', 'How should it look, %s?': 'Wie soll es aussehen, %s?', 'Your name': 'Dein Name', 'Your city': 'Dein Ort', 'Arrows': 'Pfeile', 'choose': 'wählen', 'continue': 'weiter', 'previous step': 'vorheriger Schritt', 'Photo screensaver': 'Foto-Bildschirmschoner', 'OK': 'OK', 'Back': 'Zurück', 'Selected': 'Ausgewählt', 'People': 'Personen', 'Reset settings': 'Einstellungen zurücksetzen', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Setzt alle Einstellungen und das Regal auf die Standardwerte zurück. Personen und Verlauf bleiben.', 'Erase everything on this TV': 'Alles auf diesem Fernseher löschen', 'Deletes every person, setting, key and history, then starts first-run setup': 'Löscht alle Personen, Einstellungen, Schlüssel und den Verlauf und startet die Ersteinrichtung', 'Press OK again to erase everything': 'OK erneut drücken, um alles zu löschen', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'Free My TV ist eine unabhängige App und nicht mit LG verbunden. Keine Werbung. Kein Konto. Deine Einstellungen bleiben auf diesem Fernseher.', 'About': 'Info', 'Keep at least one grown-up profile': 'Behalte mindestens ein Erwachsenenprofil', 'Settings': 'Einstellungen', '%s, opened at %s': '%s, geöffnet um %s', '%s, opened %s': '%s, geöffnet am %s', 'More options': 'Weitere Optionen', 'Back close': 'Zurück schließt', '%s apps': '%s Apps', '1 app': '1 App', 'Apps on Home': 'Apps im Start', 'Auto-locate by IP': 'Standort per IP', 'Back cancel': 'Zurück bricht ab', 'Back groups': 'Zurück zu den Gruppen', 'Back return': 'Zurück geht zurück', 'Brightness': 'Helligkeit', 'City': 'Stadt', 'Clock format': 'Uhrzeitformat', 'Clock position': 'Uhrposition', 'Continue where you left off': 'Dort weitermachen, wo du aufgehört hast', 'Dimmer at night': 'Nachts dunkler', 'HDMI names': 'HDMI-Namen', 'Home': 'Start', 'Keep LG screensaver away': 'LG-Bildschirmschoner verhindern', 'LG TV settings': 'LG-TV-Einstellungen', 'Left / Right change': 'Links / Rechts ändert', 'Look': 'Aussehen', 'Motion': 'Bewegung', 'Motion speed': 'Bewegungstempo', 'Movie night, Game on, Music': 'Filmabend, Spielzeit, Musik', 'OK confirm': 'OK bestätigt', 'OK edit': 'OK bearbeitet', 'OK open': 'OK öffnet', 'OK switch': 'OK schaltet', 'Performance mode': 'Leistungsmodus', 'Photo length': 'Fotodauer', 'Photos and the clock when the TV is idle': 'Fotos und die Uhr, wenn der Fernseher ruht', 'Photos from': 'Fotos von', 'Photos on Home': 'Fotos im Start', 'Screensaver': 'Bildschirmschoner', 'Starts after': 'Startet nach', 'TMDB key': 'TMDB-Schlüssel', 'Text size': 'Textgröße', 'The apps you opened last, first in the row': 'Die zuletzt geöffneten Apps stehen zuerst in der Zeile', 'Trending this week': 'Trends der Woche', 'Unsplash, connected': 'Unsplash, verbunden', 'You and this TV': 'Du und dieser Fernseher', 'Off uses your city. On sends your IP to ipapi.co.': 'Aus verwendet deine Stadt. An sendet deine IP an ipapi.co.', 'Your Unsplash key, kept on this TV only': 'Dein Unsplash-Schlüssel, nur auf diesem Fernseher gespeichert', 'Arrange your apps': 'Apps anordnen', 'Hold OK on any app on Home to get here.': 'Halte OK auf einer App im Startbildschirm gedrückt, um hierher zu gelangen.', 'Moving': 'Verschieben', 'Add app': 'App hinzufügen', 'Removed %s from Home': '%s vom Startbildschirm entfernt', 'Left / Right move · Down remove · OK done': 'Links / Rechts bewegen · Unten entfernen · OK fertig', 'Arrange on Home': 'Auf dem Startbildschirm anordnen', 'OK start': 'OK starten', 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
+                'Show the movies and shows row on the home screen': 'Die Zeile mit Filmen und Serien auf dem Startbildschirm zeigen', 'Good morning': 'Guten Morgen', 'Good afternoon': 'Guten Tag', 'Good evening': 'Guten Abend', 'Good night': 'Gute Nacht', 'e.g. Noa': 'z. B. Noa', 'Used in the greeting on the home screen': 'Wird in der Begrüßung auf dem Startbildschirm verwendet', 'Pick up where you left off': 'Dort weitermachen, wo du aufgehört hast', 'A little dimmer after sunset, much dimmer after 23:00': 'Nach Sonnenuntergang etwas dunkler, nach 23:00 viel dunkler', 'No ads. No account. Your settings stay on this TV.': 'Keine Werbung. Kein Konto. Deine Einstellungen bleiben auf diesem Fernseher.', 'Movie night': 'Filmabend', 'Game on': 'Spielzeit', 'Background music': 'Hintergrundmusik', 'Scenes': 'Szenen', 'Scene': 'Szene', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Öffnet die passende App und stellt das Aussehen ein. Zurück in dieser App ist alles wie vorher.', 'Name a device on an HDMI input in Customize first': 'Benenne zuerst in Anpassen ein Gerät an einem HDMI-Eingang','Continue': 'Weiter', 'Finish': 'Fertig', 'Skip setup': 'Einrichtung überspringen','How should it look?': 'Wie soll es aussehen?','Photo screensaver: On': 'Foto-Bildschirmschoner: An', 'Photo screensaver: Off': 'Foto-Bildschirmschoner: Aus','Run setup again': 'Einrichtung erneut starten', 'Who is watching?': 'Wer schaut gerade?', 'Add person': 'Person hinzufügen', 'Switch person': 'Person wechseln', 'Ask who is watching': 'Fragen, wer schaut', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Ein Profil ist eine Leiste, ein Look, ein Ort und ein Bildschirmschoner. Es ist kein Konto und wird nur auf diesem Fernseher gespeichert.', 'Shows the person picker when the app opens, if there is more than one person': 'Zeigt die Personenauswahl beim Start, wenn es mehr als eine Person gibt', 'You': 'Du', 'Person': 'Person', 'Remove this person': 'Diese Person entfernen', 'Kids profile (hides settings)': 'Kinderprofil (blendet Einstellungen aus)', 'Press OK again to remove %s': 'Zum Entfernen von %s erneut OK drücken', 'Step %s of %s': 'Schritt %s von %s','How should it look, %s?': 'Wie soll es aussehen, %s?', 'Your name': 'Dein Name','Photo screensaver': 'Foto-Bildschirmschoner', 'OK': 'OK', 'Back': 'Zurück', 'Selected': 'Ausgewählt', 'People': 'Personen', 'Reset settings': 'Einstellungen zurücksetzen', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Setzt alle Einstellungen und das Regal auf die Standardwerte zurück. Personen und Verlauf bleiben.', 'Erase everything on this TV': 'Alles auf diesem Fernseher löschen', 'Deletes every person, setting, key and history, then starts first-run setup': 'Löscht alle Personen, Einstellungen, Schlüssel und den Verlauf und startet die Ersteinrichtung', 'Press OK again to erase everything': 'OK erneut drücken, um alles zu löschen', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'Free My TV ist eine unabhängige App und nicht mit LG verbunden. Keine Werbung. Kein Konto. Deine Einstellungen bleiben auf diesem Fernseher.', 'About': 'Info', 'Keep at least one grown-up profile': 'Behalte mindestens ein Erwachsenenprofil', 'Settings': 'Einstellungen', '%s, opened at %s': '%s, geöffnet um %s', '%s, opened %s': '%s, geöffnet am %s', 'More options': 'Weitere Optionen', 'Back close': 'Zurück schließt', '%s apps': '%s Apps', '1 app': '1 App', 'Apps on Home': 'Apps im Start', 'Auto-locate by IP': 'Standort per IP', 'Back cancel': 'Zurück bricht ab', 'Back groups': 'Zurück zu den Gruppen', 'Back return': 'Zurück geht zurück', 'Brightness': 'Helligkeit', 'City': 'Stadt', 'Clock format': 'Uhrzeitformat', 'Clock position': 'Uhrposition', 'Continue where you left off': 'Dort weitermachen, wo du aufgehört hast', 'Dimmer at night': 'Nachts dunkler', 'HDMI names': 'HDMI-Namen', 'Home': 'Start', 'Keep LG screensaver away': 'LG-Bildschirmschoner verhindern', 'LG TV settings': 'LG-TV-Einstellungen', 'Left / Right change': 'Links / Rechts ändert', 'Look': 'Aussehen', 'Motion': 'Bewegung', 'Motion speed': 'Bewegungstempo', 'Movie night, Game on, Music': 'Filmabend, Spielzeit, Musik', 'OK confirm': 'OK bestätigt', 'OK edit': 'OK bearbeitet', 'OK open': 'OK öffnet', 'OK switch': 'OK schaltet', 'Performance mode': 'Leistungsmodus', 'Photo length': 'Fotodauer', 'Photos and the clock when the TV is idle': 'Fotos und die Uhr, wenn der Fernseher ruht', 'Photos from': 'Fotos von', 'Photos on Home': 'Fotos im Start', 'Screensaver': 'Bildschirmschoner', 'Starts after': 'Startet nach', 'TMDB key': 'TMDB-Schlüssel', 'Text size': 'Textgröße', 'The apps you opened last, first in the row': 'Die zuletzt geöffneten Apps stehen zuerst in der Zeile', 'Trending this week': 'Trends der Woche', 'Unsplash, connected': 'Unsplash, verbunden', 'You and this TV': 'Du und dieser Fernseher', 'Off uses your city. On sends your IP to ipapi.co.': 'Aus verwendet deine Stadt. An sendet deine IP an ipapi.co.', 'Your Unsplash key, kept on this TV only': 'Dein Unsplash-Schlüssel, nur auf diesem Fernseher gespeichert', 'Arrange your apps': 'Apps anordnen', 'Hold OK on any app on Home to get here.': 'Halte OK auf einer App im Startbildschirm gedrückt, um hierher zu gelangen.', 'Moving': 'Verschieben', 'Add app': 'App hinzufügen', 'Removed %s from Home': '%s vom Startbildschirm entfernt', 'Left / Right move · Down remove · OK done': 'Links / Rechts bewegen · Unten entfernen · OK fertig', 'Arrange on Home': 'Auf dem Startbildschirm anordnen', 'OK start': 'OK starten', 'Hi. What should we call you?': 'Hallo. Wie sollen wir dich nennen?',
+                'Used for the greeting. You can change it later.': 'Für die Begrüßung. Du kannst es später ändern.',
+                'City, for the weather': 'Ort, für das Wetter',
+                'Leave it empty to use São Paulo, or turn on Auto-locate by IP in Settings.': 'Leer lassen für São Paulo oder in den Einstellungen die automatische Ortung per IP einschalten.',
+                'Pick your apps': 'Wähle deine Apps',
+                'Up to 8. They go on Home in this order.': 'Bis zu 8. Sie erscheinen in dieser Reihenfolge auf dem Startbildschirm.',
+                '%s picked': '%s gewählt',
+                'Show all %s apps and inputs': 'Alle %s Apps und Eingänge zeigen',
+                'The screen changes as you move. OK picks.': 'Der Bildschirm ändert sich beim Bewegen. OK wählt aus.',
+                'Follows the sun': 'Folgt der Sonne',
+                'Midnight': 'Mitternacht',
+                'Pure black': 'Reines Schwarz',
+                'Show photos when the TV is idle': 'Fotos zeigen, wenn der Fernseher ruht',
+                'All set, %s': 'Alles bereit, %s',
+                'All set': 'Alles bereit',
+                'Who is this?': 'Wer ist das?',
+                'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
                 'Optional, for weekly trending movies and shows': 'Optional, für wöchentlich angesagte Filme und Serien', 
             },
             fr: {
@@ -1790,7 +1823,6 @@
                 'Personalize': 'Personnaliser', 'Customize Shelf & Settings': 'Personnaliser l’Étagère et les Réglages',
                 'Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.': 'Choisissez les applis de la TV affichées sur l’étagère, la ville météo et la clé TMDB.',
                 'Live Forecast': 'Prévisions en Direct', 'Local Weather & Sunset': 'Météo Locale et Coucher du Soleil', 'Live temperature and sky conditions powered by Open-Meteo.': 'Température et ciel en direct via Open-Meteo.',
-                
                 'Trending': 'Tendances',
                 "Switch the row below to this week's trending movies.": 'Affiche les films tendance de la semaine dans la rangée ci-dessous.',
                 "Switch the row below to this week's trending TV shows.": 'Affiche les séries tendance de la semaine dans la rangée ci-dessous.',
@@ -1824,17 +1856,31 @@
                 'Could not confirm %s opened. Please try again.': 'Impossible de confirmer l’ouverture de %s. Veuillez réessayer.',
                 'No response opening %s. Please try again.': 'Aucune réponse à l’ouverture de %s. Veuillez réessayer.',
                 
-                
                 'Could not save the order. Please try again.': 'Impossible d’enregistrer l’ordre. Veuillez réessayer.',
                 'Tile order saved': 'Ordre enregistré', 'Max 8 apps on shelf': '8 applis maximum sur l’étagère',
                 'Defaults restored': 'Valeurs par défaut rétablies', 'Saved & Applied!': 'Enregistré et appliqué !',
-                
                 'Not set': 'Non défini', 'Saved': 'Enregistré', 
                 'Press OK again to confirm': 'Appuyez de nouveau sur OK pour confirmer', 
                 'Up / Down: move one row': 'Haut / Bas : déplacer d’une ligne', 'OK: add or remove': 'OK : ajouter ou retirer', 'Back: return': 'Retour : revenir',
                 'Enter: save': 'Entrée : enregistrer', 'Back: cancel': 'Retour : annuler', '%s of 8 selected': '%s sur 8 sélectionnées',
                 'Keep at least one app on the shelf.': 'Gardez au moins une appli sur l’étagère.', 
-                'Show the movies and shows row on the home screen': 'Afficher la rangée de films et séries sur l’écran d’accueil', 'Good morning': 'Bonjour', 'Good afternoon': 'Bon après-midi', 'Good evening': 'Bonsoir', 'Good night': 'Bonne nuit', 'e.g. Noa': 'ex. : Noa', 'Used in the greeting on the home screen': 'Utilisé dans le message d’accueil de l’écran d’accueil', 'Pick up where you left off': 'Reprenez où vous en étiez', 'A little dimmer after sunset, much dimmer after 23:00': 'Un peu plus sombre après le coucher du soleil, bien plus après 23 h', 'No ads. No account. Your settings stay on this TV.': 'Pas de pub. Pas de compte. Vos réglages restent sur cette TV.', 'Movie night': 'Soirée cinéma', 'Game on': 'Place au jeu', 'Background music': 'Musique d’ambiance', 'Scenes': 'Scènes', 'Scene': 'Scène', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Ouvre la bonne appli et règle l’apparence. De retour ici, tout redevient comme avant.', 'Name a device on an HDMI input in Customize first': 'Nommez d’abord un appareil sur une entrée HDMI dans Personnaliser', 'Welcome to Free My TV': 'Bienvenue sur Free My TV', 'A quiet home screen with no ads. This takes about a minute and every choice can be changed later in Customize.': 'Un écran d’accueil calme, sans pub. Cela prend environ une minute et tout se change ensuite dans Personnaliser.', 'Start': 'Commencer', 'Continue': 'Continuer', 'Finish': 'Terminer', 'Skip setup': 'Passer la configuration', 'Open my home screen': 'Ouvrir mon écran d’accueil', 'Welcome': 'Bienvenue', 'Your name and city': 'Votre prénom et ville', 'Used for the greeting and the weather. Leave it empty to use São Paulo, or turn on Auto-locate by IP in Customize.': 'Utilisés pour l’accueil et la météo. Laissez vide pour utiliser São Paulo, ou activez la localisation automatique par IP dans Personnaliser.', 'Your apps': 'Vos applis', 'Pick up to 8 for your shelf.': 'Choisissez-en jusqu’à 8 pour votre étagère.', 'Your look': 'Votre style', 'How should it look?': 'Quel style voulez-vous ?', 'Pick one. The whole screen changes as you move over it.': 'Choisissez-en un. Tout l’écran change quand vous le survolez.', 'Follow the sun': 'Suivre le soleil', 'Light by day, warm at sunset, dark at night.': 'Clair le jour, chaud au coucher du soleil, sombre la nuit.', 'Deep Midnight': 'Minuit profond', 'Blue-black, easy on eyes in a dark room.': 'Bleu nuit, reposant dans une pièce sombre.', 'Pure Black': 'Noir pur', 'True black for movies and OLED panels.': 'Noir absolu pour les films et les écrans OLED.', 'Bright and airy for a sunny living room.': 'Lumineux et aéré pour un salon ensoleillé.', 'Screensaver photos': 'Photos de l’écran de veille', 'When the TV is idle it shows photos behind the clock. You can add your free Unsplash key later in Customize.': 'En veille, la TV affiche des photos derrière l’horloge. Vous pourrez ajouter votre clé Unsplash gratuite plus tard dans Personnaliser.', 'Photo screensaver: On': 'Écran de veille photo : activé', 'Photo screensaver: Off': 'Écran de veille photo : désactivé', 'Your TV is ready': 'Votre TV est prête', 'Your settings stay on this TV. Change anything later in Customize.': 'Vos réglages restent sur cette TV. Modifiez ce que vous voulez plus tard dans Personnaliser.', 'Run setup again': 'Relancer la configuration', 'Who is watching?': 'Qui regarde ?', 'Add person': 'Ajouter une personne', 'Switch person': 'Changer de personne', 'Ask who is watching': 'Demander qui regarde', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Un profil, c’est une étagère, un style, une ville et un écran de veille. Ce n’est pas un compte et il reste sur cette TV.', 'Shows the person picker when the app opens, if there is more than one person': 'Affiche le choix de la personne à l’ouverture, s’il y en a plusieurs', 'You': 'Vous', 'Person': 'Personne', 'Remove this person': 'Retirer cette personne', 'Kids profile (hides settings)': 'Profil enfant (masque les réglages)', 'Press OK again to remove %s': 'Appuyez de nouveau sur OK pour retirer %s', 'Step %s of %s': 'Étape %s sur %s', 'About a minute': 'Environ une minute', 'Nothing here needs an account. You can change every choice later in Customize.': 'Rien ici ne demande de compte. Vous pourrez changer chaque choix plus tard dans Personnaliser.', 'How should it look, %s?': 'Quel style voulez-vous, %s ?', 'Your name': 'Votre prénom', 'Your city': 'Votre ville', 'Arrows': 'Flèches', 'choose': 'choisir', 'continue': 'continuer', 'previous step': 'étape précédente', 'Photo screensaver': 'Écran de veille photo', 'OK': 'OK', 'Back': 'Retour', 'Selected': 'Sélectionné', 'People': 'Personnes', 'Reset settings': 'Réinitialiser les réglages', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Remet tous les réglages et l’étagère par défaut. Les personnes et l’historique restent.', 'Erase everything on this TV': 'Tout effacer sur ce téléviseur', 'Deletes every person, setting, key and history, then starts first-run setup': 'Supprime toutes les personnes, réglages, clés et l’historique, puis lance la configuration initiale', 'Press OK again to erase everything': 'Appuyez à nouveau sur OK pour tout effacer', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'Free My TV est une application indépendante, non affiliée à LG. Sans publicité. Sans compte. Vos réglages restent sur ce téléviseur.', 'About': 'À propos', 'Keep at least one grown-up profile': 'Gardez au moins un profil adulte', 'Settings': 'Réglages', '%s, opened at %s': '%s, ouvert à %s', '%s, opened %s': '%s, ouvert %s', 'More options': 'Plus d’options', 'Back close': 'Retour ferme', '%s apps': '%s applis', '1 app': '1 appli', 'Apps on Home': 'Applis sur l’accueil', 'Auto-locate by IP': 'Localiser par IP', 'Back cancel': 'Retour annule', 'Back groups': 'Retour va aux groupes', 'Back return': 'Retour revient', 'Brightness': 'Luminosité', 'City': 'Ville', 'Clock format': 'Format de l’horloge', 'Clock position': 'Position de l’horloge', 'Continue where you left off': 'Reprenez où vous en étiez', 'Dimmer at night': 'Plus sombre la nuit', 'HDMI names': 'Noms des HDMI', 'Home': 'Accueil', 'Keep LG screensaver away': 'Éviter l’écran de veille LG', 'LG TV settings': 'Réglages TV LG', 'Left / Right change': 'Gauche / Droite change', 'Look': 'Apparence', 'Motion': 'Mouvement', 'Motion speed': 'Vitesse du mouvement', 'Movie night, Game on, Music': 'Soirée cinéma, Place au jeu, Musique', 'OK confirm': 'OK confirme', 'OK edit': 'OK modifie', 'OK open': 'OK ouvre', 'OK switch': 'OK bascule', 'Performance mode': 'Mode performance', 'Photo length': 'Durée de la photo', 'Photos and the clock when the TV is idle': 'Photos et horloge quand la TV est inactive', 'Photos from': 'Photos de', 'Photos on Home': 'Photos sur l’accueil', 'Screensaver': 'Écran de veille', 'Starts after': 'Démarre après', 'TMDB key': 'Clé TMDB', 'Text size': 'Taille du texte', 'The apps you opened last, first in the row': 'Les applis ouvertes en dernier, en premier dans la rangée', 'Trending this week': 'Tendances de la semaine', 'Unsplash, connected': 'Unsplash, connecté', 'You and this TV': 'Vous et ce téléviseur', 'Off uses your city. On sends your IP to ipapi.co.': 'Désactivé utilise votre ville. Activé envoie votre IP à ipapi.co.', 'Your Unsplash key, kept on this TV only': 'Votre clé Unsplash, conservée uniquement sur ce téléviseur', 'Arrange your apps': 'Organisez vos applis', 'Hold OK on any app on Home to get here.': 'Maintenez OK sur une appli de l’accueil pour arriver ici.', 'Moving': 'Déplacement', 'Add app': 'Ajouter une appli', 'Removed %s from Home': '%s retiré de l’accueil', 'Left / Right move · Down remove · OK done': 'Gauche / Droite déplacer · Bas retirer · OK terminé', 'Arrange on Home': 'Organiser sur l’accueil', 'OK start': 'OK démarrer', 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
+                'Show the movies and shows row on the home screen': 'Afficher la rangée de films et séries sur l’écran d’accueil', 'Good morning': 'Bonjour', 'Good afternoon': 'Bon après-midi', 'Good evening': 'Bonsoir', 'Good night': 'Bonne nuit', 'e.g. Noa': 'ex. : Noa', 'Used in the greeting on the home screen': 'Utilisé dans le message d’accueil de l’écran d’accueil', 'Pick up where you left off': 'Reprenez où vous en étiez', 'A little dimmer after sunset, much dimmer after 23:00': 'Un peu plus sombre après le coucher du soleil, bien plus après 23 h', 'No ads. No account. Your settings stay on this TV.': 'Pas de pub. Pas de compte. Vos réglages restent sur cette TV.', 'Movie night': 'Soirée cinéma', 'Game on': 'Place au jeu', 'Background music': 'Musique d’ambiance', 'Scenes': 'Scènes', 'Scene': 'Scène', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Ouvre la bonne appli et règle l’apparence. De retour ici, tout redevient comme avant.', 'Name a device on an HDMI input in Customize first': 'Nommez d’abord un appareil sur une entrée HDMI dans Personnaliser','Continue': 'Continuer', 'Finish': 'Terminer', 'Skip setup': 'Passer la configuration','How should it look?': 'Quel style voulez-vous ?','Photo screensaver: On': 'Écran de veille photo : activé', 'Photo screensaver: Off': 'Écran de veille photo : désactivé','Run setup again': 'Relancer la configuration', 'Who is watching?': 'Qui regarde ?', 'Add person': 'Ajouter une personne', 'Switch person': 'Changer de personne', 'Ask who is watching': 'Demander qui regarde', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Un profil, c’est une étagère, un style, une ville et un écran de veille. Ce n’est pas un compte et il reste sur cette TV.', 'Shows the person picker when the app opens, if there is more than one person': 'Affiche le choix de la personne à l’ouverture, s’il y en a plusieurs', 'You': 'Vous', 'Person': 'Personne', 'Remove this person': 'Retirer cette personne', 'Kids profile (hides settings)': 'Profil enfant (masque les réglages)', 'Press OK again to remove %s': 'Appuyez de nouveau sur OK pour retirer %s', 'Step %s of %s': 'Étape %s sur %s','How should it look, %s?': 'Quel style voulez-vous, %s ?', 'Your name': 'Votre prénom','Photo screensaver': 'Écran de veille photo', 'OK': 'OK', 'Back': 'Retour', 'Selected': 'Sélectionné', 'People': 'Personnes', 'Reset settings': 'Réinitialiser les réglages', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Remet tous les réglages et l’étagère par défaut. Les personnes et l’historique restent.', 'Erase everything on this TV': 'Tout effacer sur ce téléviseur', 'Deletes every person, setting, key and history, then starts first-run setup': 'Supprime toutes les personnes, réglages, clés et l’historique, puis lance la configuration initiale', 'Press OK again to erase everything': 'Appuyez à nouveau sur OK pour tout effacer', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'Free My TV est une application indépendante, non affiliée à LG. Sans publicité. Sans compte. Vos réglages restent sur ce téléviseur.', 'About': 'À propos', 'Keep at least one grown-up profile': 'Gardez au moins un profil adulte', 'Settings': 'Réglages', '%s, opened at %s': '%s, ouvert à %s', '%s, opened %s': '%s, ouvert %s', 'More options': 'Plus d’options', 'Back close': 'Retour ferme', '%s apps': '%s applis', '1 app': '1 appli', 'Apps on Home': 'Applis sur l’accueil', 'Auto-locate by IP': 'Localiser par IP', 'Back cancel': 'Retour annule', 'Back groups': 'Retour va aux groupes', 'Back return': 'Retour revient', 'Brightness': 'Luminosité', 'City': 'Ville', 'Clock format': 'Format de l’horloge', 'Clock position': 'Position de l’horloge', 'Continue where you left off': 'Reprenez où vous en étiez', 'Dimmer at night': 'Plus sombre la nuit', 'HDMI names': 'Noms des HDMI', 'Home': 'Accueil', 'Keep LG screensaver away': 'Éviter l’écran de veille LG', 'LG TV settings': 'Réglages TV LG', 'Left / Right change': 'Gauche / Droite change', 'Look': 'Apparence', 'Motion': 'Mouvement', 'Motion speed': 'Vitesse du mouvement', 'Movie night, Game on, Music': 'Soirée cinéma, Place au jeu, Musique', 'OK confirm': 'OK confirme', 'OK edit': 'OK modifie', 'OK open': 'OK ouvre', 'OK switch': 'OK bascule', 'Performance mode': 'Mode performance', 'Photo length': 'Durée de la photo', 'Photos and the clock when the TV is idle': 'Photos et horloge quand la TV est inactive', 'Photos from': 'Photos de', 'Photos on Home': 'Photos sur l’accueil', 'Screensaver': 'Écran de veille', 'Starts after': 'Démarre après', 'TMDB key': 'Clé TMDB', 'Text size': 'Taille du texte', 'The apps you opened last, first in the row': 'Les applis ouvertes en dernier, en premier dans la rangée', 'Trending this week': 'Tendances de la semaine', 'Unsplash, connected': 'Unsplash, connecté', 'You and this TV': 'Vous et ce téléviseur', 'Off uses your city. On sends your IP to ipapi.co.': 'Désactivé utilise votre ville. Activé envoie votre IP à ipapi.co.', 'Your Unsplash key, kept on this TV only': 'Votre clé Unsplash, conservée uniquement sur ce téléviseur', 'Arrange your apps': 'Organisez vos applis', 'Hold OK on any app on Home to get here.': 'Maintenez OK sur une appli de l’accueil pour arriver ici.', 'Moving': 'Déplacement', 'Add app': 'Ajouter une appli', 'Removed %s from Home': '%s retiré de l’accueil', 'Left / Right move · Down remove · OK done': 'Gauche / Droite déplacer · Bas retirer · OK terminé', 'Arrange on Home': 'Organiser sur l’accueil', 'OK start': 'OK démarrer', 'Hi. What should we call you?': 'Bonjour. Comment doit-on vous appeler ?',
+                'Used for the greeting. You can change it later.': 'Utilisé pour l’accueil. Vous pourrez le changer plus tard.',
+                'City, for the weather': 'Ville, pour la météo',
+                'Leave it empty to use São Paulo, or turn on Auto-locate by IP in Settings.': 'Laissez vide pour utiliser São Paulo, ou activez la localisation automatique par IP dans Réglages.',
+                'Pick your apps': 'Choisissez vos apps',
+                'Up to 8. They go on Home in this order.': 'Jusqu’à 8. Elles s’affichent à l’accueil dans cet ordre.',
+                '%s picked': '%s choisies',
+                'Show all %s apps and inputs': 'Afficher les %s apps et entrées',
+                'The screen changes as you move. OK picks.': 'L’écran change quand vous vous déplacez. OK valide.',
+                'Follows the sun': 'Suit le soleil',
+                'Midnight': 'Minuit',
+                'Pure black': 'Noir pur',
+                'Show photos when the TV is idle': 'Afficher des photos quand la télé est inactive',
+                'All set, %s': 'Tout est prêt, %s',
+                'All set': 'Tout est prêt',
+                'Who is this?': 'Qui est-ce ?',
+                'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
                 'Optional, for weekly trending movies and shows': 'Facultatif, pour les films et séries tendance de la semaine', 
             }
         };
@@ -4744,12 +4790,12 @@
         }
 
         // --- First-run setup ---
-        var WIZARD_STEPS = ['welcome', 'who', 'apps', 'look', 'photos', 'done'];
+        var WIZARD_STEPS = ['who', 'apps', 'look'];
         var WIZARD_LOOKS = [
-            { key: 'auto', label: 'Follow the sun', desc: 'Light by day, warm at sunset, dark at night.' },
-            { key: 'night', label: 'Deep Midnight', desc: 'Blue-black, easy on eyes in a dark room.' },
-            { key: 'oled', label: 'Pure Black', desc: 'True black for movies and OLED panels.' },
-            { key: 'day', label: 'Daylight Blue', desc: 'Bright and airy for a sunny living room.' }
+            { key: 'auto', label: 'Follows the sun' },
+            { key: 'night', label: 'Midnight' },
+            { key: 'oled', label: 'Pure black' },
+            { key: 'day', label: 'Daylight Blue' }
         ];
         // A fresh install has no fmtv_* key at all; any stored setting means an existing install (never show). Storage trouble means never show.
         function wizardNeeded() {
@@ -4790,7 +4836,7 @@
         var WZ_CHECK_SVG = '<svg width="{n}" height="{n}" viewBox="0 0 24 24" fill="none" stroke="{c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
         function wzCheck(n, c) { return WZ_CHECK_SVG.replace(/\{n\}/g, n).replace('{c}', c); }
 
-        // Preview thumbnail for a look card: the theme gradient, a title bar and (except Follow the sun) three mini tiles.
+        // Preview thumbnail for a look card: the theme gradient, a title bar and (except Follows the sun) three mini tiles.
         var WZ_THUMBS = {
             auto: { bg: 'linear-gradient(90deg, #dbe9ff 0%, #6a3d6b 55%, #0a1028 100%)', tiles: false },
             night: { bg: 'linear-gradient(160deg, #1a2a55, #0a1028)', tiles: true },
@@ -4828,7 +4874,9 @@
             wizardRestoreLook();
             wizard.step = Math.max(0, Math.min(step, WIZARD_STEPS.length - 1));
             wizard.focus = 0;
-            if (WIZARD_STEPS[wizard.step] === 'look') {
+            var name = WIZARD_STEPS[wizard.step];
+            if (name === 'apps') { wizard.appIds = null; wizard.showAll = false; }
+            if (name === 'look') {
                 wizard.lookSaved = state.theme;
                 // Focus starts on the card of the saved look.
                 for (var li = 0; li < WIZARD_LOOKS.length; li++) if (WIZARD_LOOKS[li].key === state.theme) wizard.focus = li;
@@ -4836,82 +4884,84 @@
             renderWizard();
         }
 
+        // The apps step lists the apps already on the shelf first, then the rest of the catalog. The order is fixed
+        // when the step opens, so a tile does not jump away when it is switched off.
+        var WIZARD_FIRST_APPS = 12;
+        function wizardAppList() {
+            var cat = wizardCatalog(), byId = {};
+            cat.forEach(function(a) { byId[a.id] = a; });
+            if (!wizard.appIds || wizard.appCount !== cat.length) {
+                var ids = [], seen = {};
+                state.favorites.forEach(function(id) { if (byId[id] && !seen[id]) { seen[id] = true; ids.push(id); } });
+                cat.forEach(function(a) { if (!seen[a.id]) { seen[a.id] = true; ids.push(a.id); } });
+                wizard.appIds = ids;
+                wizard.appCount = cat.length;
+            }
+            return wizard.appIds.map(function(id) { return byId[id]; }).filter(function(a) { return !!a; });
+        }
+
         function paintWizardFocus() {
             wizard.items.forEach(function(item, i) { item.classList.toggle('focused', i === wizard.focus); });
             var scroller = document.getElementById('wzScroll');
             var cur = wizard.items[wizard.focus];
-            if (scroller && cur && cur.parentNode === scroller.firstChild) {
+            if (scroller && cur && scroller.contains(cur)) {
                 var pad = 12;
-                var top = cur.offsetTop, bottom = top + cur.offsetHeight;
+                var sr = scroller.getBoundingClientRect(), cr = cur.getBoundingClientRect();
+                var top = cr.top - sr.top + scroller.scrollTop, bottom = top + cr.height;
                 if (top - pad < scroller.scrollTop) scroller.scrollTop = Math.max(0, top - pad);
                 else if (bottom + pad > scroller.scrollTop + scroller.clientHeight) scroller.scrollTop = bottom + pad - scroller.clientHeight;
             }
         }
 
-        function wizardMove(delta) {
-            var next = Math.max(0, Math.min(wizard.focus + delta, wizard.items.length - 1));
-            if (next === wizard.focus) return;
+        function wizardFocusTo(next) {
+            if (next === wizard.focus || next < 0 || next >= wizard.items.length) return;
             var fromLook = !!wizard.items[wizard.focus].dataset.look;
             wizard.focus = next;
             paintWizardFocus();
             var look = wizard.items[next].dataset.look;
-            // Moving between look cards previews the look; arriving from Continue must not switch the theme silently.
+            // Moving between look cards previews the look; arriving from the switch or Finish must not switch the theme silently.
             if (look && fromLook) { state.theme = look; applyTheme(); }
             else if (fromLook && !look) wizardRestoreLook(true);
+        }
+        function wizardMove(delta) { wizardFocusTo(Math.max(0, Math.min(wizard.focus + delta, wizard.items.length - 1))); }
+
+        // Finish: close the setup, land on Home and say so.
+        function wizardFinish() {
+            closeWizard(true);
+            showToast(state.userName ? t('All set, %s', state.userName) : t('All set'), 3000);
         }
 
         function renderWizard() {
             var main = document.getElementById('wizardMain');
-            var rail = document.getElementById('wizardRail');
             main.innerHTML = '';
-            rail.innerHTML = '';
             var name = WIZARD_STEPS[wizard.step];
             var items = [];
             wizard.gridCount = 0;
-            var railLabels = ['Welcome', 'Your name and city', 'Your apps', 'Your look', 'Screensaver photos'];
-            var brand = wzEl('div', 'wz-brand');
-            var tile = wzEl('div', 'wz-brand-tile');
-            tile.innerHTML = '<svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>';
-            brand.appendChild(tile);
-            brand.appendChild(wzEl('div', 'wz-brand-name', 'Free My TV'));
-            rail.appendChild(brand);
-            rail.appendChild(wzEl('div', 'wz-minute', t('About a minute')));
-            var steps = wzEl('div', 'wz-steps');
-            var shown = 0;
-            railLabels.forEach(function(label, i) {
-                if (wizard.add && i === 0) return; // adding a person never shows the welcome step
-                shown++;
-                var r = wzEl('div', 'wz-rail-row' + (i === wizard.step ? ' current' : (i < wizard.step ? ' done' : '')));
-                var dot = wzEl('div', 'wz-dot');
-                if (i < wizard.step) dot.innerHTML = wzCheck(21, '#bdf3d6');
-                else dot.textContent = String(shown);
-                r.appendChild(dot);
-                r.appendChild(wzEl('span', 'wz-rail-label', t(label)));
-                steps.appendChild(r);
-            });
-            rail.appendChild(steps);
-            rail.appendChild(wzEl('div', 'wz-note', t('Nothing here needs an account. You can change every choice later in Customize.')));
+            wizard.cols = 1;
+            document.getElementById('wizardOverlay').classList.toggle('wide', name !== 'who');
+
+            var bars = wzEl('div', 'wz-bars');
+            bars.setAttribute('role', 'img');
+            bars.setAttribute('aria-label', t('Step %s of %s', wizard.step + 1, WIZARD_STEPS.length));
+            WIZARD_STEPS.forEach(function(s, i) { bars.appendChild(wzEl('div', 'wz-bar' + (i < wizard.step ? ' done' : (i === wizard.step ? ' cur' : '')))); });
+            main.appendChild(bars);
 
             var head = wzEl('div', 'wz-head');
+            var headText = wzEl('div', 'wz-head-text');
+            head.appendChild(headText);
             main.appendChild(head);
-            // The finish screen keeps an empty eyebrow so the title does not jump.
-            head.appendChild(wzEl('div', 'wz-eyebrow', name === 'done' ? '\u00a0' : t('Step %s of %s', wizard.step + 1 - (wizard.add ? 1 : 0), railLabels.length - (wizard.add ? 1 : 0))));
-            function title(text) { head.appendChild(wzEl('div', 'wz-title', text)); }
-            function lead(text) { head.appendChild(wzEl('div', 'wz-lead', text)); }
+            function title(text) { headText.appendChild(wzEl('div', 'wz-title', text)); }
+            function lead(text) { headText.appendChild(wzEl('div', 'wz-lead', text)); }
             function add(el, parent) { items.push(el); (parent || main).appendChild(el); }
-            // The primary and Skip buttons live in the footer; items keep the order content, primary, skip.
-            var primary = null, skip = null;
+            // The primary and second buttons live in the footer; items keep the order content, primary, second.
+            var primary = null, second = null;
             function addPrimary(label, fn) { primary = wzButton(label, fn, 'wz-primary'); items.push(primary); }
-            function addSkip() { skip = wzButton('Skip setup', function() { closeWizard(false); }, 'wz-skip'); items.push(skip); }
+            function addSecond(label, fn) { second = wzButton(label, fn, 'wz-second'); items.push(second); }
+            function rerender(focus) { wizard.focus = focus; renderWizard(); }
 
-            if (name === 'welcome') {
-                title(t('Welcome to Free My TV'));
-                lead(t('A quiet home screen with no ads. This takes about a minute and every choice can be changed later in Customize.'));
-                addPrimary('Start', function() { wizardGo(1); });
-                addSkip();
-            } else if (name === 'who') {
-                title(t('Your name and city'));
-                lead(t('Used for the greeting and the weather. Leave it empty to use São Paulo, or turn on Auto-locate by IP in Customize.'));
+            if (name === 'who') {
+                title(wizard.add ? t('Who is this?') : t('Hi. What should we call you?'));
+                lead(t('Used for the greeting. You can change it later.'));
                 var fields = wzEl('div', 'wz-fields');
                 main.appendChild(fields);
                 var nameInput = wzEl('input', 'wz-item wz-input');
@@ -4934,58 +4984,74 @@
                 add(nameInput, nameField);
                 fields.appendChild(nameField);
                 var cityField = wzEl('div', 'wz-field');
-                cityField.appendChild(wzEl('div', 'wz-label', t('Your city')));
+                cityField.appendChild(wzEl('div', 'wz-label', t('City, for the weather')));
                 add(cityInput, cityField);
+                cityField.appendChild(wzEl('div', 'wz-hint', t('Leave it empty to use São Paulo, or turn on Auto-locate by IP in Settings.')));
                 fields.appendChild(cityField);
                 if (wizard.add) {
                     var kids = wzToggle(t('Kids profile (hides settings)'), !!state.locked, function() {
                         state.locked = !state.locked;
                         applyLock(true);
-                        var keep = wizard.focus;
-                        renderWizard();
-                        wizard.focus = keep;
-                        paintWizardFocus();
+                        rerender(wizard.focus);
                     });
                     add(kids, fields);
                 }
-                addPrimary('Continue', function() { saveName(); saveCity(); scheduleSettingsNetwork(true, false); wizardGo(2); });
-                addSkip();
+                wizard.contentCount = items.length;
+                addPrimary('Continue', function() { saveName(); saveCity(); scheduleSettingsNetwork(true, false); wizardGo(1); });
+                addSecond('Skip setup', function() { closeWizard(false); });
             } else if (name === 'apps') {
-                title(t('Your apps'));
-                lead(t('Pick up to 8 for your shelf.'));
+                title(t('Pick your apps'));
+                lead(t('Up to 8. They go on Home in this order.'));
+                head.appendChild(wzEl('div', 'wz-count', t('%s picked', state.favorites.length)));
+                var list = wizardAppList();
+                var shown = wizard.showAll ? list : list.slice(0, WIZARD_FIRST_APPS);
                 var grid = wzEl('div', 'wz-grid wz-apps');
-                wizardCatalog().forEach(function(app) {
+                shown.forEach(function(app) {
                     var on = state.favorites.indexOf(app.id) !== -1;
+                    var device = devicePreset(app, state.hdmiDevices);
+                    var label = device.title || app.title;
                     var tileBtn = wzEl('button', 'wz-item wz-tile' + (on ? ' on' : ''));
+                    tileBtn.dataset.id = app.id;
+                    tileBtn.dataset.title = label;
+                    tileBtn.setAttribute('aria-label', label);
+                    tileBtn.appendChild(buildAppIcon(app, device));
                     if (on) {
                         var chk = wzEl('span', 'wz-check');
-                        chk.innerHTML = wzCheck(18, '#fff');
+                        chk.innerHTML = wzCheck(22, '#1b2230');
                         tileBtn.appendChild(chk);
                     }
-                    tileBtn.appendChild(wzEl('span', 'wz-tile-name', app.title));
                     tileBtn.setAttribute('aria-pressed', String(on));
                     tileBtn.onOk = function() {
                         var result = toggleFavorite(app.id);
                         if (result === 'full') showToast(t('Max 8 apps on shelf'), 3000);
                         else if (result === 'last') showToast(t('Keep at least one app on the shelf.'), 3000);
-                        var keep = wizard.focus;
-                        renderWizard();
-                        wizard.focus = keep;
-                        paintWizardFocus();
+                        rerender(wizard.focus);
                     };
                     tileBtn.onclick = tileBtn.onOk;
                     items.push(tileBtn);
                     grid.appendChild(tileBtn);
                 });
+                var inner = wzEl('div', 'wz-inner');
+                inner.appendChild(grid);
+                wizard.gridCount = items.length;
+                wizard.cols = 6;
+                if (!wizard.showAll && list.length > shown.length) {
+                    var more = wzEl('button', 'wz-item wz-more', t('Show all %s apps and inputs', list.length));
+                    more.onOk = function() { wizard.showAll = true; rerender(shown.length); };
+                    more.onclick = more.onOk;
+                    items.push(more);
+                    inner.appendChild(more);
+                }
                 var scroller = wzEl('div', 'wz-scroll');
                 scroller.id = 'wzScroll';
-                scroller.appendChild(grid);
+                scroller.appendChild(inner);
                 main.appendChild(scroller);
-                wizard.gridCount = items.length;
-                addPrimary('Continue', function() { wizardGo(3); });
-            } else if (name === 'look') {
+                wizard.contentCount = items.length;
+                addPrimary('Continue', function() { wizardGo(2); });
+                addSecond('Back', function() { wizardGo(0); });
+            } else {
                 title(state.userName ? t('How should it look, %s?', state.userName) : t('How should it look?'));
-                lead(t('Pick one. The whole screen changes as you move over it.'));
+                lead(t('The screen changes as you move. OK picks.'));
                 var cards = wzEl('div', 'wz-grid wz-looks');
                 WIZARD_LOOKS.forEach(function(look) {
                     var isSel = (wizard.lookSaved != null ? wizard.lookSaved : state.theme) === look.key;
@@ -4999,16 +5065,11 @@
                         card.appendChild(selBadge);
                     }
                     card.appendChild(wzThumb(look.key));
-                    var txt = wzEl('div', 'wz-look-text');
-                    txt.appendChild(wzEl('div', 'wz-look-name', t(look.label)));
-                    txt.appendChild(wzEl('div', 'wz-look-desc', t(look.desc)));
-                    card.appendChild(txt);
+                    card.appendChild(wzEl('div', 'wz-look-name', t(look.label)));
                     card.onOk = function() {
                         setSettingValue(settingDef('theme'), look.key);
                         wizard.lookSaved = look.key;
-                        renderWizard();
-                        wizard.focus = wizard.items.length - 1; // on to Continue, as before
-                        paintWizardFocus();
+                        rerender(WIZARD_LOOKS.length + 1); // on to Finish
                     };
                     card.onclick = card.onOk;
                     items.push(card);
@@ -5016,39 +5077,20 @@
                 });
                 main.appendChild(cards);
                 wizard.gridCount = items.length;
-                addPrimary('Continue', function() { wizardGo(4); });
-            } else if (name === 'photos') {
-                title(t('Screensaver photos'));
-                lead(t('When the TV is idle it shows photos behind the clock. You can add your free Unsplash key later in Customize.'));
-                var toggle = wzToggle(t('Photo screensaver'), state.ambient === 'on', function() {
+                wizard.cols = WIZARD_LOOKS.length;
+                var toggle = wzToggle(t('Show photos when the TV is idle'), state.ambient === 'on', function() {
                     setSettingValue(settingDef('ambient'), state.ambient === 'on' ? 'off' : 'on');
-                    var keep = wizard.focus;
-                    renderWizard();
-                    wizard.focus = keep;
-                    paintWizardFocus();
+                    rerender(wizard.focus);
                 });
                 add(toggle);
-                addPrimary('Finish', function() { wizardGo(5); });
-                addSkip();
-            } else {
-                title(t('Your TV is ready'));
-                lead(t('Your settings stay on this TV. Change anything later in Customize.'));
-                addPrimary('Open my home screen', function() { closeWizard(true); });
+                wizard.contentCount = items.length;
+                addPrimary('Finish', wizardFinish);
+                addSecond('Back', function() { wizardGo(1); });
             }
 
             var footer = wzEl('div', 'wz-footer');
-            var hints = wzEl('div', 'wz-hints');
-            [['Arrows', 'choose'], ['OK', 'continue'], ['Back', 'previous step']].forEach(function(h) {
-                var sp = document.createElement('span');
-                sp.appendChild(wzEl('b', '', t(h[0])));
-                sp.appendChild(document.createTextNode(' ' + t(h[1])));
-                hints.appendChild(sp);
-            });
-            footer.appendChild(hints);
-            var actions = wzEl('div', 'wz-actions');
-            if (skip) actions.appendChild(skip);
-            if (primary) actions.appendChild(primary);
-            footer.appendChild(actions);
+            footer.appendChild(second);
+            footer.appendChild(primary);
             main.appendChild(footer);
             wizard.items = items;
             if (wizard.focus >= items.length) wizard.focus = 0;
@@ -5058,9 +5100,11 @@
         function openWizard(add) {
             wizard.open = true;
             wizard.add = add || null;
-            wizard.step = add ? 1 : 0;
+            wizard.step = 0;
             wizard.focus = 0;
             wizard.lookSaved = null;
+            wizard.appIds = null;
+            wizard.showAll = false;
             document.getElementById('wizardOverlay').hidden = false;
             renderWizard();
         }
@@ -5077,6 +5121,11 @@
             setMainFocus(mainNavItems[curIndex]);
         }
 
+        function wizardIndexOf(cls) {
+            for (var i = 0; i < wizard.items.length; i++) if (wizard.items[i].classList.contains(cls)) return i;
+            return -1;
+        }
+
         function handleWizardKey(e) {
             var key = e.key;
             var active = document.activeElement;
@@ -5090,14 +5139,10 @@
                 else if (key === 'ArrowDown' || key === 'ArrowUp') { active.blur(); wizardMove(key === 'ArrowDown' ? 1 : -1); e.preventDefault(); }
                 return;
             }
-            var name = WIZARD_STEPS[wizard.step];
-            var cols = name === 'apps' ? 4 : (name === 'look' ? 2 : 1);
-            var inGrid = name === 'apps' || name === 'look';
-            var gridCount = wizard.gridCount || 0;
             if (back) {
                 // Adding a person: Back on the first step walks away from the new person, restoring the previous one.
-                if (wizard.add && wizard.step <= 1) cancelAddPerson();
-                else if (wizard.step === 0) closeWizard();
+                // A first-run setup has nothing before the first step, so Back does nothing there (Skip leaves).
+                if (wizard.step === 0) { if (wizard.add) cancelAddPerson(); }
                 else wizardGo(wizard.step - 1);
                 e.preventDefault();
                 return;
@@ -5108,29 +5153,33 @@
                 e.preventDefault();
                 return;
             }
-            // The footer shows Skip on the left and the primary button on the right, while items keep primary before Skip.
-            var cur = wizard.items[wizard.focus];
-            if ((key === 'ArrowLeft' || key === 'ArrowRight') && cur && (cur.classList.contains('wz-primary') || cur.classList.contains('wz-skip'))) {
-                var other = null;
-                wizard.items.forEach(function(it) {
-                    if (key === 'ArrowLeft' && cur.classList.contains('wz-primary') && it.classList.contains('wz-skip')) other = it;
-                    if (key === 'ArrowRight' && cur.classList.contains('wz-skip') && it.classList.contains('wz-primary')) other = it;
-                });
-                if (other) { wizard.focus = wizard.items.indexOf(other); paintWizardFocus(); }
-                e.preventDefault();
-                return;
-            }
-            var delta = 0;
-            if (key === 'ArrowRight') delta = 1;
-            else if (key === 'ArrowLeft') delta = -1;
-            else if (key === 'ArrowDown') delta = inGrid && wizard.focus < gridCount ? cols : 1;
-            else if (key === 'ArrowUp') delta = inGrid && wizard.focus < gridCount ? -cols : -1;
-            else return;
-            if (!inGrid && (key === 'ArrowLeft' || key === 'ArrowRight')) { e.preventDefault(); return; }
-            // From the last grid row, Down lands on the button after the grid.
-            if (inGrid && key === 'ArrowDown' && wizard.focus < gridCount && wizard.focus + cols >= gridCount) delta = gridCount - wizard.focus;
-            wizardMove(delta);
+            var arrow = key === 'ArrowLeft' || key === 'ArrowRight' || key === 'ArrowUp' || key === 'ArrowDown';
+            if (!arrow) return;
             e.preventDefault();
+            // Layout: [grid cells (cols per row)] [other content, one per row] [footer: Back/Skip on the left, Continue on the right].
+            var n = wizard.contentCount || 0, g = wizard.gridCount || 0, cols = wizard.cols || 1, cur = wizard.focus;
+            var target = -1;
+            if (cur >= n) {
+                if (key === 'ArrowLeft') target = wizardIndexOf('wz-second');
+                else if (key === 'ArrowRight') target = wizardIndexOf('wz-primary');
+                else if (key === 'ArrowUp') target = n - 1;
+            } else if (cur < g) {
+                if (key === 'ArrowLeft') target = Math.max(0, cur - 1);
+                else if (key === 'ArrowRight') target = Math.min(g - 1, cur + 1);
+                else if (key === 'ArrowUp') target = cur - cols >= 0 ? cur - cols : -1;
+                // From the last grid row, Down lands on the next block (Show all, the photos switch) or the footer.
+                else target = cur + cols < g ? cur + cols : (g < n ? g : n);
+            } else if (key === 'ArrowUp') {
+                target = cur - 1;
+                // Back to the cards: land on the saved look, so the preview and the focus agree.
+                if (target < g && WIZARD_STEPS[wizard.step] === 'look') {
+                    var savedLook = wizard.lookSaved != null ? wizard.lookSaved : state.theme;
+                    for (var si = 0; si < g; si++) if (wizard.items[si].dataset.look === savedLook) target = si;
+                }
+            } else if (key === 'ArrowDown') {
+                target = cur + 1 < n ? cur + 1 : n;
+            }
+            if (target >= 0) wizardFocusTo(target);
         }
 
         // --- Remote Control Key Handler ---
