@@ -2347,7 +2347,11 @@
         function readLaunchHist() {
             try {
                 var h = JSON.parse(localStorage.getItem(LAUNCH_HIST_KEY) || '{}');
-                return h && typeof h === 'object' && !Array.isArray(h) ? h : {};
+                if (!h || typeof h !== 'object' || Array.isArray(h)) return {};
+                Object.keys(h).forEach(function(id) {
+                    if (!h[id] || typeof h[id] !== 'object' || typeof h[id].t !== 'number' || isNaN(h[id].t)) delete h[id];
+                });
+                return h;
             } catch (e) { return {}; }
         }
 
@@ -2568,7 +2572,7 @@
             });
 
             document.getElementById('shelfCountHint').textContent = shelfEdit ? (movingTileId ? t('← / → Move • OK Place • Back Cancel') : t('Select a tile • OK Pick up • Done to save')) : t('%s Apps • Instant Launch', favItems.length);
-            refreshMainNavList();
+            renderPickup(); // keeps the pick-up row in step with the catalog; it also refreshes the nav list
         }
 
         // Curated entries store 'Watch on X' in English; API-built ones are already localized.

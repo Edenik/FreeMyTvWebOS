@@ -96,6 +96,8 @@ setTimeout(function () {
     eq('when today', relativeWhen(T - 3600000, T), t('Today, %s', '20:10'));
     eq('when yesterday', relativeWhen(T - 86400000, T), t('Yesterday, %s', '21:10'));
     eq('when older', relativeWhen(T - 3 * 86400000, T).length > 0, true);
+    localStorage.setItem('fmtv_launch_hist', JSON.stringify({ netflix: 5, youtube: { t: 'x' }, ok: { t: 1, n: 1 } }));
+    eq('hist malformed dropped', Object.keys(readLaunchHist()).join(','), 'ok');
     localStorage.removeItem('fmtv_launch_hist');
   }
   if (need('ambientBudgetAllows')) {
@@ -1229,6 +1231,19 @@ setTimeout(function () {
     state.pickup = 'off'; renderPickup();
     eq('pickup off hidden', document.getElementById('pickupSection').hidden, true);
     localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on'; renderPickup();
+    done();
+  });
+  steps.push(function (done) { // an app added to the catalog later (discovered on the TV) shows in the pick-up row
+    localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on';
+    var fake = { id: 'fake.app', title: 'Fake', tag: 'Streaming', desc: 'Watch 4K videos, live streams, music, and coding radio.', color: '#ff0000', badge: 'F', bg: '#000' };
+    state.catalog.push(fake);
+    recordLaunch('fake.app', Date.now());
+    renderAppsShelf();
+    eq('pickup follows catalog', !!document.querySelector('#pickupRow .pickup-card[data-id="fake.app"]'), true);
+    state.catalog.pop();
+    localStorage.removeItem('fmtv_launch_hist');
+    renderAppsShelf();
+    eq('pickup cleared again', document.getElementById('pickupSection').hidden, true);
     done();
   });
   steps.push(function (done) { // an HDMI row changes its device with Right and saves at once
