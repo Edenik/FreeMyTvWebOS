@@ -2359,7 +2359,13 @@ setTimeout(function () {
     eq('wizard apps shows 12 logo tiles', wzq('.wz-tile').length, Math.min(12, wizardCatalog().length));
     eq('wizard tile is 156px tall', wzq('.wz-tile')[0].getBoundingClientRect().height, 156);
     eq('wizard picked tiles carry a check badge', wzq('.wz-tile.on .wz-check').length, wzq('.wz-tile.on').length);
-    eq('wizard unpicked tiles are dimmed to 55%', getComputedStyle(wzq('.wz-tile:not(.on)')[0]).opacity, '0.55');
+    var dimTile = wzq('.wz-tile:not(.on)')[0];
+    eq('wizard unpicked tiles dim only the tile background, not the logo', getComputedStyle(dimTile).opacity + '|' + getComputedStyle(dimTile.querySelector('.app-icon'), '::before').backgroundColor, '1|rgba(12, 16, 24, 0.45)');
+    wizard.focus = 0; paintWizardFocus();
+    eq('wizard status line names the focused tile', wzq('.wz-status')[0].textContent, wizard.items[0].dataset.full);
+    var hdmiTiles = [].filter.call(wzq('.wz-tile'), function (n) { return /^com\.webos\.app\.hdmi[1-4]$/.test(n.dataset.id); });
+    eq('wizard HDMI tiles carry a visible name', hdmiTiles.length > 0 && hdmiTiles.every(function (n) { return !!n.querySelector('.wz-tile-name') && n.querySelector('.wz-tile-name').textContent === n.dataset.title; }), true);
+    eq('wizard non-HDMI tiles have no name label', wzq('.wz-tile .wz-tile-name').length, hdmiTiles.length);
     var firstId = wizard.items[0].dataset.id, was = state.favorites.indexOf(firstId) !== -1;
     wizard.focus = 0; key('Enter');
     eq('wizard toggles an app', state.favorites.indexOf(firstId) !== -1, !was);
@@ -2376,6 +2382,9 @@ setTimeout(function () {
     eq('wizard four cards share one row', c0.top === c3.top && c3.left > c0.left, true);
     eq('wizard one thumbnail per look card', wzq('.wz-look .wz-thumb').length, WIZARD_LOOKS.length);
     eq('wizard photos switch row', wzq('.wz-toggle')[0].textContent.indexOf(t('Show photos when the TV is idle')), 0);
+    eq('wizard photos switch is the Settings switch', wzq('.wz-toggle .sr-switch')[0].getAttribute('role') + '|' + wzq('.wz-toggle .sr-switch')[0].getAttribute('aria-checked') + '|' + (state.ambient === 'on'), 'switch|' + (state.ambient === 'on') + '|' + (state.ambient === 'on'));
+    eq('wizard look cards carry one-line descriptions', [].map.call(wzq('.wz-look .wz-look-desc'), function (c) { return c.textContent; }).join('|'), [t('Light by day, dark at night'), t('Deep blue, easy in a dark room'), t('For movies and OLED screens'), t('Bright and airy for a sunny room')].join('|'));
+    eq('wizard photos hint mentions the Unsplash key', wzq('.wz-hint')[0].textContent, t('Photos need a free Unsplash key. Add it later in Settings, Screensaver.'));
     eq('wizard look footer', wzq('.wz-footer .wz-second')[0].textContent + '|' + wzq('.wz-footer .wz-primary')[0].textContent, t('Back') + '|' + t('Finish'));
     eq('wizard no hint bar', wzq('.wz-hints').length, 0);
     wizard.focus = 0; key('ArrowRight');
@@ -2512,12 +2521,26 @@ setTimeout(function () {
     wizard.focus = 40; paintWizardFocus();
     var tileRect = wizard.items[40].getBoundingClientRect(), scrRect = scr.getBoundingClientRect();
     eq('apps: focused tile is scrolled into view', tileRect.top >= scrRect.top - 1 && tileRect.bottom <= scrRect.bottom + 1, true);
-    wizard.focus = 40; key('ArrowDown');
-    eq('apps: Down from the last rows reaches Continue', wizard.items[wizard.focus].classList.contains('wz-primary'), true);
+    wizard.focus = 43; key('ArrowDown');
+    eq('apps: Down from the last row reaches Continue', wizard.items[wizard.focus].classList.contains('wz-primary'), true);
     key('ArrowUp');
     eq('apps: Up from Continue returns to a tile', wizard.focus < 45, true);
     wizard.focus = 3; key('ArrowDown'); key('ArrowUp');
     eq('apps: Down then Up by rows returns', wizard.focus, 3);
+    [39, 40, 41].forEach(function (from) {
+      wizard.focus = from; key('ArrowDown');
+      eq('apps: Down from column ' + (from - 36) + ' of the row before a short last row lands on the last tile', wizard.focus, 44);
+    });
+    [36, 37, 38].forEach(function (from) {
+      wizard.focus = from; key('ArrowDown');
+      eq('apps: Down from column ' + (from - 36) + ' of the row before the last row stays in the same column', wizard.focus, from + 6);
+    });
+    wizard.focus = 40; paintWizardFocus();
+    var scrollBefore = scr.scrollTop;
+    eq('apps: the list is scrolled down', scrollBefore > 0, true);
+    key('Enter');
+    eq('apps: toggling a tile keeps the scroll position', document.getElementById('wzScroll').scrollTop, scrollBefore);
+    eq('apps: toggling a tile keeps the focus', wizard.focus, 40);
     wizard.focus = 2; key('ArrowRight');
     eq('apps: Right moves one tile', wizard.focus, 3);
     closeWizard();

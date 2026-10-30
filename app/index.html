@@ -481,8 +481,7 @@
         .wz-input { width: 100%; height: 96px; padding: 0 36px; border-radius: 24px; border: 2px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.08); color: inherit; font-size: 30px; font-family: inherit; box-sizing: border-box; }
         .wz-input::placeholder { color: #7f8aa3; }
         .wz-toggle { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: 100%; min-height: 96px; padding: 0 36px; border-radius: 24px; border: 0; background: rgba(255,255,255,0.06); color: inherit; font-size: 27px; font-weight: 600; font-family: inherit; text-align: left; box-sizing: border-box; flex: none; }
-        .wz-pill { flex: none; min-width: 84px; height: 48px; padding: 0 24px; border-radius: 24px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 600; border: 2px solid #46536e; color: #aeb8d0; }
-        .wz-toggle.on .wz-pill { background: #2a7de1; border-color: #2a7de1; color: #fff; }
+        .wz-toggle .sr-switch { margin-left: 0; }
         .wz-grid { display: flex; flex-wrap: wrap; display: grid; gap: 24px; }
         .wz-apps { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 18px; }
         .wz-looks { grid-template-columns: repeat(4, minmax(0, 1fr)); flex: none; }
@@ -492,8 +491,13 @@
             .wz-looks .wz-look { width: calc((100% - 72px) / 4); margin-right: 24px; }
             .wz-looks .wz-look:nth-child(4n) { margin-right: 0; }
         }
-        .wz-tile { position: relative; display: flex; height: 156px; padding: 0; overflow: hidden; border-radius: 24px; border: 0; background: rgba(255,255,255,0.06); color: inherit; font-family: inherit; opacity: 0.55; }
-        .wz-tile.on, .wz-tile.focused { opacity: 1; }
+        .wz-tile { position: relative; display: flex; height: 156px; padding: 0; overflow: hidden; border-radius: 24px; border: 0; background: rgba(255,255,255,0.06); color: inherit; font-family: inherit; }
+        /* Unpicked tiles dim only the tile background, so the logo stays readable. */
+        .wz-tile:not(.on):not(.focused) .app-icon::before { content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(12, 16, 24, 0.45); }
+        .wz-tile .app-icon img { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); }
+        .wz-tile .app-art-fallback, .wz-tile .app-icon svg { position: relative; z-index: 1; }
+        .wz-tile-name { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 14px 10px 8px; box-sizing: border-box; font-size: 22px; font-weight: 700; text-align: center; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6)); }
+        .wz-status { flex: none; min-height: 36px; font-size: 27px; font-weight: 600; color: #e6ebf6; text-align: center; }
         .wz-tile .app-icon { border-radius: 0; }
         .wz-check svg, .wz-sel svg { display: block; }
         .wz-check { position: absolute; top: 12px; right: 12px; z-index: 2; width: 36px; height: 36px; border-radius: 18px; background: #fff; display: flex; align-items: center; justify-content: center; }
@@ -506,7 +510,9 @@
         .wz-thumb-bar { position: absolute; left: 15px; top: 15px; width: 90px; height: 12px; border-radius: 6px; background: rgba(255,255,255,0.8); }
         .wz-thumb-tiles { position: absolute; left: 15px; bottom: 15px; display: flex; gap: 9px; }
         .wz-thumb-tiles span { width: 42px; height: 42px; border-radius: 8px; }
-        .wz-look-name { font-size: 30px; font-weight: 600; padding: 0 6px; }
+        .wz-look-text { display: flex; flex-direction: column; gap: 5px; padding: 0 6px; min-width: 0; }
+        .wz-look-name { font-size: 30px; font-weight: 600; }
+        .wz-look-desc { font-size: 21px; color: #b3bdd3; line-height: 1.35; }
         .wz-footer { margin-top: auto; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
         .wz-primary, .wz-second { display: flex; align-items: center; height: 78px; border-radius: 39px; font-size: 27px; font-weight: 600; font-family: inherit; color: #fff; box-sizing: border-box; }
         .wz-primary { padding: 0 54px; border: 0; background: #2a7de1; }
@@ -1631,6 +1637,11 @@
                 'All set, %s': 'Tudo pronto, %s',
                 'All set': 'Tudo pronto',
                 'Who is this?': 'Quem é?',
+                'Light by day, dark at night': 'Claro de dia, escuro à noite',
+                'Deep blue, easy in a dark room': 'Azul profundo, suave numa sala escura',
+                'For movies and OLED screens': 'Para filmes e telas OLED',
+                'Bright and airy for a sunny room': 'Claro e leve para uma sala ensolarada',
+                'Photos need a free Unsplash key. Add it later in Settings, Screensaver.': 'As fotos precisam de uma chave gratuita do Unsplash. Adicione depois em Ajustes, Protetor de tela.',
                 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
                 'Optional, for weekly trending movies and shows': 'Opcional, para filmes e séries em alta da semana', 
             },
@@ -1714,6 +1725,11 @@
                 'All set, %s': 'Todo listo, %s',
                 'All set': 'Todo listo',
                 'Who is this?': '¿Quién es?',
+                'Light by day, dark at night': 'Claro de día, oscuro de noche',
+                'Deep blue, easy in a dark room': 'Azul profundo, cómodo en una sala oscura',
+                'For movies and OLED screens': 'Para películas y pantallas OLED',
+                'Bright and airy for a sunny room': 'Luminoso y ligero para una sala soleada',
+                'Photos need a free Unsplash key. Add it later in Settings, Screensaver.': 'Las fotos necesitan una clave gratuita de Unsplash. Añádela después en Ajustes, Protector de pantalla.',
                 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
                 'Optional, for weekly trending movies and shows': 'Opcional, para las películas y series en tendencia de la semana', 
             },
@@ -1797,6 +1813,11 @@
                 'All set, %s': 'Alles bereit, %s',
                 'All set': 'Alles bereit',
                 'Who is this?': 'Wer ist das?',
+                'Light by day, dark at night': 'Tagsüber hell, nachts dunkel',
+                'Deep blue, easy in a dark room': 'Tiefblau, angenehm im dunklen Raum',
+                'For movies and OLED screens': 'Für Filme und OLED-Bildschirme',
+                'Bright and airy for a sunny room': 'Hell und luftig für ein sonniges Zimmer',
+                'Photos need a free Unsplash key. Add it later in Settings, Screensaver.': 'Fotos brauchen einen kostenlosen Unsplash-Schlüssel. Du kannst ihn später unter Einstellungen, Bildschirmschoner eintragen.',
                 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
                 'Optional, for weekly trending movies and shows': 'Optional, für wöchentlich angesagte Filme und Serien', 
             },
@@ -1880,6 +1901,11 @@
                 'All set, %s': 'Tout est prêt, %s',
                 'All set': 'Tout est prêt',
                 'Who is this?': 'Qui est-ce ?',
+                'Light by day, dark at night': 'Clair le jour, sombre la nuit',
+                'Deep blue, easy in a dark room': 'Bleu profond, reposant dans une pièce sombre',
+                'For movies and OLED screens': 'Pour les films et les écrans OLED',
+                'Bright and airy for a sunny room': 'Lumineux et aéré pour une pièce ensoleillée',
+                'Photos need a free Unsplash key. Add it later in Settings, Screensaver.': 'Les photos demandent une clé Unsplash gratuite. Ajoutez-la plus tard dans Réglages, Écran de veille.',
                 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
                 'Optional, for weekly trending movies and shows': 'Facultatif, pour les films et séries tendance de la semaine', 
             }
@@ -4792,10 +4818,10 @@
         // --- First-run setup ---
         var WIZARD_STEPS = ['who', 'apps', 'look'];
         var WIZARD_LOOKS = [
-            { key: 'auto', label: 'Follows the sun' },
-            { key: 'night', label: 'Midnight' },
-            { key: 'oled', label: 'Pure black' },
-            { key: 'day', label: 'Daylight Blue' }
+            { key: 'auto', label: 'Follows the sun', desc: 'Light by day, dark at night' },
+            { key: 'night', label: 'Midnight', desc: 'Deep blue, easy in a dark room' },
+            { key: 'oled', label: 'Pure black', desc: 'For movies and OLED screens' },
+            { key: 'day', label: 'Daylight Blue', desc: 'Bright and airy for a sunny room' }
         ];
         // A fresh install has no fmtv_* key at all; any stored setting means an existing install (never show). Storage trouble means never show.
         function wizardNeeded() {
@@ -4822,12 +4848,16 @@
             return b;
         }
 
-        // A card row with a label and an On/Off pill (kids profile, photo screensaver).
+        // A card row with a label and the same switch as Settings (kids profile, idle photos).
         function wzToggle(label, on, onOk) {
             var b = wzEl('button', 'wz-item wz-toggle' + (on ? ' on' : ''));
             b.appendChild(wzEl('span', 'wz-toggle-label', label));
-            b.appendChild(wzEl('span', 'wz-pill', t(on ? 'On' : 'Off')));
-            b.setAttribute('aria-pressed', String(!!on));
+            var sw = wzEl('span', 'sr-switch' + (on ? ' on' : ''));
+            sw.setAttribute('role', 'switch');
+            sw.setAttribute('aria-checked', on ? 'true' : 'false');
+            sw.setAttribute('aria-label', label);
+            sw.appendChild(wzEl('span', 'sr-knob'));
+            b.appendChild(sw);
             b.onOk = onOk;
             b.onclick = function() { onOk(); };
             return b;
@@ -4904,6 +4934,8 @@
             wizard.items.forEach(function(item, i) { item.classList.toggle('focused', i === wizard.focus); });
             var scroller = document.getElementById('wzScroll');
             var cur = wizard.items[wizard.focus];
+            var status = document.getElementById('wzStatus');
+            if (status) status.textContent = (cur && cur.dataset.full) || '';
             if (scroller && cur && scroller.contains(cur)) {
                 var pad = 12;
                 var sr = scroller.getBoundingClientRect(), cr = cur.getBoundingClientRect();
@@ -4957,7 +4989,15 @@
             var primary = null, second = null;
             function addPrimary(label, fn) { primary = wzButton(label, fn, 'wz-primary'); items.push(primary); }
             function addSecond(label, fn) { second = wzButton(label, fn, 'wz-second'); items.push(second); }
-            function rerender(focus) { wizard.focus = focus; renderWizard(); }
+            // Redraw after a change, keeping the apps list where the person had scrolled it.
+            function rerender(focus) {
+                var old = document.getElementById('wzScroll');
+                var keep = old ? old.scrollTop : 0;
+                wizard.focus = focus;
+                renderWizard();
+                var fresh = document.getElementById('wzScroll');
+                if (fresh && keep) { fresh.scrollTop = keep; paintWizardFocus(); }
+            }
 
             if (name === 'who') {
                 title(wizard.add ? t('Who is this?') : t('Hi. What should we call you?'));
@@ -5013,8 +5053,10 @@
                     var tileBtn = wzEl('button', 'wz-item wz-tile' + (on ? ' on' : ''));
                     tileBtn.dataset.id = app.id;
                     tileBtn.dataset.title = label;
+                    tileBtn.dataset.full = label + (device.title ? ' \u00b7 ' + app.title : '');
                     tileBtn.setAttribute('aria-label', label);
                     tileBtn.appendChild(buildAppIcon(app, device));
+                    if (isHDMI(app)) tileBtn.appendChild(wzEl('span', 'wz-tile-name', label));
                     if (on) {
                         var chk = wzEl('span', 'wz-check');
                         chk.innerHTML = wzCheck(22, '#1b2230');
@@ -5046,6 +5088,9 @@
                 scroller.id = 'wzScroll';
                 scroller.appendChild(inner);
                 main.appendChild(scroller);
+                var statusLine = wzEl('div', 'wz-status');
+                statusLine.id = 'wzStatus';
+                main.appendChild(statusLine);
                 wizard.contentCount = items.length;
                 addPrimary('Continue', function() { wizardGo(2); });
                 addSecond('Back', function() { wizardGo(0); });
@@ -5065,7 +5110,10 @@
                         card.appendChild(selBadge);
                     }
                     card.appendChild(wzThumb(look.key));
-                    card.appendChild(wzEl('div', 'wz-look-name', t(look.label)));
+                    var txt = wzEl('div', 'wz-look-text');
+                    txt.appendChild(wzEl('div', 'wz-look-name', t(look.label)));
+                    txt.appendChild(wzEl('div', 'wz-look-desc', t(look.desc)));
+                    card.appendChild(txt);
                     card.onOk = function() {
                         setSettingValue(settingDef('theme'), look.key);
                         wizard.lookSaved = look.key;
@@ -5083,6 +5131,7 @@
                     rerender(wizard.focus);
                 });
                 add(toggle);
+                main.appendChild(wzEl('div', 'wz-hint', t('Photos need a free Unsplash key. Add it later in Settings, Screensaver.')));
                 wizard.contentCount = items.length;
                 addPrimary('Finish', wizardFinish);
                 addSecond('Back', function() { wizardGo(1); });
@@ -5168,7 +5217,10 @@
                 else if (key === 'ArrowRight') target = Math.min(g - 1, cur + 1);
                 else if (key === 'ArrowUp') target = cur - cols >= 0 ? cur - cols : -1;
                 // From the last grid row, Down lands on the next block (Show all, the photos switch) or the footer.
-                else target = cur + cols < g ? cur + cols : (g < n ? g : n);
+                else if (cur + cols < g) target = cur + cols;
+                // Next row is short: stay in the grid on the last tile. Only the last row goes on.
+                else if (cur < Math.floor((g - 1) / cols) * cols) target = g - 1;
+                else target = g < n ? g : n;
             } else if (key === 'ArrowUp') {
                 target = cur - 1;
                 // Back to the cards: land on the saved look, so the preview and the focus agree.
