@@ -101,19 +101,20 @@ setTimeout(function () {
     eq('greet no name', greetingText(19, ''), t('Good evening'));
   }
   if (need('wizardNeeded')) {
-    var keep = { done: localStorage.getItem('fmtv_setup_done'), fav: localStorage.getItem('fmtv_favorites'), city: state.city };
-    localStorage.removeItem('fmtv_setup_done'); localStorage.removeItem('fmtv_favorites'); state.city = '';
+    var savedKeys = {}, k2, n2;
+    for (n2 = localStorage.length - 1; n2 >= 0; n2--) { k2 = localStorage.key(n2); if (k2.indexOf('fmtv_') === 0) { savedKeys[k2] = localStorage.getItem(k2); localStorage.removeItem(k2); } }
     eq('wizard fresh', wizardNeeded(), true);
-    localStorage.setItem('fmtv_favorites', '["netflix"]');
-    eq('wizard existing user', wizardNeeded(), false);
-    localStorage.removeItem('fmtv_favorites'); state.city = 'Tel Aviv';
-    eq('wizard has city', wizardNeeded(), false);
-    state.city = ''; localStorage.setItem('fmtv_setup_done', '1');
+    ['fmtv_launch_hist', 'fmtv_theme', 'fmtv_favorites', 'fmtv_city'].forEach(function (key) {
+      localStorage.setItem(key, 'x');
+      eq('wizard existing install (' + key + ')', wizardNeeded(), false);
+      localStorage.removeItem(key);
+    });
+    localStorage.setItem('fmtv_setup_done', '1');
     eq('wizard done', wizardNeeded(), false);
     localStorage.removeItem('fmtv_setup_done');
-    if (keep.done !== null) localStorage.setItem('fmtv_setup_done', keep.done);
-    if (keep.fav !== null) localStorage.setItem('fmtv_favorites', keep.fav);
-    state.city = keep.city;
+    eq('wizard fresh again', wizardNeeded(), true);
+    eq('wizard boot flag is a boolean', typeof wizardAtBoot, 'boolean');
+    Object.keys(savedKeys).forEach(function (key) { localStorage.setItem(key, savedKeys[key]); });
   }
   if (need('recordLaunch') && need('recentApps') && need('relativeWhen')) {
     localStorage.removeItem('fmtv_launch_hist');
@@ -1560,6 +1561,41 @@ setTimeout(function () {
     eq('wizard no longer needed', wizardNeeded(), false);
     openWizard(); key('Escape');
     eq('wizard back on first step closes', wizard.open, false);
+    openWizard(); wizard.focus = 1; key('Enter');
+    eq('wizard skip closes', wizard.open, false);
+    eq('wizard skip sets flag', localStorage.getItem('fmtv_setup_done'), '1');
+    localStorage.removeItem('fmtv_setup_done');
+    openWizard(); wizardGo(3); key('Escape');
+    eq('wizard back goes one step back', WIZARD_STEPS[wizard.step], 'apps');
+    key('Escape'); key('Escape');
+    eq('wizard back to first step', WIZARD_STEPS[wizard.step], 'welcome');
+    key('Escape');
+    eq('wizard closed by back on first', wizard.open, false);
+    localStorage.removeItem('fmtv_setup_done');
+    var keepCat = state.catalog, keepFav = state.favorites.slice();
+    state.catalog = keepCat.slice(0, 6); state.favorites = [state.catalog[0].id];
+    wizardGo(2); // wizard is closed here; reopen
+    openWizard(); wizardGo(2);
+    eq('wizard grid count', wizard.gridCount, 6);
+    wizard.focus = 1; key('ArrowDown');
+    eq('wizard down inside a short last row', wizard.focus, 5);
+    wizard.focus = 2; key('ArrowDown');
+    eq('wizard down lands on the button after the grid', wizard.focus, 6);
+    wizard.focus = 0; key('Enter');
+    eq('wizard last app guard keeps it', state.favorites.length, 1);
+    eq('wizard last app toast', document.querySelector('.toast-msg').textContent, t('Keep at least one app on the shelf.'));
+    state.catalog = keepCat; state.favorites = keepCat.slice(0, 8).map(function (a) { return a.id; });
+    if (keepCat.length > 8) {
+      wizardGo(2); wizard.focus = 8; key('Enter');
+      eq('wizard full shelf unchanged', state.favorites.length, 8);
+      eq('wizard full shelf toast', document.querySelector('.toast-msg').textContent, t('Max 8 apps on shelf'));
+    }
+    eq('toast above wizard', parseInt(getComputedStyle(document.querySelector('.toast-msg')).zIndex, 10) > parseInt(getComputedStyle(document.getElementById('wizardOverlay')).zIndex, 10), true);
+    wizardGo(3); wizard.focus = WIZARD_LOOKS.length; var themeBefore = state.theme; key('ArrowUp');
+    eq('wizard Up from Continue does not switch theme', state.theme, themeBefore);
+    eq('wizard background follows theme var', getComputedStyle(document.getElementById('wizardOverlay')).backgroundImage.indexOf('radial-gradient') !== -1, true);
+    state.catalog = keepCat; state.favorites = keepFav; renderAppsShelf();
+    closeWizard(); localStorage.removeItem('fmtv_setup_done');
     var runDef = settingDef('runSetup');
     eq('run setup row', !!runDef && runDef.type === 'run', true);
     state.theme = oldTheme; state.userName = oldName; state.ambient = oldAmbient; state.favorites = oldFavs;

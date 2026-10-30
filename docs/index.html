@@ -550,7 +550,7 @@
         }
         .pickup-card.focused { outline: 3px solid #ffffff; outline-offset: 6px; border-radius: 14px; }
 
-        .wizard { position: fixed; inset: 0; z-index: 2500; display: flex; gap: 56px; padding: 64px; background: linear-gradient(180deg, #0f1528 0%, #080b16 100%); color: #f2f5fb; }
+        .wizard { position: fixed; inset: 0; z-index: 2500; display: flex; gap: 56px; padding: 64px; background: #04060a var(--bg-gradient); color: #f2f5fb; }
         .wizard[hidden] { display: none; }
         .wz-rail { width: 300px; flex: none; display: flex; flex-direction: column; gap: 6px; padding-top: 70px; }
         .wz-rail-row { font-size: 22px; color: #8c97ae; padding: 10px 0; }
@@ -903,7 +903,7 @@
             font-weight: 600;
             box-shadow: 0 15px 35px rgba(0,0,0,0.6);
             display: none;
-            z-index: 1000;
+            z-index: 2600; /* above the setup wizard (2500), below the screensaver (3000) */
         }
 
         /* Weather & Sun Drawer */
@@ -1494,6 +1494,9 @@
         ];
 
         // --- Persistent State ---
+        // Decided before anything at boot can write a fmtv_* key.
+        var wizardAtBoot = wizardNeeded();
+
         var state = {
             favorites: JSON.parse(localStorage.getItem('fmtv_favorites') || 'null') || DEFAULT_FAVORITES.slice(),
             hdmiDevices: readDeviceChoices(),
@@ -4063,10 +4066,15 @@
             { key: 'oled', label: 'Pure Black', desc: 'True black for movies and OLED panels.' },
             { key: 'day', label: 'Daylight Blue', desc: 'Bright and airy for a sunny living room.' }
         ];
+        // A fresh install has no fmtv_* key at all; any stored setting means an existing install (never show). Storage trouble means never show.
         function wizardNeeded() {
-            var done = null, favs = null;
-            try { done = localStorage.getItem('fmtv_setup_done'); favs = localStorage.getItem('fmtv_favorites'); } catch (e) {}
-            return !done && !favs && !state.city;
+            try {
+                for (var i = 0; i < localStorage.length; i++) {
+                    var k = localStorage.key(i);
+                    if (k && k.indexOf('fmtv_') === 0) return false;
+                }
+            } catch (e) { return false; }
+            return true;
         }
 
         function wzEl(tag, cls, text) {
@@ -4096,10 +4104,12 @@
         function wizardMove(delta) {
             var next = Math.max(0, Math.min(wizard.focus + delta, wizard.items.length - 1));
             if (next === wizard.focus) return;
+            var fromLook = !!wizard.items[wizard.focus].dataset.look;
             wizard.focus = next;
             paintWizardFocus();
             var look = wizard.items[next].dataset.look;
-            if (look) setSettingValue(settingDef('theme'), look); // moving over a look previews it
+            // Moving between look cards previews the look; arriving from Continue must not switch the theme silently.
+            if (look && fromLook) setSettingValue(settingDef('theme'), look);
         }
 
         function renderWizard() {
@@ -4109,6 +4119,7 @@
             rail.innerHTML = '';
             var name = WIZARD_STEPS[wizard.step];
             var items = [];
+            wizard.gridCount = 0;
             var railLabels = ['Welcome', 'Your name and city', 'Your apps', 'Your look', 'Screensaver photos'];
             railLabels.forEach(function(label, i) {
                 var r = wzEl('div', 'wz-rail-row' + (i === wizard.step ? ' current' : (i < wizard.step ? ' done' : '')), t(label));
@@ -4137,7 +4148,7 @@
                 cityInput.id = 'wzCity';
                 cityInput.placeholder = t('e.g. Sao Paulo, Lisbon, NYC');
                 cityInput.value = state.city || '';
-                function saveCity() { state.city = cityInput.value; try { localStorage.setItem('fmtv_city', state.city); } catch (e) {} }
+                function saveCity() { state.city = cityInput.value.replace(/^\s+|\s+$/g, ''); try { localStorage.setItem('fmtv_city', state.city); } catch (e) {} }
                 cityInput.oninput = cityInput.onchange = cityInput.onblur = saveCity;
                 nameInput.onOk = function() { nameInput.focus(); };
                 cityInput.onOk = function() { cityInput.focus(); };
@@ -4167,6 +4178,7 @@
                     grid.appendChild(tile);
                 });
                 main.appendChild(grid);
+                wizard.gridCount = items.length;
                 add(wzButton('Continue', function() { wizardGo(3); }));
             } else if (name === 'look') {
                 title(t('How should it look?'));
@@ -4183,6 +4195,7 @@
                     cards.appendChild(card);
                 });
                 main.appendChild(cards);
+                wizard.gridCount = items.length;
                 add(wzButton('Continue', function() { wizardGo(4); }));
             } else if (name === 'photos') {
                 title(t('Screensaver photos'));
@@ -4219,6 +4232,7 @@
             wizard.open = false;
             document.getElementById('wizardOverlay').hidden = true;
             try { localStorage.setItem('fmtv_setup_done', '1'); } catch (e) {}
+            scheduleSettingsNetwork(true, false); // a city typed on the way out still refreshes the weather
             applyTheme(); renderAppsShelf(); renderPickup(); updateGreeting();
             refreshMainNavList();
             setMainFocus(mainNavItems[curIndex]);
@@ -4240,7 +4254,7 @@
             var name = WIZARD_STEPS[wizard.step];
             var cols = name === 'apps' ? 4 : (name === 'look' ? 2 : 1);
             var inGrid = name === 'apps' || name === 'look';
-            var gridCount = name === 'apps' ? state.catalog.length : (name === 'look' ? WIZARD_LOOKS.length : 0);
+            var gridCount = wizard.gridCount || 0;
             if (back) { if (wizard.step === 0) closeWizard(); else wizardGo(wizard.step - 1); e.preventDefault(); return; }
             if (key === 'Enter') {
                 var item = wizard.items[wizard.focus];
@@ -4348,7 +4362,7 @@
         restoreScene();
         renderAppsShelf();
         renderPicks(FALLBACK_MOVIES);
-        if (wizardNeeded()) openWizard();
+        if (wizardAtBoot) openWizard();
         applyTheme();
         fetchWeather();
         fetchTrendingPicks();
