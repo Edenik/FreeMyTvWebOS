@@ -45,6 +45,7 @@ flowchart LR
 
 ### v1.3 — OLED Care Screensaver & PC Wake-on-LAN
 - [x] **Idle Screensaver & Clock Overlay:** An OLED-safe screensaver with a floating clock that pixel-shifts position every ~25s, starting after a configurable idle time (1-30 minutes, default 3). With an Unsplash key it shows dimmed, slowly moving night-sky and landscape photos behind the clock (about 5 API calls per 12-hour refresh plus one download ping per photo shown, at most 30 per hour, inside Unsplash's 50 requests per hour); without one it stays pure black. Photos can also run behind the home screen (setting), and a hidden muted video keeps LG's own screensaver from covering ours (setting).
+- [x] **Remote-friendly Customize screen:** categories, one row per setting, an apps page, instant save, visible focus and masked keys.
 - [ ] **Wake-on-LAN (WoL) PC Tile:** Turn on your gaming PC or home media server automatically when clicking the HDMI / Plex tile.
 - [ ] **System Debloat Helper:** Optional one-click toggle inside Settings to mute LG promotional notifications and clear background app memory. Needs root (Homebrew Channel) — this app runs unrooted, so it cannot touch system services on its own.
 

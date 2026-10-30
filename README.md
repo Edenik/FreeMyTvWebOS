@@ -141,6 +141,8 @@ The shelf displays larger artwork with bundled brand logos for PS5, PS4, Xbox, N
 
 Some newer webOS releases block Developer Mode apps from listing installed apps. On those TVs, a one-time on-screen prompt asks to allow Free My TV; accept it so your installed apps appear in Customize.
 
+**Using the Customize screen with the remote:** pick a category on the left (Up/Down, then Right or OK), then move through its settings with Up/Down. On a setting, Left/Right changes its value (or OK cycles it); OK on a text setting opens the keyboard. **Shelf apps** opens a page where Up/Down move a whole row of apps and OK adds or removes one (up to 8). Every change is saved the moment you make it, so there is no Save button; Back steps out one level at a time. Keys (Unsplash, TMDB) are never shown on screen, only dots.
+
 | Setting | What It Does |
 |---|---|
 | **App Shelf Selector** | Auto-discovers apps installed on your TV (`listLaunchPoints`) so you can pick up to 8 favorites for your glass dock. |
@@ -340,6 +342,8 @@ python scripts/install.py
 ## ⚙️ Deixe do Seu Jeito (Personalização na TV)
 
 Clique no botão **⚙️ Customize** no canto superior direito do painel usando o controle remoto:
+
+**Usando a tela Personalizar com o controle remoto:** escolha uma categoria à esquerda (Cima/Baixo, depois Direita ou OK) e percorra os ajustes com Cima/Baixo. Em um ajuste, Esquerda/Direita muda o valor (ou OK avança); OK em um ajuste de texto abre o teclado. **Apps da prateleira** abre uma página em que Cima/Baixo movem uma linha inteira de apps e OK adiciona ou remove um (até 8). Cada mudança é salva na hora, por isso não há botão Salvar; Voltar sai um nível por vez. As chaves (Unsplash, TMDB) nunca aparecem na tela, só pontos.
 
 | Configuração | O Que Faz |
 |---|---|

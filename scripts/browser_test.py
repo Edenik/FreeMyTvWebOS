@@ -130,7 +130,15 @@ setTimeout(function () {
   ['Screensaver Starts After', '1 minute', '3 minutes', '5 minutes', '10 minutes', '30 minutes',
    'Ambient Photo Screensaver', 'Off', 'Photo Duration', '30 seconds', '90 seconds', 'Photo Motion',
    'Ken Burns (zoom & drift)', 'Drift only', 'None', 'Unsplash Access Key (Optional)',
-   'Optional for photo screensaver', 'Photo by %s on Unsplash'].forEach(function (k) {
+   'Optional for photo screensaver', 'Photo by %s on Unsplash',
+   'Shelf & Inputs', 'Look & Feel', 'Weather & Location', 'Photos & Screensaver', 'Accounts & Keys', 'Close', 'Categories',
+   'Shelf apps', 'OK to edit', 'OK to open', 'Not set', 'Saved', 'Reset to defaults', 'Press OK again to confirm',
+   'Up / Down: move', 'Left / Right: change value', 'OK: select or edit', 'Back: close', 'Changes apply instantly',
+   'Up / Down: move one row', 'OK: add or remove', 'Back: return', 'Enter: save', 'Back: cancel', '%s of 8 selected',
+   'Keep at least one app on the shelf.', 'Previous value', 'Next value',
+   'Dimmed, slowly moving photos behind the dashboard', 'Photos behind the clock when the TV is idle',
+   'Plays a hidden video so LG does not cover ours', 'For the photos. Stored on this TV only',
+   'Optional, for weekly trending movies and shows', 'Back: categories', 'OK or Right: open'].forEach(function (k) {
     if (!Object.prototype.hasOwnProperty.call(I18N.pt, k)) out.ambient.push('no translation: ' + k);
   });
   var pre = document.createElement('pre');
@@ -940,7 +948,8 @@ setTimeout(function () {
     openSettingsModal();
     press('Enter'); press('Enter'); // category 0, then "Shelf apps"
     var grid = document.getElementById('settingsAppsGrid'), guard = 80, okDown = true, okUp = true, node;
-    eq('apps grid id is unique', document.querySelectorAll('#appsGrid').length + document.querySelectorAll('#settingsAppsGrid').length, 2);
+    eq('home shelf grid id is unique', document.querySelectorAll('#appsGrid').length, 1);
+    eq('settings apps grid id is unique', document.querySelectorAll('#settingsAppsGrid').length, 1);
     eq('apps grid overflows', !!grid && grid.scrollHeight > grid.clientHeight, true);
     function check() { node = grid.querySelector('.apps-tile.sf'); return !!node && inView(node, grid); }
     while (settingsUi.appIdx < big.length - 5 && guard--) { press('ArrowDown'); if (!check()) okDown = false; }
@@ -1035,6 +1044,26 @@ setTimeout(function () {
     eq('click selected category', settingsUi.cat, 2);
     closeSettingsModal();
     ['fetchWeather', 'fetchTrendingPicks', 'ambientRefresh'].forEach(function (n) { window[n] = uiReal[n]; });
+    done();
+  });
+
+  steps.push(function (done) { // the screen always opens on the category list; hovering away drops a pending reset question
+    settingsPointerLive = true;
+    openSettingsModal();
+    eq('opening resets the pointer flag', settingsPointerLive, false);
+    function move(x, y) { document.dispatchEvent(new MouseEvent('mousemove', { clientX: x, clientY: y, bubbles: true })); }
+    function over(node) { node.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); }
+    var resetIdx = -1, rws = settingsRowsFor(4), k;
+    for (k = 0; k < rws.length; k++) if (rws[k].id === 'reset') resetIdx = k;
+    settingsUi.cat = 4; settingsUi.catFocus = 4; settingsUi.zone = 'rows'; settingsUi.row = resetIdx;
+    renderSettings();
+    press('Enter');
+    eq('reset asks for confirmation', settingsUi.confirmReset, true);
+    eq('confirmation text shown', modalEl().textContent.indexOf('Press OK again to confirm') >= 0, true);
+    move(700, 400); over(modalEl().querySelector('#settingsRows .settings-row[data-i="1"]'));
+    eq('hover clears confirmReset', settingsUi.confirmReset, false);
+    eq('hover removes the confirmation text', modalEl().textContent.indexOf('Press OK again to confirm'), -1);
+    closeSettingsModal();
     done();
   });
 
