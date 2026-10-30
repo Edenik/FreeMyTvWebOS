@@ -267,8 +267,8 @@ setTimeout(function () {
    'Up / Down: move one row', 'OK: add or remove', 'Back: return', 'Enter: save', 'Back: cancel', '%s of 8 selected',
    'Keep at least one app on the shelf.', 'Keep at least one grown-up profile',
    'Dimmed, slowly moving photos behind the dashboard', 'Photos and the clock when the TV is idle',
-   'The apps you opened last, first in the row', 'Movie night, Game on, Music', 'Off uses the city above. On sends your IP to ipapi.co.',
-   'Plays a hidden video so LG does not cover ours', 'For the photos. Stored on this TV only',
+   'The apps you opened last, first in the row', 'Movie night, Game on, Music', 'Off uses your city. On sends your IP to ipapi.co.',
+   'Plays a hidden video so LG does not cover ours', 'Your Unsplash key, kept on this TV only',
    'Optional, for weekly trending movies and shows'].forEach(function (k) {
     if (!Object.prototype.hasOwnProperty.call(I18N.pt, k)) out.ambient.push('no translation: ' + k);
   });
@@ -1084,7 +1084,7 @@ setTimeout(function () {
     eq('no wrap past the last group', settingsUi.catFocus, 3);
     for (var u = 0; u < 9; u++) press('ArrowUp');
     eq('no wrap above first', settingsUi.catFocus, 0);
-    eq('fr key hint feminine', I18N.fr['For the photos. Stored on this TV only'].indexOf('Stockée uniquement sur cette TV') !== -1, true);
+    eq('fr key hint feminine', I18N.fr['Your Unsplash key, kept on this TV only'].indexOf('uniquement sur ce téléviseur') !== -1, true);
     eq('es keep one says estante', I18N.es['Keep at least one app on the shelf.'].indexOf('estante') !== -1 && I18N.es['Keep at least one app on the shelf.'].indexOf('estantería') === -1, true);
     eq('de not set', I18N.de['Not set'], 'Nicht festgelegt');
     eq('de confirm', I18N.de['Press OK again to confirm'], 'Zum Bestätigen erneut OK drücken');
@@ -1479,6 +1479,8 @@ setTimeout(function () {
     var keepProfiles = localStorage.getItem('fmtv_profiles'), keepActive = localStorage.getItem('fmtv_active_profile');
     localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
     openSettingsModal();
+    eq('Trending header is translated', document.querySelector('.picks-header').textContent, t('Trending this week'));
+    eq('Trending header translation exists outside English', currentLang() === 'en' || t('Trending this week') !== 'Trending this week', true);
     eq('four groups in order', SETTING_CATEGORIES.join('|'), 'Home|Look|Screensaver|You and this TV');
     eq('Home page', ids(lastPage(0)), 'shelf,hdmiNames,pickup,scenes,showTrending');
     eq('Look page', ids(lastPage(1)), 'theme,homePhotos,textSize,clockFormat,moreOptions');
@@ -1491,6 +1493,7 @@ setTimeout(function () {
     saveProfiles([{ id: 'p1', name: 'Noa', color: '#2a7de1', data: snapshotProfile() }, { id: 'p2', name: 'Kid', color: '#ff9f43', data: snapshotProfile() }]);
     localStorage.setItem('fmtv_active_profile', 'p1');
     eq('People page with two people', ids(lastPage(3, 'people')), 'askWho,switchPerson,addPerson,removePerson');
+    eq('HDMI names row shown when HDMI inputs exist', lastPage(0).some(function (d) { return d.id === 'hdmiNames'; }), true);
     eq('HDMI page holds the HDMI rows', ids(lastPage(0, 'hdmi')), ids(hdmiSettings()));
     eq('HDMI names label', settingDef('hdmiNames').label, 'HDMI names');
     eq('no group page has more than five rows', [0, 1, 2, 3].filter(function (g) { return lastPage(g).length > 5; }).length, 0);
@@ -1516,7 +1519,7 @@ setTimeout(function () {
     eq('pickup hint', findSetting('pickup').hint, 'The apps you opened last, first in the row');
     eq('scenes hint', findSetting('scenes').hint, 'Movie night, Game on, Music');
     eq('screensaver hint', findSetting('ambient').hint, 'Photos and the clock when the TV is idle');
-    eq('ip hint', findSetting('ipLocate').hint, 'Off uses the city above. On sends your IP to ipapi.co.');
+    eq('ip hint', findSetting('ipLocate').hint, 'Off uses your city. On sends your IP to ipapi.co.');
     // values on the link rows
     open(0);
     eq('Apps on Home value', modalEl().querySelector('.settings-row[data-id="shelf"] .sr-value').textContent, state.favorites.length === 1 ? t('1 app') : t('%s apps', String(state.favorites.length)));
@@ -1594,6 +1597,8 @@ setTimeout(function () {
     // an empty page never throws
     var keepCat = state.catalog; state.catalog = []; open(0, 'hdmi');
     eq('hdmi page empty', settingsRowsFor(0).length, 0);
+    eq('HDMI names row hidden without HDMI inputs', settingsRowsFor(0, '').some(function (d) { return d.id === 'hdmiNames'; }), false);
+    eq('Home page without HDMI inputs', ids(settingsRowsFor(0, '')), 'shelf,pickup,scenes,showTrending');
     var threw = '';
     ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'].forEach(function (k) {
       open(0, 'hdmi');
