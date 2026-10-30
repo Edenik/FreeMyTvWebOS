@@ -136,7 +136,7 @@ setTimeout(function () {
     eq('profile fields', PROFILE_FIELDS.join(','), 'userName,theme,city,lat,lon,ambient,homePhotos');
     eq('profile snapshot has the lock', typeof snapshotProfile().locked, 'boolean');
   }
-  if (need('recordLaunch') && need('recentApps') && need('relativeWhen')) {
+  if (need('recordLaunch') && need('recentApps')) {
     localStorage.removeItem('fmtv_launch_hist');
     var T = new Date(2026, 9, 30, 21, 10).getTime();
     var TA = new Date(2026, 9, 30, 15, 10).getTime(); // afternoon: netflix's 21:10 launches are no habit then, so plain recency decides
@@ -149,9 +149,8 @@ setTimeout(function () {
     eq('recent order', recent.map(function (r) { return r.app.id; }).join(','), 'youtube.leanback.v4,netflix');
     eq('recent limit', recentApps(hist, DEFAULT_CATALOG, 1, TA).length, 1);
     eq('recent unknown app ignored', recentApps({ nope: { t: 1, n: 1 } }, DEFAULT_CATALOG, 3, TA).length, 0);
-    eq('when today', relativeWhen(T - 3600000, T), t('Today, %s', '20:10'));
-    eq('when yesterday', relativeWhen(T - 86400000, T), t('Yesterday, %s', '21:10'));
-    eq('when older', relativeWhen(T - 3 * 86400000, T).length > 0, true);
+    eq('caption today', openedCaption('Netflix', T - 3600000, T), t('%s, opened at %s', 'Netflix', '20:10'));
+    eq('caption older day', openedCaption('Netflix', T - 3 * 86400000, T).indexOf('Netflix') !== -1, true);
     localStorage.setItem('fmtv_launch_hist', JSON.stringify({ netflix: 5, youtube: { t: 'x' }, ok: { t: 1, n: 1 } }));
     eq('hist malformed dropped', Object.keys(readLaunchHist()).join(','), 'ok');
     localStorage.removeItem('fmtv_launch_hist');
@@ -1335,7 +1334,7 @@ setTimeout(function () {
   steps.push(function (done) { // calm home: one headline, logo-only tiles, one caption, quiet corners
     function gearBtn0() { return document.getElementById('customizeBtn'); }
     function vis(el) { return el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden'; }
-    var keepFav = state.favorites.slice(), keepPickup = state.pickup;
+    var keepFav = state.favorites.slice(), keepPickup = state.pickup, keepFavStore = localStorage.getItem('fmtv_favorites');
     localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on'; renderAppsShelf();
     ['FPS', 'Instant', 'Curated', 'Favorite Apps', 'No ads', 'Live Feed'].forEach(function (word) {
       var hits = toArray(document.querySelectorAll('.container *')).filter(function (el) {
@@ -1370,6 +1369,13 @@ setTimeout(function () {
     eq('greeting title 78px', getComputedStyle(document.getElementById('greetingTitle')).fontSize, '78px');
     eq('clock 39px', getComputedStyle(document.getElementById('clockText')).fontSize, '39px');
     eq('greeting eyebrow is the weekday', document.getElementById('greetingEyebrow').textContent, new Date().toLocaleDateString(LANG_LOCALES[currentLang()], { weekday: 'long' }));
+    // the corner text beside the clock
+    if (currentLang() === 'en') {
+      document.getElementById('weatherText').textContent = '17°C • Clear';
+      document.getElementById('weatherSub').textContent = 'Tel Aviv • Sunset 18:18';
+      state.sunset = '18:18'; updateGreeting();
+      eq('weather corner text', /^\d+° .+ · Sunset \d\d:\d\d$/.test(document.getElementById('weatherCorner').textContent), true);
+    }
     // one caption, on the focused tile
     var labels = toArray(document.querySelectorAll('.app-tile .app-label')).filter(vis);
     eq('exactly one visible tile caption', labels.length, 1);
@@ -1419,6 +1425,24 @@ setTimeout(function () {
     eq('recent tiles are nav items', mainNavItems.indexOf(kids[0]) !== -1, true);
     eq('recent caption has the time', kids[0].querySelector('.app-label').textContent.indexOf(pad2(new Date(T - 1000).getHours())) !== -1, true);
     eq('recent tiles stay off the shelf', state.favorites.join(','), keepFav.join(','));
+    eq('recent tiles are never stored', localStorage.getItem('fmtv_favorites'), keepFavStore);
+    var gotId = null, oldWeb = window.webOS, gotReq = null;
+    window.webOS = { service: { request: function (uri, o) { gotReq = o; gotId = o.parameters.id; } } };
+    kids[0].click();
+    eq('a recent tile launches its app', gotId, off[0].id);
+    if (gotReq) gotReq.onSuccess({ returnValue: true });
+    window.webOS = oldWeb;
+    // coming back to the app: focus moves to the pick-up tile when pick-up is on, stays put when it is off
+    setMainFocus(document.querySelectorAll('#appsGrid .app-tile:not(.tile-recent)')[4]);
+    var parked = document.querySelector('.nav-item.focused').dataset.id;
+    onVisibilityChange();
+    eq('return to app with pick-up on focuses the last opened tile', document.querySelector('.nav-item.focused').dataset.id, id);
+    state.pickup = 'off';
+    setMainFocus(document.querySelectorAll('#appsGrid .app-tile')[4]);
+    parked = document.querySelector('.nav-item.focused').dataset.id;
+    onVisibilityChange();
+    eq('return to app with pick-up off keeps the focus', document.querySelector('.nav-item.focused').dataset.id, parked);
+    state.pickup = 'on'; renderAppsShelf();
     eq('focus still lands on the last opened shelf tile', document.querySelector('.nav-item.focused').dataset.id, id);
     // dim lower rows
     var scenes = document.getElementById('scenesRow'), picks = document.querySelector('.picks-section');
