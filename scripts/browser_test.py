@@ -69,6 +69,133 @@ setTimeout(function () {
     eq('dim bad', ambientDim('nope'), 0.68);
     eq('dim none', ambientDim(undefined), 0.68);
   }
+  if (need('nightFactor')) {
+    eq('night noon', nightFactor(new Date(2026, 9, 30, 12, 0), '16:52'), 1);
+    eq('night before sunset', nightFactor(new Date(2026, 9, 30, 16, 51), '16:52'), 1);
+    eq('night after sunset', nightFactor(new Date(2026, 9, 30, 16, 52), '16:52'), 0.75);
+    eq('night 22:59', nightFactor(new Date(2026, 9, 30, 22, 59), '16:52'), 0.75);
+    eq('night 23:00', nightFactor(new Date(2026, 9, 30, 23, 0), '16:52'), 0.5);
+    eq('night 04:59', nightFactor(new Date(2026, 9, 30, 4, 59), '16:52'), 0.5);
+    eq('night 05:00', nightFactor(new Date(2026, 9, 30, 5, 0), '16:52'), 1);
+    eq('night unknown sunset', nightFactor(new Date(2026, 9, 30, 17, 59), ''), 1);
+    eq('night unknown sunset after', nightFactor(new Date(2026, 9, 30, 18, 0), ''), 0.75);
+  }
+  if (need('screensaverWeatherVisible')) {
+    eq('ssweather noon', screensaverWeatherVisible(12, '22C'), true);
+    eq('ssweather 22', screensaverWeatherVisible(22, '22C'), true);
+    eq('ssweather 23', screensaverWeatherVisible(23, '22C'), false);
+    eq('ssweather 04', screensaverWeatherVisible(4, '22C'), false);
+    eq('ssweather 05', screensaverWeatherVisible(5, '22C'), true);
+    eq('ssweather loading', screensaverWeatherVisible(12, 'Loading...'), false);
+  }
+  if (need('greetingKey') && need('greetingText')) {
+    eq('greet 4', greetingKey(4), 'Good night');
+    eq('greet 5', greetingKey(5), 'Good morning');
+    eq('greet 11', greetingKey(11), 'Good morning');
+    eq('greet 12', greetingKey(12), 'Good afternoon');
+    eq('greet 16', greetingKey(16), 'Good afternoon');
+    eq('greet 17', greetingKey(17), 'Good evening');
+    eq('greet 21', greetingKey(21), 'Good evening');
+    eq('greet 22', greetingKey(22), 'Good night');
+    eq('greet name', greetingText(19, 'Noa'), t('Good evening') + ', Noa');
+    eq('greet no name', greetingText(19, ''), t('Good evening'));
+  }
+  if (need('wizardNeeded')) {
+    var savedKeys = {}, k2, n2;
+    for (n2 = localStorage.length - 1; n2 >= 0; n2--) { k2 = localStorage.key(n2); if (k2.indexOf('fmtv_') === 0) { savedKeys[k2] = localStorage.getItem(k2); localStorage.removeItem(k2); } }
+    eq('wizard fresh', wizardNeeded(), true);
+    ['fmtv_launch_hist', 'fmtv_theme', 'fmtv_favorites', 'fmtv_city'].forEach(function (key) {
+      localStorage.setItem(key, 'x');
+      eq('wizard existing install (' + key + ')', wizardNeeded(), false);
+      localStorage.removeItem(key);
+    });
+    localStorage.setItem('fmtv_setup_done', '1');
+    eq('wizard done', wizardNeeded(), false);
+    localStorage.removeItem('fmtv_setup_done');
+    eq('wizard fresh again', wizardNeeded(), true);
+    eq('wizard boot flag is a boolean', typeof wizardAtBoot, 'boolean');
+    // The harness seeds fmtv_lang and fmtv_setup_done before the app starts, so this profile counts as an existing install.
+    eq('wizard not shown at boot for a seeded profile', wizardAtBoot, false);
+    Object.keys(savedKeys).forEach(function (key) { localStorage.setItem(key, savedKeys[key]); });
+  }
+  if (need('snapshotProfile') && need('applyProfile')) {
+    var before = JSON.stringify(snapshotProfile());
+    var snap = snapshotProfile();
+    snap.userName = 'Kid'; snap.theme = 'day'; snap.favorites = ['youtube.leanback.v4'];
+    applyProfile(snap);
+    eq('profile name', state.userName, 'Kid');
+    eq('profile theme', state.theme, 'day');
+    eq('profile shelf', state.favorites.join(','), 'youtube.leanback.v4');
+    eq('profile persisted', localStorage.getItem('fmtv_theme'), 'day');
+    applyProfile(JSON.parse(before));
+    eq('profile restored', JSON.stringify(snapshotProfile()), before);
+    applyProfile({ userName: 'Only' });
+    eq('profile applies only the fields present', state.theme + '|' + state.favorites.join(','), JSON.parse(before).theme + '|' + JSON.parse(before).favorites.join(','));
+    applyProfile(JSON.parse(before));
+    eq('profile restored again', JSON.stringify(snapshotProfile()), before);
+    eq('profile fields', PROFILE_FIELDS.join(','), 'userName,theme,city,lat,lon,ambient,homePhotos');
+    eq('profile snapshot has the lock', typeof snapshotProfile().locked, 'boolean');
+  }
+  if (need('recordLaunch') && need('recentApps') && need('relativeWhen')) {
+    localStorage.removeItem('fmtv_launch_hist');
+    var T = new Date(2026, 9, 30, 21, 10).getTime();
+    var TA = new Date(2026, 9, 30, 15, 10).getTime(); // afternoon: netflix's 21:10 launches are no habit then, so plain recency decides
+    recordLaunch('netflix', T - 86400000);
+    recordLaunch('youtube.leanback.v4', T - 3600000);
+    recordLaunch('netflix', T - 86400000 + 1000);
+    var hist = readLaunchHist();
+    eq('hist count', hist.netflix.n, 2);
+    var recent = recentApps(hist, DEFAULT_CATALOG, 3, TA);
+    eq('recent order', recent.map(function (r) { return r.app.id; }).join(','), 'youtube.leanback.v4,netflix');
+    eq('recent limit', recentApps(hist, DEFAULT_CATALOG, 1, TA).length, 1);
+    eq('recent unknown app ignored', recentApps({ nope: { t: 1, n: 1 } }, DEFAULT_CATALOG, 3, TA).length, 0);
+    eq('when today', relativeWhen(T - 3600000, T), t('Today, %s', '20:10'));
+    eq('when yesterday', relativeWhen(T - 86400000, T), t('Yesterday, %s', '21:10'));
+    eq('when older', relativeWhen(T - 3 * 86400000, T).length > 0, true);
+    localStorage.setItem('fmtv_launch_hist', JSON.stringify({ netflix: 5, youtube: { t: 'x' }, ok: { t: 1, n: 1 } }));
+    eq('hist malformed dropped', Object.keys(readLaunchHist()).join(','), 'ok');
+    localStorage.removeItem('fmtv_launch_hist');
+    // time-of-day buckets: hours 3, 8, 14, 21 land in buckets 0..3
+    [3, 8, 14, 21].forEach(function (h) { recordLaunch('bk', new Date(2026, 9, 30, h, 5).getTime()); });
+    recordLaunch('bk', new Date(2026, 9, 30, 23, 59).getTime());
+    eq('buckets counted', JSON.stringify(readLaunchHist().bk.b), '[1,1,1,2]');
+    eq('bucket edges', [0, 5, 6, 11, 12, 17, 18, 23].map(function (h) { return launchBucket(new Date(2026, 9, 30, h).getTime()); }).join(','), '0,0,1,1,2,2,3,3');
+    localStorage.setItem('fmtv_launch_hist', JSON.stringify({ old: { t: T, n: 3 }, bad: { t: T, n: 1, b: 'x' }, bad2: { t: T, n: 1, b: [1, 'a', null, -4, 9, 9] }, bad3: { t: T, n: 1, b: { 0: 5 } } }));
+    eq('old entry gets zeros', JSON.stringify(readLaunchHist().old.b), '[0,0,0,0]');
+    eq('malformed b zeros', JSON.stringify(readLaunchHist().bad.b), '[0,0,0,0]');
+    eq('partly malformed b', JSON.stringify(readLaunchHist().bad2.b), '[1,0,0,0]');
+    eq('object b zeros', JSON.stringify(readLaunchHist().bad3.b), '[0,0,0,0]');
+    recordLaunch('bad', new Date(2026, 9, 30, 9, 0).getTime());
+    eq('record repairs malformed b', JSON.stringify(readLaunchHist().bad.b), '[0,1,0,0]');
+    localStorage.removeItem('fmtv_launch_hist');
+    for (var ci = 0; ci < 40; ci++) recordLaunch('app' + ci, T + ci);
+    eq('history cap', Object.keys(readLaunchHist()).length, 30);
+    localStorage.removeItem('fmtv_launch_hist');
+    // habit ranking (T is 21:10 = evening bucket 3)
+    var ids = function (h) { return recentApps(h, DEFAULT_CATALOG, 5, T).map(function (r) { return r.app.id; }).join(','); };
+    var HR = 3600000, DAY = 86400000;
+    eq('rank (a) no bucket data = newest first', ids({ netflix: { t: T - 5 * HR, n: 1 }, 'youtube.leanback.v4': { t: T - HR, n: 1 } }), 'youtube.leanback.v4,netflix');
+    eq('rank (a) empty b = newest first', ids({ netflix: { t: T - 5 * HR, n: 1, b: [0, 0, 0, 0] }, 'youtube.leanback.v4': { t: T - HR, n: 1, b: 'x' } }), 'youtube.leanback.v4,netflix');
+    eq('rank (b) habit beats recent', ids({ netflix: { t: T - 5 * HR, n: 2, b: [0, 0, 0, 2] }, 'youtube.leanback.v4': { t: T - HR, n: 1, b: [0, 1, 0, 0] } }), 'netflix,youtube.leanback.v4');
+    eq('rank (c) one launch is not a habit', ids({ netflix: { t: T - 5 * HR, n: 1, b: [0, 0, 0, 1] }, 'youtube.leanback.v4': { t: T - HR, n: 1, b: [0, 1, 0, 0] } }), 'youtube.leanback.v4,netflix');
+    eq('rank habit in other bucket ignored', ids({ netflix: { t: T - 5 * HR, n: 5, b: [0, 5, 0, 0] }, 'youtube.leanback.v4': { t: T - HR, n: 1, b: [0, 0, 0, 0] } }), 'youtube.leanback.v4,netflix');
+    eq('rank stale habit ignored', ids({ netflix: { t: T - 20 * DAY, n: 9, b: [0, 0, 0, 9] }, 'youtube.leanback.v4': { t: T - HR, n: 1 } }), 'youtube.leanback.v4,netflix');
+    eq('rank (d) tie by recency', ids({ netflix: { t: T - 5 * HR, n: 2, b: [0, 0, 0, 2] }, 'youtube.leanback.v4': { t: T - HR, n: 2, b: [0, 0, 0, 2] } }), 'youtube.leanback.v4,netflix');
+    var cat0 = DEFAULT_CATALOG[0].id, cat1 = DEFAULT_CATALOG[1].id, tieH = {};
+    tieH[cat1] = { t: T - HR, n: 1 }; tieH[cat0] = { t: T - HR, n: 1 };
+    eq('rank (d) tie by catalog order', ids(tieH), cat0 + ',' + cat1);
+    eq('rank 3-arg form still works', recentApps({ netflix: { t: 1, n: 1 }, 'youtube.leanback.v4': { t: 2, n: 1 } }, DEFAULT_CATALOG, 3).map(function (r) { return r.app.id; }).join(','), 'youtube.leanback.v4,netflix');
+    eq('scene ignores habit', pickSceneApp('streaming', { netflix: { t: 9, n: 1, b: [0, 0, 0, 0] }, 'com.disney.disneyplus-prod': { t: 5, n: 8, b: [0, 0, 0, 8] } }, DEFAULT_CATALOG, {}).id, 'netflix');
+  }
+  if (need('pickSceneApp')) {
+    var hist2 = { 'com.disney.disneyplus-prod': { t: 5, n: 1 }, netflix: { t: 9, n: 1 } };
+    eq('scene streaming newest', pickSceneApp('streaming', hist2, DEFAULT_CATALOG, {}).id, 'netflix');
+    eq('scene streaming none used', pickSceneApp('streaming', {}, DEFAULT_CATALOG, {}).id, 'youtube.leanback.v4');
+    eq('scene game none named', pickSceneApp('game', {}, DEFAULT_CATALOG, {}), null);
+    eq('scene game ps5', pickSceneApp('game', {}, DEFAULT_CATALOG, { 'com.webos.app.hdmi2': 'ps5' }).id, 'com.webos.app.hdmi2');
+    eq('scene direct id', pickSceneApp('spotify-beehive', {}, DEFAULT_CATALOG, {}).id, 'spotify-beehive');
+    eq('scene direct missing', pickSceneApp('nope', {}, DEFAULT_CATALOG, {}), null);
+  }
   if (need('ambientBudgetAllows')) {
     var now = 10000000, recent = [], old = [], i;
     for (i = 0; i < 40; i++) { recent.push(now - 1000); old.push(now - 3700000); }
@@ -94,6 +221,8 @@ setTimeout(function () {
     eq('shape partial', ambientShape({ id: 'x' }), null);
     eq('shape null', ambientShape(null), null);
   }
+  var bootFocus = document.querySelector('.nav-item.focused');
+  eq('boot focus starts on the first app tile', !!bootFocus && bootFocus.classList.contains('app-tile'), true);
   eq('state ambient', state.ambient, 'on');
   eq('state secs', state.ambientSecs, '90');
   eq('state motion', state.ambientMotion, 'drift');
@@ -131,11 +260,13 @@ setTimeout(function () {
    'Ambient Photo Screensaver', 'Off', 'Photo Duration', '30 seconds', '90 seconds', 'Photo Motion',
    'Ken Burns (zoom & drift)', 'Drift only', 'None', 'Unsplash Access Key (Optional)',
    'Optional for photo screensaver', 'Photo by %s on Unsplash',
-   'Shelf & Inputs', 'Look & Feel', 'Weather & Location', 'Photos & Screensaver', 'Accounts & Keys', 'Close', 'Categories',
-   'Shelf apps', 'OK to edit', 'OK to open', 'Not set', 'Saved', 'Reset to defaults', 'Press OK again to confirm',
+   'Home screen', 'Look & Feel', 'People', 'Language & Location', 'Photos & Screensaver', 'Accounts & Keys', 'Reset & About', 'Close',
+   'Shelf apps', 'OK to edit', 'OK to open', 'Not set', 'Saved', 'Reset settings', 'Puts every setting and the shelf back to defaults. People and history stay.',
+   'Erase everything on this TV', 'Deletes every person, setting, key and history, then starts first-run setup',
+   'Press OK again to erase everything', 'Version', 'Selected', 'Press OK again to confirm',
    'Up / Down: move', 'Left / Right: change value', 'OK: select or edit', 'Back: close', 'Changes apply instantly',
    'Up / Down: move one row', 'OK: add or remove', 'Back: return', 'Enter: save', 'Back: cancel', '%s of 8 selected',
-   'Keep at least one app on the shelf.', 'Previous value', 'Next value',
+   'Keep at least one app on the shelf.', 'Keep at least one grown-up profile', 'Previous value', 'Next value',
    'Dimmed, slowly moving photos behind the dashboard', 'Photos behind the clock when the TV is idle',
    'Plays a hidden video so LG does not cover ours', 'For the photos. Stored on this TV only',
    'Optional, for weekly trending movies and shows', 'Back: categories', 'OK or Right: open'].forEach(function (k) {
@@ -162,6 +293,7 @@ setTimeout(function () {
     document.body.appendChild(pre);
   }
   function reset() {
+    state.nightDim = 'off'; // the clock must not change exact opacity assertions
     ['fmtv_ambient_cache', 'fmtv_ambient_calls', 'fmtv_ambient_pause', 'fmtv_ambient_pinged'].forEach(function (k) {
       localStorage.removeItem(k);
     });
@@ -402,6 +534,20 @@ setTimeout(function () {
       eq('kenburns no leg timer', !!shown._moveTimer, false);
       exitScreensaver();
       state.ambientMotion = 'drift';
+      done();
+    }, 400);
+  });
+  steps.push(function (done) { // Dim Photos at Night scales the opacity when on
+    seedCache(); state.ambient = 'on'; state.unsplashKey = 'k'; state.ambientMotion = 'none'; state.nightDim = 'on'; state.ambientBright = 'normal';
+    var realNow = window.nightFactor;
+    window.nightFactor = function () { return 0.5; };
+    window.fetch = fakeFetch(200, '49', []);
+    enterScreensaver();
+    setTimeout(function () {
+      var a = document.getElementById('ssPhotoA').style.opacity, b = document.getElementById('ssPhotoB').style.opacity;
+      eq('night dim opacity', a === '0.43' || b === '0.43', true); // 0.85 * 0.5 = 0.425, rounded to 0.43
+      exitScreensaver();
+      window.nightFactor = realNow; state.nightDim = 'off';
       done();
     }, 400);
   });
@@ -824,7 +970,7 @@ setTimeout(function () {
       eq('engine hdmi shelf', seen.indexOf('renderAppsShelf') !== -1, true);
       var cat0 = settingsForCategory(0);
       eq('engine cat0 first is shelf', cat0[0] && cat0[0].id, 'shelf');
-      eq('engine cat0 hdmi follow', cat0.length, 1 + hd.length);
+      eq('engine cat0 hdmi follow', cat0.length, 4 + hd.length);
 
       state.favorites = ['a'];
       eq('engine fav last', toggleFavorite('a'), 'last');
@@ -913,7 +1059,7 @@ setTimeout(function () {
   }
   function rowIndexOf(id) {
     var rows = settingsForCategory(settingsUi.cat);
-    for (var i = 0; i < rows.length; i++) if (rows[i].id === id) return i + 1; // +1: the "Categories" row comes first
+    for (var i = 0; i < rows.length; i++) if (rows[i].id === id) return i;
     return -1;
   }
   function goToRow(id) { var n = rowIndexOf(id), guard = 40; while (settingsUi.row < n && guard--) press('ArrowDown'); while (settingsUi.row > n && guard--) press('ArrowUp'); }
@@ -928,15 +1074,15 @@ setTimeout(function () {
     eq('modal open', modalOpen, true);
     eq('zone cats', settingsUi.zone, 'cats');
     eq('one focus mark', sfCount(), 1);
-    eq('first category focused', focusedText().indexOf(t('Shelf & Inputs')) !== -1, true);
-    press('ArrowDown'); press('ArrowDown'); press('ArrowDown');
-    eq('down x3 selects category 3', settingsUi.cat, 3);
+    eq('first category focused', focusedText().indexOf(t('Home screen')) !== -1, true);
+    press('ArrowDown'); press('ArrowDown'); press('ArrowDown'); press('ArrowDown');
+    eq('down x4 selects category 4', settingsUi.cat, 4);
     eq('rows show that category', !!modalEl().querySelector('.settings-row[data-id="homePhotos"]'), true);
-    press('ArrowDown'); press('ArrowDown');
-    eq('down reaches Close', settingsUi.catFocus, 5);
+    press('ArrowDown'); press('ArrowDown'); press('ArrowDown');
+    eq('down reaches Close', settingsUi.catFocus, 7);
     press('ArrowDown');
-    eq('no wrap past Close', settingsUi.catFocus, 5);
-    press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp');
+    eq('no wrap past Close', settingsUi.catFocus, 7);
+    for (var u = 0; u < 9; u++) press('ArrowUp');
     eq('no wrap above first', settingsUi.catFocus, 0);
     eq('fr key hint feminine', I18N.fr['For the photos. Stored on this TV only'].indexOf('Stockée uniquement sur cette TV') !== -1, true);
     eq('es shelf apps says estante', I18N.es['Shelf apps'].indexOf('estante') !== -1 && I18N.es['Shelf apps'].indexOf('estantería') === -1, true);
@@ -954,10 +1100,10 @@ setTimeout(function () {
     done();
   });
   steps.push(function (done) { // entering a category, choice rows change with Left and Right and save at once
-    settingsUi.cat = 3; settingsUi.catFocus = 3; renderSettings();
+    settingsUi.cat = 4; settingsUi.catFocus = 4; renderSettings();
     press('ArrowRight');
     eq('zone rows', settingsUi.zone, 'rows');
-    eq('lands on first setting', settingsUi.row, 1);
+    eq('lands on first setting', settingsUi.row, 0);
     eq('one focus mark rows', sfCount(), 1);
     state.idleMins = '3';
     goToRow('idleMins');
@@ -984,22 +1130,21 @@ setTimeout(function () {
     press('Escape');
     eq('back from cats closes', modalOpen, false);
     openSettingsModal();
-    settingsUi.cat = 3; settingsUi.catFocus = 3; renderSettings(); press('Enter');
-    goToRow('keepAwake'); // then up to the "Categories" row
+    settingsUi.cat = 4; settingsUi.catFocus = 4; renderSettings(); press('Enter');
+    goToRow('keepAwake'); // then up past the first row
     var guard = 20; while (settingsUi.row > 0 && guard--) press('ArrowUp');
-    eq('categories row first', settingsUi.row, 0);
-    press('Enter');
-    eq('Categories row returns', settingsUi.zone, 'cats');
-    eq('Categories row focuses its category', settingsUi.catFocus, 3);
-    press('ArrowDown'); press('ArrowDown');
-    eq('arrows reach Close', settingsUi.catFocus, 5);
+    eq('first row reached', settingsUi.row, 0);
+    press('ArrowUp');
+    eq('Up from the first row returns to the category list', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:4');
+    press('ArrowDown'); press('ArrowDown'); press('ArrowDown');
+    eq('arrows reach Close', settingsUi.catFocus, 7);
     press('Enter');
     eq('Close item closes', modalOpen, false);
     done();
   });
   steps.push(function (done) { // text rows: inline editor, commit, cancel; secrets are masked everywhere
     openSettingsModal();
-    settingsUi.cat = 2; settingsUi.catFocus = 2; renderSettings(); press('Enter');
+    settingsUi.cat = 3; settingsUi.catFocus = 3; renderSettings(); press('Enter');
     goToRow('city');
     press('Enter');
     var input = document.getElementById('settingsEditInput');
@@ -1027,7 +1172,7 @@ setTimeout(function () {
     eq('blur commits once', commits, 1);
     eq('blur returns to rows', settingsUi.zone, 'rows');
 
-    settingsUi.cat = 4; settingsUi.catFocus = 4; settingsUi.zone = 'cats'; renderSettings(); press('Enter');
+    settingsUi.cat = 5; settingsUi.catFocus = 5; settingsUi.zone = 'cats'; renderSettings(); press('Enter');
     goToRow('unsplashKey');
     press('Enter');
     var secret = document.getElementById('settingsEditInput');
@@ -1044,7 +1189,8 @@ setTimeout(function () {
   steps.push(function (done) { // background renders (shelf, picks) do not steal focus from an open editor
     var keepCity = state.city;
     openSettingsModal();
-    settingsUi.cat = 2; settingsUi.catFocus = 2; renderSettings(); press('Enter'); // first setting: City
+    settingsUi.cat = 3; settingsUi.catFocus = 3; renderSettings(); press('Enter');
+    goToRow('city');
     press('Enter');
     var input = document.getElementById('settingsEditInput');
     eq('city editor open', !!input && settingsUi.zone === 'edit', true);
@@ -1060,8 +1206,8 @@ setTimeout(function () {
   });
   steps.push(function (done) { // long lists scroll to keep the focused row in view (Photos & Screensaver has 7 rows, taller than the list at 1080p)
     openSettingsModal();
-    settingsUi.cat = 3; settingsUi.catFocus = 3; renderSettings(); press('Enter');
-    var rows = document.getElementById('settingsRows'), last = settingsForCategory(3).length, guard = 60;
+    settingsUi.cat = 4; settingsUi.catFocus = 4; renderSettings(); press('Enter');
+    var rows = document.getElementById('settingsRows'), last = settingsForCategory(4).length, guard = 60;
     while (settingsUi.row < last && guard--) press('ArrowDown');
     var focused = modalEl().querySelector('.settings-row.sf');
     eq('focused last row exists', !!focused, true);
@@ -1178,6 +1324,63 @@ setTimeout(function () {
     renderAppsShelf();
     done();
   });
+  steps.push(function (done) { // the greeting shows the name and the part of the day
+    state.userName = 'Noa'; updateGreeting();
+    eq('greeting title', document.getElementById('greetingTitle').textContent, greetingText(new Date().getHours(), 'Noa'));
+    eq('greeting eyebrow set', document.getElementById('greetingEyebrow').textContent.length > 0, true);
+    state.userName = ''; updateGreeting();
+    eq('greeting no name', document.getElementById('greetingTitle').textContent, t(greetingKey(new Date().getHours())));
+    done();
+  });
+  steps.push(function (done) { // the pick-up row lists the last apps, newest first, and hides when off or empty
+    localStorage.removeItem('fmtv_launch_hist');
+    state.pickup = 'on'; renderPickup();
+    eq('pickup empty hidden', document.getElementById('pickupSection').hidden, true);
+    var T = Date.now();
+    recordLaunch('netflix', T - 5000); recordLaunch('youtube.leanback.v4', T - 1000);
+    renderPickup();
+    var cards = document.querySelectorAll('#pickupRow .pickup-card');
+    eq('pickup cards', cards.length, 2);
+    eq('pickup first is newest', cards[0].dataset.id, 'youtube.leanback.v4');
+    eq('pickup in nav', mainNavItems.indexOf(cards[0]) !== -1, true);
+    state.pickup = 'off'; renderPickup();
+    eq('pickup off hidden', document.getElementById('pickupSection').hidden, true);
+    localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on'; renderPickup();
+    done();
+  });
+  steps.push(function (done) { // an app added to the catalog later (discovered on the TV) shows in the pick-up row
+    localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on';
+    var fake = { id: 'fake.app', title: 'Fake', tag: 'Streaming', desc: 'Watch 4K videos, live streams, music, and coding radio.', color: '#ff0000', badge: 'F', bg: '#000' };
+    state.catalog.push(fake);
+    recordLaunch('fake.app', Date.now());
+    renderAppsShelf();
+    eq('pickup follows catalog', !!document.querySelector('#pickupRow .pickup-card[data-id="fake.app"]'), true);
+    state.catalog.pop();
+    localStorage.removeItem('fmtv_launch_hist');
+    renderAppsShelf();
+    eq('pickup cleared again', document.getElementById('pickupSection').hidden, true);
+    done();
+  });
+  steps.push(function (done) { // D-pad focus draws a white ring on every kind of focusable element
+    var ids = ['customizeBtn', 'tvSettingsBtn', 'weatherWidget', 'tabMovies'];
+    var els = ids.map(function (id) { return document.getElementById(id); });
+    var tile = document.querySelector('.app-tile'), card = document.querySelector('.pick-card');
+    if (tile) els.push(tile);
+    if (card) els.push(card);
+    localStorage.removeItem('fmtv_launch_hist'); state.pickup = 'on';
+    recordLaunch('netflix', Date.now()); renderPickup();
+    var pc = document.querySelector('#pickupRow .pickup-card');
+    if (pc) els.push(pc);
+    els.forEach(function (el, i) {
+      el.classList.add('focused');
+      var cs = getComputedStyle(el);
+      eq('ring style ' + i, cs.outlineStyle, 'solid');
+      eq('ring width ' + i, cs.outlineWidth, '3px');
+      el.classList.remove('focused');
+    });
+    localStorage.removeItem('fmtv_launch_hist'); renderPickup();
+    done();
+  });
   steps.push(function (done) { // an HDMI row changes its device with Right and saves at once
     var hd = hdmiSettings()[0];
     if (!hd) { fails.push('no HDMI row in the test catalog'); done(); return; }
@@ -1198,7 +1401,7 @@ setTimeout(function () {
   steps.push(function (done) { // reset needs a second OK
     state.theme = 'day'; localStorage.setItem('fmtv_theme', 'day');
     openSettingsModal();
-    settingsUi.cat = 4; settingsUi.catFocus = 4; renderSettings(); press('Enter');
+    settingsUi.cat = 6; settingsUi.catFocus = 6; renderSettings(); press('Enter');
     goToRow('reset');
     press('Enter');
     eq('first OK only asks', state.theme, 'day');
@@ -1208,6 +1411,104 @@ setTimeout(function () {
     press('Enter'); press('Enter');
     eq('second OK resets', state.theme, 'auto');
     closeSettingsModal();
+    done();
+  });
+  steps.push(function (done) { // seven groups in order; every setting in exactly one; Down reaches the last row of each; Reset keeps people; Erase wipes fmtv_*
+    eq('seven groups in order', SETTING_CATEGORIES.join('|'), 'Home screen|Look & Feel|People|Language & Location|Photos & Screensaver|Accounts & Keys|Reset & About');
+    var expectIds = [
+      ['shelf', 'showTrending', 'pickup', 'scenes'],
+      ['theme', 'textSize', 'perfMode', 'clockFormat'],
+      ['userName', 'askWho', 'switchPerson', 'addPerson', 'removePerson'],
+      ['lang', 'city', 'ipLocate'],
+      ['homePhotos', 'ambient', 'idleMins', 'ambientSecs', 'ambientMotion', 'ambientSpeed', 'ambientBright', 'nightDim', 'clockPos', 'keepAwake'],
+      ['unsplashKey', 'tmdbKey'],
+      ['runSetup', 'reset', 'eraseAll', 'version', 'about']
+    ];
+    var seen = {}, dupes = 0;
+    SETTINGS.forEach(function (d) { if (seen[d.id]) dupes++; seen[d.id] = true; });
+    eq('no setting id twice', dupes, 0);
+    expectIds.forEach(function (ids, c) {
+      eq('group ' + c + ' lists its settings in order', SETTINGS.filter(function (d) { return d.cat === c; }).map(function (d) { return d.id; }).join(','), ids.join(','));
+    });
+    eq('every setting is in a group', SETTINGS.filter(function (d) { return !(d.cat >= 0 && d.cat < 7); }).length, 0);
+    eq('Reset & About rows', settingsRowsFor(6).map(function (d) { return d.id; }).join(','), 'runSetup,reset,eraseAll,version,about');
+    eq('reset label', findSetting('reset').label, 'Reset settings');
+    eq('version row shows the version', settingsRowsFor(6)[3].value(), APP_VERSION);
+
+    openSettingsModal();
+    var counts = [].map.call(modalEl().querySelectorAll('.settings-cat .sc-count'), function (n) { return n.textContent; });
+    eq('seven category chips with counts', counts.length, 7);
+    eq('chip counts follow the schema', counts.join(','), [0, 1, 2, 3, 4, 5, 6].map(function (c) { return String(settingsRowsFor(c).length); }).join(','));
+    for (var c = 0; c < 7; c++) {
+      settingsUi.zone = 'cats'; settingsUi.catFocus = c; settingsUi.cat = c; renderSettings();
+      press('ArrowRight');
+      var guard = 40; while (guard--) press('ArrowDown');
+      var rws = settingsRowsFor(c), lastRow = modalEl().querySelector('.settings-row.sf');
+      eq('group ' + c + ' Down reaches the last row', settingsUi.row === rws.length - 1 && !!lastRow && lastRow.getAttribute('data-id') === rws[rws.length - 1].id, true);
+      press('Escape');
+      settingsUi.cat = c; settingsUi.catFocus = c; press('ArrowRight');
+      eq('group ' + c + ' has no back row', modalEl().querySelectorAll('.settings-row[data-id="back"]').length + ':' + rws.some(function (d) { return d.type === 'back'; }), '0:false');
+      eq('group ' + c + ' opens on the first setting', settingsUi.row === 0 && modalEl().querySelector('.settings-row.sf').getAttribute('data-id') === rws[0].id, true);
+      if (rws.length > 1) {
+        press('ArrowDown');
+        eq('group ' + c + ' Down from the first row', settingsUi.row === 1 && modalEl().querySelector('.settings-row.sf').getAttribute('data-id') === rws[1].id, true);
+        press('ArrowUp');
+        eq('group ' + c + ' Up returns to the first row', settingsUi.row === 0 && settingsUi.zone === 'rows', true);
+      }
+      press('ArrowUp');
+      eq('group ' + c + ' Up from the first row leaves for the categories', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:' + c);
+    }
+    eq('no note in the left column', modalEl().querySelector('#settingsNote') === null && modalEl().querySelectorAll('#settingsCats .settings-note').length, 0);
+    var clr = modalEl().querySelector('.settings-close').getBoundingClientRect(), hr = document.getElementById('settingsHints').getBoundingClientRect();
+    eq('Close ends above the hint bar', clr.bottom <= hr.top - 4, true);
+    settingsUi.zone = 'cats'; settingsUi.catFocus = 6; settingsUi.cat = 6; renderSettings();
+    var aboutRow = modalEl().querySelector('#settingsRows .settings-row[data-id="about"]');
+    eq('About row holds the independence note', !!aboutRow && aboutRow.textContent.indexOf(t('Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.')) !== -1, true);
+    eq('Reset & About has 5 rows with About last', settingsRowsFor(6).length === 5 && settingsRowsFor(6)[4].id === 'about', true);
+    eq('About row is info type (no OK action)', settingsRowsFor(6)[4].type, 'info');
+    closeSettingsModal();
+
+    // Reset keeps people and history
+    state.theme = 'day'; localStorage.setItem('fmtv_theme', 'day');
+    saveProfiles([{ id: 'p1', name: 'Noa', color: '#2a7de1', data: snapshotProfile() }, { id: 'p2', name: 'Kid', color: '#ff9f43', data: snapshotProfile() }]);
+    localStorage.setItem('fmtv_launch_hist', '[{"id":"netflix","t":1}]');
+    openSettingsModal();
+    settingsUi.cat = 6; settingsUi.catFocus = 6; renderSettings(); press('Enter');
+    goToRow('reset'); press('Enter'); press('Enter');
+    eq('reset settings restores defaults', state.theme, 'auto');
+    eq('reset keeps the people', readProfiles().length, 2);
+    eq('reset keeps the history', localStorage.getItem('fmtv_launch_hist') !== null, true);
+    closeSettingsModal();
+
+    // Erase everything: two presses, every fmtv_ key gone, wizard needed on the next boot
+    var saved = {}, i, k;
+    for (i = 0; i < localStorage.length; i++) { k = localStorage.key(i); if (k.indexOf('fmtv_') === 0) saved[k] = localStorage.getItem(k); }
+    var snapState = {}; SETTINGS.forEach(function (d) { if (d.field) snapState[d.field] = state[d.field]; });
+    var keepFav = state.favorites.slice(), keepDev = JSON.parse(JSON.stringify(state.hdmiDevices)), keepLocked = state.locked;
+    var realReload = window.reloadApp, reloads = 0, keysAtReload = -1;
+    function fmtvKeys() { var n = 0, j, kk; for (j = 0; j < localStorage.length; j++) { kk = localStorage.key(j); if (kk && kk.indexOf('fmtv_') === 0) n++; } return n; }
+    window.reloadApp = function () { reloads++; keysAtReload = fmtvKeys(); };
+    state.userName = 'Noa'; localStorage.setItem('fmtv_user_name', 'Noa'); localStorage.setItem('fmtv_tmdb_key', 'abc');
+    openSettingsModal();
+    settingsUi.cat = 6; settingsUi.catFocus = 6; renderSettings(); press('Enter');
+    goToRow('eraseAll'); press('Enter');
+    eq('erase asks first', reloads + ':' + (fmtvKeys() > 0), '0:true');
+    eq('erase confirm text', modalEl().querySelector('.settings-row[data-id="eraseAll"]').textContent.indexOf(t('Press OK again to erase everything')) !== -1, true);
+    eq('erase confirm text is only on the erase row', modalEl().querySelector('.settings-row[data-id="reset"]').textContent.indexOf(t('Press OK again to confirm')), -1);
+    press('Enter');
+    eq('erase reloads once', reloads, 1);
+    eq('erase leaves no fmtv_ key at reload time', keysAtReload, 0);
+    eq('erase leaves no fmtv_ key', fmtvKeys(), 0);
+    eq('next boot opens the wizard', wizardNeeded(), true);
+    eq('erase resets the in-memory name', state.userName, '');
+    window.reloadApp = realReload;
+    Object.keys(saved).forEach(function (key) { localStorage.setItem(key, saved[key]); });
+    SETTINGS.forEach(function (d) { if (d.field) state[d.field] = snapState[d.field]; });
+    state.favorites = keepFav; state.hdmiDevices = keepDev; state.locked = keepLocked;
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile'); localStorage.removeItem('fmtv_launch_hist'); localStorage.removeItem('fmtv_tmdb_key');
+    state.theme = 'auto'; localStorage.setItem('fmtv_theme', 'auto');
+    closeSettingsModal();
+    applyTheme(); renderAppsShelf(); updateGreeting();
     done();
   });
   steps.push(function (done) { // the idle screensaver does not start while the screen is open; hover only moves focus
@@ -1227,13 +1528,13 @@ setTimeout(function () {
     eq('row hover ring', modalEl().querySelector('.sf') === row, true);
     eq('row hover rebuilt nothing', modalEl().querySelector('#settingsRows .settings-row[data-i="1"]') === row && modalEl().querySelectorAll('.settings-cat')[2] === cats[2], true);
     move(120, 900); over(modalEl().querySelector('.settings-close'));
-    eq('Close hover from the rows', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:5');
+    eq('Close hover from the rows', settingsUi.zone + ':' + settingsUi.catFocus, 'cats:7');
     press('ArrowUp');
-    eq('key moves focus', settingsUi.catFocus, 4);
+    eq('key moves focus', settingsUi.catFocus, 6);
     over(modalEl().querySelectorAll('.settings-cat')[1]);
-    eq('mouseover without a pointer move keeps key focus', settingsUi.catFocus, 4);
+    eq('mouseover without a pointer move keeps key focus', settingsUi.catFocus, 6);
     move(120, 900); over(modalEl().querySelectorAll('.settings-cat')[1]);
-    eq('mousemove at the same spot is not a move', settingsUi.catFocus, 4);
+    eq('mousemove at the same spot is not a move', settingsUi.catFocus, 6);
     cats = modalEl().querySelectorAll('.settings-cat');
     cats[2].click();
     eq('click enters the category', settingsUi.zone, 'rows');
@@ -1250,23 +1551,588 @@ setTimeout(function () {
     eq('opening resets the pointer flag', settingsPointerLive, false);
     function move(x, y) { document.dispatchEvent(new MouseEvent('mousemove', { clientX: x, clientY: y, bubbles: true })); }
     function over(node) { node.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); }
-    var resetIdx = -1, rws = settingsRowsFor(4), k;
+    var resetIdx = -1, rws = settingsRowsFor(6), k;
     for (k = 0; k < rws.length; k++) if (rws[k].id === 'reset') resetIdx = k;
-    settingsUi.cat = 4; settingsUi.catFocus = 4; settingsUi.zone = 'rows'; settingsUi.row = resetIdx;
+    settingsUi.cat = 6; settingsUi.catFocus = 6; settingsUi.zone = 'rows'; settingsUi.row = resetIdx;
     renderSettings();
     press('Enter');
-    eq('reset asks for confirmation', settingsUi.confirmReset, true);
+    eq('reset asks for confirmation', settingsUi.confirmReset, 'reset');
     eq('confirmation text shown', modalEl().textContent.indexOf('Press OK again to confirm') >= 0, true);
-    move(700, 400); over(modalEl().querySelector('#settingsRows .settings-row[data-i="1"]'));
+    move(700, 400); over(modalEl().querySelector('#settingsRows .settings-row[data-i="0"]'));
     eq('hover clears confirmReset', settingsUi.confirmReset, false);
     eq('hover removes the confirmation text', modalEl().textContent.indexOf('Press OK again to confirm'), -1);
+    // armed Reset must not arm-and-run Erase: a click straight on Erase only asks
+    localStorage.setItem('fmtv_theme', 'day');
+    erasing = false; // an earlier step ran the real erase
+    settingsUi.row = resetIdx; press('Enter');
+    eq('reset armed', settingsUi.confirmReset, 'reset');
+    modalEl().querySelector('#settingsRows .settings-row[data-id="eraseAll"]').click();
+    eq('erase only asks after Reset was armed', settingsUi.confirmReset, 'eraseAll');
+    eq('nothing erased by the first press on Erase', String(erasing) + ':' + localStorage.getItem('fmtv_theme'), 'false:day');
+    eq('erase text shows only on Erase', modalEl().querySelector('.settings-row[data-id="reset"]').textContent.indexOf(t('Press OK again to confirm')), -1);
     closeSettingsModal();
+    done();
+  });
+
+  steps.push(function (done) { // Movie night switches the look, opens an app, and coming back restores the look
+    var calls = [], oldWebOS = window.webOS;
+    window.webOS = { service: { request: function (uri, o) { calls.push(o); } } };
+    state.theme = 'auto'; state.homePhotos = 'on';
+    localStorage.removeItem('fmtv_scene_restore');
+    runScene('movie');
+    eq('scene theme', state.theme, 'oled');
+    eq('scene photos', state.homePhotos, 'off');
+    eq('scene launched', calls.length > 0 && /^(netflix|youtube\.leanback\.v4|amazon|com\.disney\.disneyplus-prod|com\.crunchyroll\.webapp|cdp-30)$/.test(calls[0].parameters.id), true);
+    if (calls[0]) calls[0].onSuccess({ returnValue: true });
+    restoreScene();
+    eq('scene restored theme', state.theme, 'auto');
+    eq('scene restored photos', state.homePhotos, 'on');
+    eq('scene restore key gone', localStorage.getItem('fmtv_scene_restore'), null);
+    // a restore left in storage (app closed while the scene ran) is applied by the next restoreScene, as at boot
+    state.theme = 'oled'; state.homePhotos = 'off';
+    localStorage.setItem('fmtv_scene_restore', JSON.stringify({ theme: { from: 'auto', to: 'oled' }, homePhotos: { from: 'on', to: 'off' } }));
+    restoreScene();
+    eq('boot restore theme', state.theme, 'auto');
+    eq('boot restore photos', state.homePhotos, 'on');
+    // the user changed the theme themselves before coming back: that choice stays, the untouched field still returns
+    state.theme = 'oled'; state.homePhotos = 'off';
+    localStorage.setItem('fmtv_scene_restore', JSON.stringify({ theme: { from: 'auto', to: 'oled' }, homePhotos: { from: 'on', to: 'off' } }));
+    setSettingValue(settingDef('theme'), 'day');
+    restoreScene();
+    eq('user theme kept', state.theme, 'day');
+    eq('untouched field restored', state.homePhotos, 'on');
+    eq('restore key gone again', localStorage.getItem('fmtv_scene_restore'), null);
+    state.theme = 'auto';
+    var before = calls.length;
+    state.hdmiDevices = {};
+    runScene('game');
+    eq('game scene without a named device launches nothing', calls.length, before);
+    var chips = document.querySelectorAll('#scenesRow .scene-chip');
+    eq('scene chips', chips.length, SCENES.length);
+    eq('scene chip in nav', mainNavItems.indexOf(chips[0]) !== -1, true);
+    eq('scene chips fit in a row', chips[0].getBoundingClientRect().height, 44);
+    state.scenes = 'off'; renderScenes();
+    eq('scenes hidden when off', document.getElementById('scenesRow').hidden, true);
+    state.scenes = 'on'; renderScenes();
+    window.webOS = oldWebOS;
+    done();
+  });
+
+  steps.push(function (done) { // a launch that does not happen never leaves the scene look behind
+    var oldWebOS = window.webOS, keepPending = pendingLaunch, keepEdit = shelfEdit;
+    function reset() { state.theme = 'auto'; state.homePhotos = 'on'; localStorage.removeItem('fmtv_scene_restore'); pendingLaunch = null; shelfEdit = false; }
+    function untouched(label) {
+      eq(label + ' theme', state.theme, 'auto'); eq(label + ' photos', state.homePhotos, 'on');
+      eq(label + ' no restore key', localStorage.getItem('fmtv_scene_restore'), null);
+    }
+    pendingLaunch = null;
+    reset(); window.webOS = { service: { request: function (uri, o) { o.onFailure({ errorText: 'nope' }); } } };
+    runScene('movie'); untouched('failed launch (sync)');
+    reset(); window.webOS = { service: { request: function (uri, o) { setTimeout(function () { o.onFailure({ errorText: 'nope' }); }, 20); } } };
+    runScene('movie');
+    eq('look applied while the request is open', state.theme, 'oled');
+    setTimeout(function () {
+      untouched('failed launch (async)');
+      reset(); window.webOS = { service: { request: function () {} } };
+      pendingLaunch = { timer: null };
+      runScene('movie'); untouched('pending launch');
+      pendingLaunch = null; shelfEdit = true;
+      runScene('movie'); untouched('shelf edit');
+      shelfEdit = false; window.webOS = undefined;
+      runScene('movie'); untouched('no webOS');
+      var sets = 0, realSet = Storage.prototype.setItem;
+      window.webOS = { service: { request: function () {} } };
+      Storage.prototype.setItem = function (k, v) { if (k === 'fmtv_scene_restore') throw new Error('full'); return realSet.call(this, k, v); };
+      runScene('movie');
+      Storage.prototype.setItem = realSet;
+      untouched('restore key cannot be saved');
+      reset(); window.webOS = oldWebOS; pendingLaunch = keepPending; shelfEdit = keepEdit;
+      done();
+    }, 150);
+  });
+
+  steps.push(function (done) { // chips follow the language and Reset
+    var keepLang = state.lang, other = keepLang === 'de' ? 'fr' : 'de';
+    state.lang = other; applyStaticTranslations(); renderAppsShelf();
+    var first = document.querySelector('#scenesRow .scene-chip span');
+    eq('chip text follows language', first && first.textContent, t('Movie night'));
+    state.lang = keepLang; applyStaticTranslations(); renderAppsShelf();
+    state.scenes = 'off'; renderScenes();
+    eq('scenes off hides row', document.getElementById('scenesRow').hidden, true);
+    resetAllSettings();
+    eq('reset shows the row again', document.getElementById('scenesRow').hidden, false);
+    eq('reset chips present', document.querySelectorAll('#scenesRow .scene-chip').length, SCENES.length);
+    state.lang = keepLang;
+    done();
+  });
+
+  steps.push(function (done) { // scenes + pick-up row + shelf + Trending all fit on a 1080p screen
+    localStorage.setItem('fmtv_launch_hist', JSON.stringify({ netflix: { t: 3, n: 1 }, 'youtube.leanback.v4': { t: 2, n: 1 }, amazon: { t: 1, n: 1 } }));
+    state.pickup = 'on'; state.scenes = 'on'; state.showTrending = 'on'; applyTrendingClass(); renderScenes(); renderPickup();
+    var pk = document.querySelector('.picks-section').getBoundingClientRect();
+    eq('trending visible', pk.height > 0, true);
+    eq('trending bottom inside screen (' + Math.round(pk.bottom) + ')', pk.bottom <= window.innerHeight, true);
+    localStorage.removeItem('fmtv_launch_hist'); renderPickup();
+    done();
+  });
+
+  steps.push(function (done) { // the honest privacy line sits on the home screen
+    var tl = document.getElementById('trustLine'), sp = tl && tl.querySelector('span');
+    eq('trust line exists', !!tl, true);
+    eq('trust line text', sp ? sp.textContent : null, t('No ads. No account. Your settings stay on this TV.'));
+    eq('trust line visible', !!tl && tl.getClientRects().length > 0, true);
+    done();
+  });
+
+  steps.push(function (done) { // the setup wizard walks every step with the remote and saves name, look and photos
+    var keepSetup = localStorage.getItem('fmtv_setup_done');
+    localStorage.removeItem('fmtv_setup_done');
+    var oldTheme = state.theme, oldName = state.userName, oldAmbient = state.ambient, oldFavs = state.favorites.slice();
+    function key(k) { handleWizardKey({ key: k, keyCode: 0, preventDefault: function () {} }); }
+    openWizard();
+    eq('wizard open', wizard.open && !document.getElementById('wizardOverlay').hidden, true);
+    eq('wizard step welcome', WIZARD_STEPS[wizard.step], 'welcome');
+    key('Enter');
+    eq('wizard step who', WIZARD_STEPS[wizard.step], 'who');
+    var nameInput = document.getElementById('wzName');
+    nameInput.value = 'Noa'; nameInput.dispatchEvent(new Event('input'));
+    eq('wizard name saved', state.userName, 'Noa');
+    nameInput.focus(); wizard.focus = 0; key('ArrowDown');
+    eq('wizard Down leaves a closed-keyboard input', wizard.focus === 1 && document.activeElement !== nameInput, true);
+    wizard.focus = wizard.items.length - 2; key('Enter');
+    eq('wizard step apps', WIZARD_STEPS[wizard.step], 'apps');
+    var firstApp = state.catalog[0].id, had = state.favorites.indexOf(firstApp) !== -1;
+    wizard.focus = 0; key('Enter');
+    eq('wizard toggles an app', state.favorites.indexOf(firstApp) !== -1, !had);
+    wizard.focus = wizard.items.length - 1; key('Enter');
+    eq('wizard step look', WIZARD_STEPS[wizard.step], 'look');
+    var wzq = function (sel) { return document.querySelectorAll('#wizardOverlay ' + sel); };
+    eq('t substitutes special characters literally', t('How should it look, %s?', "A$&B$'C$`D"), t('How should it look, %s?', 'X').split('X').join("A$&B$'C$`D"));
+    wizard.focus = wizard.items.length - 1; key('ArrowLeft');
+    eq('wizard footer Left from primary stays put without Skip', wizard.focus, wizard.items.length - 1);
+    wizardGo(4); wizard.focus = 1; key('ArrowLeft');
+    eq('wizard footer Left from primary goes to Skip', wizard.focus, 2);
+    key('ArrowRight');
+    eq('wizard footer Right from Skip goes to primary', wizard.focus, 1);
+    wizardGo(3);
+    eq('wizard look eyebrow', wzq('.wz-eyebrow')[0].textContent, t('Step %s of %s', 4, 5));
+    eq('wizard rail has 5 rows', wzq('.wz-rail-row').length, 5);
+    eq('wizard rail one current row', wzq('.wz-rail-row.current').length, 1);
+    eq('wizard rail done rows before the current one', wzq('.wz-rail-row.done').length, 3);
+    eq('wizard rail brand and note', !!wzq('.wz-brand')[0] && wzq('.wz-note')[0].textContent, t('Nothing here needs an account. You can change every choice later in Customize.'));
+    eq('wizard look title uses the name', wzq('.wz-title')[0].textContent, t('How should it look, %s?', 'Noa'));
+    eq('wizard one thumbnail per look card', wzq('.wz-look .wz-thumb').length, WIZARD_LOOKS.length);
+    eq('wizard primary pill is in the footer', wzq('.wz-footer .wz-primary').length, 1);
+    eq('wizard primary pill is the last item before Skip', wizard.items[wizard.items.length - 1].classList.contains('wz-primary'), true);
+    eq('wizard hint bar has three hints', wzq('.wz-hints span').length, 3);
+    wizard.focus = 0; key('ArrowRight');
+    eq('wizard previews a look', state.theme, 'night');
+    key('Enter');
+    eq('wizard look confirm moves to Continue', wizard.focus, wizard.items.length - 1);
+    key('Enter');
+    eq('wizard step photos', WIZARD_STEPS[wizard.step], 'photos');
+    state.ambient = 'on'; renderWizard(); wizard.focus = 0; key('Enter');
+    eq('wizard photos toggle', state.ambient, 'off');
+    wizard.focus = 1; key('Enter');
+    eq('wizard step done', WIZARD_STEPS[wizard.step], 'done');
+    key('Enter');
+    eq('wizard closed', wizard.open, false);
+    eq('wizard remembered', localStorage.getItem('fmtv_setup_done'), '1');
+    eq('wizard no longer needed', wizardNeeded(), false);
+    openWizard(); key('Escape');
+    eq('wizard back on first step closes', wizard.open, false);
+    openWizard(); wizard.focus = 1; key('Enter');
+    eq('wizard skip closes', wizard.open, false);
+    eq('wizard skip sets flag', localStorage.getItem('fmtv_setup_done'), '1');
+    localStorage.removeItem('fmtv_setup_done');
+    openWizard(); wizardGo(3); key('Escape');
+    eq('wizard back goes one step back', WIZARD_STEPS[wizard.step], 'apps');
+    key('Escape'); key('Escape');
+    eq('wizard back to first step', WIZARD_STEPS[wizard.step], 'welcome');
+    key('Escape');
+    eq('wizard closed by back on first', wizard.open, false);
+    localStorage.removeItem('fmtv_setup_done');
+    var keepCat = state.catalog, keepFav = state.favorites.slice();
+    state.catalog = keepCat.slice(0, 6); state.favorites = [state.catalog[0].id];
+    openWizard(); wizardGo(2);
+    eq('wizard grid count', wizard.gridCount, 6);
+    wizard.focus = 1; key('ArrowDown');
+    eq('wizard down inside a short last row', wizard.focus, 5);
+    wizard.focus = 2; key('ArrowDown');
+    eq('wizard down lands on the button after the grid', wizard.focus, 6);
+    wizard.focus = 0; key('Enter');
+    eq('wizard last app guard keeps it', state.favorites.length, 1);
+    eq('wizard last app toast', document.querySelector('.toast-msg').textContent, t('Keep at least one app on the shelf.'));
+    state.catalog = keepCat; state.favorites = keepCat.slice(0, 8).map(function (a) { return a.id; });
+    if (keepCat.length > 8) {
+      wizardGo(2); wizard.focus = 8; key('Enter');
+      eq('wizard full shelf unchanged', state.favorites.length, 8);
+      eq('wizard full shelf toast', document.querySelector('.toast-msg').textContent, t('Max 8 apps on shelf'));
+    }
+    eq('toast above wizard', parseInt(getComputedStyle(document.querySelector('.toast-msg')).zIndex, 10) > parseInt(getComputedStyle(document.getElementById('wizardOverlay')).zIndex, 10), true);
+    wizardGo(3); wizard.focus = WIZARD_LOOKS.length; var themeBefore = state.theme; key('ArrowUp');
+    eq('wizard Up from Continue does not switch theme', state.theme, themeBefore);
+    eq('wizard background follows theme var', getComputedStyle(document.getElementById('wizardOverlay')).backgroundImage.indexOf('radial-gradient') !== -1, true);
+    state.catalog = keepCat; state.favorites = keepFav; renderAppsShelf();
+    closeWizard(); localStorage.removeItem('fmtv_setup_done');
+    var runDef = settingDef('runSetup');
+    eq('run setup row', !!runDef && runDef.type === 'run', true);
+    state.theme = oldTheme; state.userName = oldName; state.ambient = oldAmbient; state.favorites = oldFavs;
+    try { localStorage.setItem('fmtv_theme', oldTheme); localStorage.setItem('fmtv_user_name', oldName); localStorage.setItem('fmtv_ambient', oldAmbient); localStorage.setItem('fmtv_favorites', JSON.stringify(oldFavs)); } catch (e) {}
+    applyTheme(); renderAppsShelf(); updateGreeting();
+    if (keepSetup === null) localStorage.removeItem('fmtv_setup_done'); else localStorage.setItem('fmtv_setup_done', keepSetup);
+    done();
+  });
+
+  steps.push(function (done) { // wizard polish: the saved look is marked, Continue stays on screen with 45 apps, this app and duplicates are not listed
+    var keepSetup = localStorage.getItem('fmtv_setup_done');
+    var oldTheme = state.theme, keepCat = state.catalog, keepFav = state.favorites.slice();
+    function key(k) { handleWizardKey({ key: k, keyCode: 0, preventDefault: function () {} }); }
+    var wzq = function (sel) { return document.querySelectorAll('#wizardOverlay ' + sel); };
+    state.theme = 'oled'; applyTheme();
+    openWizard(); wizardGo(3);
+    eq('look: one selected badge', wzq('.wz-look .wz-sel').length, 1);
+    eq('look: badge sits on the saved theme card', wzq('.wz-look.on')[0].dataset.look + ':' + wzq('.wz-look .wz-sel')[0].parentNode.dataset.look, 'oled:oled');
+    eq('look: badge label', wzq('.wz-sel')[0].textContent, t('Selected'));
+    eq('look: selected card keeps a blue outline', getComputedStyle(wzq('.wz-look.on')[0]).borderTopColor, 'rgb(77, 163, 255)');
+    eq('look: initial focus is the saved card', wizard.items[wizard.focus].dataset.look, 'oled');
+    key('ArrowRight');
+    eq('look: moving previews the next card', state.theme, 'day');
+    eq('look: the badge stays on the saved card', wzq('.wz-look .wz-sel')[0].parentNode.dataset.look, 'oled');
+    eq('look: preview is not saved', localStorage.getItem('fmtv_theme') === 'day', false);
+    key('Escape');
+    eq('look: leaving without choosing restores the saved theme', state.theme, 'oled');
+    wizardGo(3); key('ArrowLeft'); key('ArrowLeft');
+    eq('look: previewing again', state.theme !== 'oled', true);
+    closeWizard();
+    eq('look: closing the wizard restores the saved theme', state.theme, 'oled');
+    openWizard(); wizardGo(3); key('ArrowRight'); key('Enter');
+    eq('look: OK saves the card', state.theme + ':' + localStorage.getItem('fmtv_theme'), 'day:day');
+    eq('look: badge moved to the picked card', wzq('.wz-look .wz-sel')[0].parentNode.dataset.look, 'day');
+    eq('look: still exactly one badge', wzq('.wz-sel').length, 1);
+    closeWizard();
+    state.theme = oldTheme; try { localStorage.setItem('fmtv_theme', oldTheme); } catch (e) {} applyTheme();
+
+    var many = [], i;
+    for (i = 0; i < 45; i++) many.push({ id: 'app.n' + i, title: 'Application ' + i, tag: 'Installed App', desc: '', color: '#0a84ff', badge: 'APP', bg: '#123' });
+    many.push({ id: 'app.n3-copy', title: 'application 3', tag: 'Installed App', desc: '', color: '#0a84ff', badge: 'APP', bg: '#123' });
+    many.push({ id: 'app.n4', title: 'Same id again', tag: 'Installed App', desc: '', color: '#0a84ff', badge: 'APP', bg: '#123' });
+    many.push({ id: 'org.webos.freemytv', title: 'Free My TV', tag: 'Installed App', desc: '', color: '#0a84ff', badge: 'FMT', bg: '#123' });
+    many.push({ id: 'other.id', title: 'free my tv', tag: 'Installed App', desc: '', color: '#0a84ff', badge: 'FMT', bg: '#123' });
+    state.catalog = many; state.favorites = ['app.n0'];
+    openWizard(); wizardGo(2);
+    var names = [].map.call(wzq('.wz-tile .wz-tile-name'), function (n) { return n.textContent.toLowerCase(); });
+    eq('apps: 45 tiles after de-duplication', names.length, 45);
+    eq('apps: no duplicate names', names.filter(function (n, k) { return names.indexOf(n) !== k; }).length, 0);
+    eq('apps: this app is not listed', names.indexOf('free my tv'), -1);
+    var cont = wzq('.wz-footer .wz-primary')[0].getBoundingClientRect();
+    eq('apps: Continue stays on screen with 45 apps', cont.bottom <= 1080 && cont.top >= 0, true);
+    var scr = document.getElementById('wzScroll');
+    eq('apps: grid area scrolls instead of growing', scr.scrollHeight > scr.clientHeight, true);
+    wizard.focus = 40; paintWizardFocus();
+    var tileRect = wizard.items[40].getBoundingClientRect(), scrRect = scr.getBoundingClientRect();
+    eq('apps: focused tile is scrolled into view', tileRect.top >= scrRect.top - 1 && tileRect.bottom <= scrRect.bottom + 1, true);
+    wizard.focus = 40; key('ArrowDown'); key('ArrowDown');
+    eq('apps: Down from the last rows reaches Continue', wizard.items[wizard.focus].classList.contains('wz-primary'), true);
+    closeWizard();
+    state.catalog = [{ id: 'keep.me', title: 'Keep Me', tag: 'x', desc: '', color: '#000', badge: 'K', bg: '#000' }];
+    addLaunchPoints([{ id: 'org.webos.freemytv', title: 'Free My TV' }, { id: 'x.self', title: 'FREE MY TV' }, { id: 'dup.keep', title: 'keep me' }, { id: 'new.one', title: 'New One' }, { id: 'new.two', title: 'new one' }]);
+    eq('discovery: skips this app and duplicate names', state.catalog.map(function (c) { return c.id; }).join(','), 'keep.me,new.one');
+    state.catalog = keepCat; state.favorites = keepFav; renderAppsShelf();
+    if (keepSetup === null) localStorage.removeItem('fmtv_setup_done'); else localStorage.setItem('fmtv_setup_done', keepSetup);
+    done();
+  });
+
+  steps.push(function (done) { // profiles swap shelf, look and name; a locked profile hides the settings buttons
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    var base = snapshotProfile();
+    var kid = snapshotProfile(); kid.userName = 'Kid'; kid.theme = 'day'; kid.favorites = ['youtube.leanback.v4']; kid.locked = true;
+    function two() { saveProfiles([{ id: 'p1', name: 'Noa', color: '#2a7de1', data: base }, { id: 'p2', name: 'Kid', color: '#ff9f43', data: kid }]); }
+    two();
+    eq('profiles read', readProfiles().length, 2);
+    localStorage.setItem('fmtv_profiles', '{nope');
+    eq('profiles garbage tolerated', readProfiles().length, 0);
+    localStorage.setItem('fmtv_profiles', '{"a":1}');
+    eq('profiles non-array tolerated', readProfiles().length, 0);
+    two();
+    localStorage.setItem('fmtv_active_profile', 'p1');
+    switchProfile('p2');
+    eq('profile switched name', state.userName, 'Kid');
+    eq('profile switched shelf', state.favorites.join(','), 'youtube.leanback.v4');
+    eq('locked hides Customize', document.getElementById('customizeBtn').offsetParent, null);
+    eq('locked hides TV Settings', document.getElementById('tvSettingsBtn').offsetParent, null);
+    eq('locked leaves nav', mainNavItems.indexOf(document.getElementById('customizeBtn')), -1);
+    eq('pill shows for two people', document.getElementById('profileBtn').offsetParent !== null, true);
+    eq('pill is in the nav even when locked', mainNavItems.indexOf(document.getElementById('profileBtn')) !== -1, true);
+    eq('pill names the active person', document.getElementById('profileBtn').textContent.indexOf('Kid') !== -1, true);
+    eq('active profile saved', localStorage.getItem('fmtv_active_profile'), 'p2');
+    switchProfile('p1');
+    eq('profile switched back', state.userName, base.userName);
+    eq('unlocked shows Customize', document.getElementById('customizeBtn').offsetParent !== null, true);
+    eq('picker needs two profiles', shouldAskWho(), true);
+    state.askWho = 'off';
+    eq('picker can be turned off', shouldAskWho(), false);
+    state.askWho = 'on';
+    saveProfiles([{ id: 'p1', name: 'Noa', color: '#2a7de1', data: base }]);
+    eq('picker hidden for one profile', shouldAskWho(), false);
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    applyProfile(base);
+    eq('pill hidden without profiles', document.getElementById('profileBtn').offsetParent, null);
+    done();
+  });
+
+  steps.push(function (done) { // Add person: own wizard, Back cancels without a trace, Skip keeps defaults, Kids locks, Remove asks twice
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    var keepSetup = localStorage.getItem('fmtv_setup_done');
+    var orig = snapshotProfile(); // the harness state, put back at the end
+    var base = snapshotProfile();
+    base.userName = 'Noa'; base.theme = 'night'; base.city = 'Lisbon'; base.favorites = ['netflix', 'youtube.leanback.v4'];
+    applyProfile(base);
+    var before = JSON.stringify(snapshotProfile());
+    function key(k) { handleWizardKey({ key: k, keyCode: 0, preventDefault: function () {} }); }
+    function itemByText(text) { for (var i = 0; i < wizard.items.length; i++) if (wizard.items[i].textContent.indexOf(text) === 0) return i; return -1; }
+    // cancel
+    startAddPerson();
+    eq('add opens the wizard', wizard.open && !document.getElementById('wizardOverlay').hidden, true);
+    eq('add starts on who', WIZARD_STEPS[wizard.step], 'who');
+    eq('add creates two people', readProfiles().length, 2);
+    eq('add first person keeps their name', readProfiles()[0].name, 'Noa');
+    eq('add new person starts from the default shelf', state.favorites.join(','), DEFAULT_FAVORITES.join(','));
+    eq('add new person has no name', state.userName, '');
+    eq('add new person has the default look', state.theme, settingDef('theme').def);
+    eq('add new person has no city', state.city, '');
+    eq('add new person is active', activeProfileId() !== readProfiles()[0].id, true);
+    eq('add has a kids toggle', itemByText(t('Kids profile (hides settings)')) !== -1, true);
+    eq('add hides the welcome row', document.querySelectorAll('#wizardRail .wz-rail-row').length, 4);
+    eq('add pill shows', document.getElementById('profileBtn').offsetParent !== null, true);
+    key('Escape');
+    eq('add Back on who closes', wizard.open, false);
+    eq('add cancel leaves no profiles', readProfiles().length, 0);
+    eq('add cancel leaves no active key', localStorage.getItem('fmtv_active_profile'), null);
+    eq('add cancel restores everything', JSON.stringify(snapshotProfile()), before);
+    eq('add cancel hides the pill', document.getElementById('profileBtn').offsetParent, null);
+    // Back from a later step goes back first
+    startAddPerson(); wizardGo(2); key('Escape');
+    eq('add Back from apps returns to who', wizard.open && WIZARD_STEPS[wizard.step], 'who');
+    key('Escape');
+    eq('add then cancel again', readProfiles().length, 0);
+    // Skip keeps the person with defaults and a numbered name
+    startAddPerson();
+    wizard.focus = itemByText(t('Skip setup'));
+    key('Enter');
+    eq('add skip closes', wizard.open, false);
+    eq('add skip keeps two people', readProfiles().length, 2);
+    eq('add skip names the person', readProfiles()[1].name, t('Person') + ' 2');
+    eq('add skip leaves the new person active', activeProfileId(), readProfiles()[1].id);
+    eq('add skip is not locked', state.locked, false);
+    eq('remove row is offered', settingsRowsFor(2).some(function (d) { return d.id === 'removePerson'; }), true);
+    // remove asks twice, then returns to the first person exactly
+    openSettingsModal();
+    settingsUi.zone = 'rows'; settingsUi.cat = 2;
+    var rows = settingsRowsFor(2);
+    settingsUi.row = rows.map(function (d) { return d.id; }).indexOf('removePerson');
+    eq('remove defaults to another person', removeTargetProfile().id !== activeProfileId(), true);
+    cyclePick(1);
+    eq('remove can pick the active person', removeTargetProfile().id, activeProfileId());
+    activateRow(settingDef('removePerson'));
+    eq('remove asks first', settingsUi.confirmReset, 'removePerson');
+    eq('remove confirm names the person', document.querySelector('#settingsRows .settings-row[data-id="removePerson"] .sr-value').textContent, t('Press OK again to remove %s', removeTargetProfile().name));
+    eq('remove asks and keeps the people', readProfiles().length, 2);
+    activateRow(settingDef('removePerson'));
+    eq('remove deletes the person', readProfiles().length, 0);
+    eq('remove returns to the first person exactly', JSON.stringify(snapshotProfile()), before);
+    eq('remove leaves no active key', localStorage.getItem('fmtv_active_profile'), null);
+    eq('remove hides the pill', document.getElementById('profileBtn').offsetParent, null);
+    eq('remove row hidden again', settingsRowsFor(2).some(function (d) { return d.id === 'removePerson'; }), false);
+    closeSettingsModal();
+    // Kids profile: typed name, lock, no remove row, settings buttons hidden
+    startAddPerson();
+    var nameInput = document.getElementById('wzName');
+    nameInput.value = 'Kid'; nameInput.dispatchEvent(new Event('input'));
+    wizard.focus = itemByText(t('Kids profile (hides settings)')); key('Enter');
+    eq('kids toggle locks', state.locked, true);
+    eq('kids toggle hides Customize', document.getElementById('customizeBtn').offsetParent, null);
+    wizard.focus = itemByText(t('Skip setup')); key('Enter');
+    eq('kids profile kept', readProfiles().length, 2);
+    eq('kids profile named', readProfiles()[1].name, 'Kid');
+    eq('kids profile saved locked', readProfiles()[1].data.locked, true);
+    eq('kids profile hides TV Settings', document.getElementById('tvSettingsBtn').offsetParent, null);
+    eq('kids profile has no remove row', settingsRowsFor(2).some(function (d) { return d.id === 'removePerson'; }), false);
+    eq('kids profile can still switch', settingsRowsFor(2).some(function (d) { return d.id === 'switchPerson'; }), true);
+    // the picker: keys route to it, Right/Enter pick, Back keeps the person
+    function press(k) { document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true })); }
+    openPicker();
+    eq('picker open', picker.open && !document.getElementById('profileOverlay').hidden, true);
+    eq('picker lists everyone', document.querySelectorAll('#profileCards .profile-card').length, 2);
+    eq('picker starts on the active person', picker.focus, 1);
+    eq('picker is above the home screen', parseInt(getComputedStyle(document.getElementById('profileOverlay')).zIndex, 10) >= 2500, true);
+    eq('picker focus ring', getComputedStyle(document.querySelector('.profile-card.focused')).outlineStyle, 'solid');
+    press('ArrowLeft');
+    eq('picker Left moves', picker.focus, 0);
+    press('Escape');
+    eq('picker Back closes', picker.open, false);
+    eq('picker Back keeps the person', state.userName, 'Kid');
+    openPicker(); press('ArrowLeft'); press('Enter');
+    eq('picker OK switches', state.userName, 'Noa');
+    eq('picker OK closes', picker.open, false);
+    eq('picker OK restores the first person exactly', JSON.stringify(snapshotProfile()), before);
+    eq('picker OK unlocks', document.getElementById('customizeBtn').offsetParent !== null, true);
+    // an unlocked person removes the locked Kids person with the pick row
+    var kidId = readProfiles()[1].id;
+    eq('remove offers the locked person first', removeTargets()[0].id, kidId);
+    openSettingsModal();
+    settingsUi.zone = 'rows'; settingsUi.cat = 2;
+    settingsUi.row = settingsRowsFor(2).map(function (d) { return d.id; }).indexOf('removePerson');
+    eq('remove targets the locked person by default', removeTargetProfile().id, kidId);
+    activateRow(settingDef('removePerson'));
+    eq('remove confirm names the Kids person', document.querySelector('#settingsRows .settings-row[data-id="removePerson"] .sr-value').textContent, t('Press OK again to remove %s', 'Kid'));
+    activateRow(settingDef('removePerson'));
+    eq('remove deletes the locked person', readProfiles().length, 0);
+    eq('remove keeps the active person untouched', JSON.stringify(snapshotProfile()), before);
+    eq('remove leaves no profile list', localStorage.getItem('fmtv_profiles'), null);
+    closeSettingsModal();
+    // the row is hidden while a locked person is active
+    saveProfiles([{ id: 'p1', name: 'Noa', color: '#2a7de1', data: JSON.parse(before) }, { id: 'p2', name: 'Kid', color: '#ff9f43', data: JSON.parse(before) }]);
+    localStorage.setItem('fmtv_active_profile', 'p1');
+    eq('remove row offered to an unlocked person', settingsRowsFor(2).some(function (d) { return d.id === 'removePerson'; }), true);
+    state.locked = true;
+    eq('remove row hidden while locked', settingsRowsFor(2).some(function (d) { return d.id === 'removePerson'; }), false);
+    state.locked = false;
+    // three people: remove the active one, then a non-active one
+    function personData(name, locked) { var d = JSON.parse(before); d.userName = name; d.locked = !!locked; return d; }
+    saveProfiles([{ id: 'a', name: 'A', color: '#2a7de1', data: personData('A') }, { id: 'b', name: 'B', color: '#1fa05a', data: personData('B') }, { id: 'c', name: 'C', color: '#ff9f43', data: personData('C', true) }]);
+    localStorage.setItem('fmtv_active_profile', 'a');
+    applyProfile(personData('A'));
+    removeProfileById('b');
+    eq('non-active removal keeps the active person', activeProfileId() + state.userName, 'aA');
+    eq('non-active removal leaves two', readProfiles().length, 2);
+    saveProfiles([{ id: 'a', name: 'A', color: '#2a7de1', data: personData('A') }, { id: 'b', name: 'B', color: '#1fa05a', data: personData('B') }, { id: 'c', name: 'C', color: '#ff9f43', data: personData('C', true) }]);
+    removeProfileById('a');
+    eq('active removal makes the first remaining active', activeProfileId(), 'b');
+    eq('active removal applies their settings', state.userName, 'B');
+    eq('active removal leaves two', readProfiles().length, 2);
+    removeProfileById('c');
+    eq('removing down to one drops the list', localStorage.getItem('fmtv_profiles'), null);
+    // removing the owner while a locked person is left must not leave the TV locked
+    saveProfiles([{ id: 'a', name: 'A', color: '#2a7de1', data: personData('A') }, { id: 'c', name: 'C', color: '#ff9f43', data: personData('C', true) }]);
+    localStorage.setItem('fmtv_active_profile', 'a');
+    applyProfile(personData('A'));
+    removeActiveProfile();
+    eq('removing the owner leaves the other person', state.userName, 'C');
+    eq('a lone person is never locked', state.locked, false);
+    eq('a lone person gets Customize back', document.getElementById('customizeBtn').offsetParent !== null, true);
+    eq('a lone person leaves no profile list', localStorage.getItem('fmtv_profiles'), null);
+    // the last unlocked person cannot be removed, or nobody could reach Customize or Erase
+    saveProfiles([{ id: 'a', name: 'A', color: '#2a7de1', data: personData('A') }, { id: 'b', name: 'B', color: '#1fa05a', data: personData('B', true) }, { id: 'c', name: 'C', color: '#ff9f43', data: personData('C', true) }]);
+    localStorage.setItem('fmtv_active_profile', 'a');
+    applyProfile(personData('A'));
+    eq('last grown-up is not a remove target', removeTargets().map(function (x) { return x.id; }).join(','), 'b,c');
+    removeProfileById('a');
+    eq('last grown-up cannot be removed', readProfiles().length, 3);
+    eq('last grown-up stays active', activeProfileId(), 'a');
+    removeProfileById('b');
+    eq('a locked person can be removed', readProfiles().map(function (x) { return x.id; }).join(','), 'a,c');
+    // moving to a locked person closes Customize
+    openSettingsModal();
+    eq('customize open before the switch', modalOpen, true);
+    switchProfile('c');
+    eq('switching to a locked person closes Customize', modalOpen, false);
+    eq('and hides the modal', document.getElementById('settingsModal').classList.contains('active'), false);
+    switchProfile('a');
+    // the screensaver covers the picker and the wizard, and handing back keeps them as they were
+    var ssOverlay = document.getElementById('screensaverOverlay');
+    openPicker(); picker.focus = 1;
+    enterScreensaver();
+    eq('screensaver over the picker', screensaverOn && ssOverlay.classList.contains('active') && picker.open, true);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    eq('first key only ends the screensaver', screensaverOn, false);
+    eq('picker still open with its focus', picker.open && picker.focus, 1);
+    eq('picker overlay still shown', document.getElementById('profileOverlay').hidden, false);
+    closePicker();
+    openWizard(); wizardGo(1); wizard.focus = 0;
+    var wzStep = wizard.step;
+    enterScreensaver();
+    eq('screensaver over the wizard', screensaverOn && wizard.open, true);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    eq('wizard key ended the screensaver only', screensaverOn, false);
+    eq('wizard keeps step and focus', wizard.open && wizard.step === wzStep && wizard.focus, 0);
+    closeWizard();
+    // clean up
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    applyProfile(orig);
+    eq('cleanup hides the pill', document.getElementById('profileBtn').offsetParent, null);
+    if (keepSetup === null) localStorage.removeItem('fmtv_setup_done'); else localStorage.setItem('fmtv_setup_done', keepSetup);
+    done();
+  });
+
+  steps.push(function (done) { // boot with profiles, an unknown active id, hdmi isolation, numeric lat/lon
+    var orig = snapshotProfile(), keepBoot = wizardAtBoot;
+    function person(name, locked, extra) { var d = JSON.parse(JSON.stringify(orig)); d.userName = name; d.locked = !!locked; for (var k in extra) d[k] = extra[k]; return d; }
+    function two(da, db) { saveProfiles([{ id: 'a', name: 'A', color: '#2a7de1', data: da }, { id: 'b', name: 'B', color: '#1fa05a', data: db }]); }
+    two(person('A'), person('B', true));
+    localStorage.setItem('fmtv_active_profile', 'zzz');
+    wizardAtBoot = true; bootProfiles();
+    eq('boot never opens the picker over the wizard', picker.open, false);
+    eq('boot repairs an unknown active id', activeProfileId(), 'a');
+    eq('boot lock follows an unlocked person', state.locked, false);
+    localStorage.setItem('fmtv_active_profile', 'b');
+    wizardAtBoot = false; bootProfiles();
+    eq('boot opens the picker', picker.open, true);
+    eq('boot lock follows the locked person', state.locked, true);
+    eq('boot keeps a valid active id', activeProfileId(), 'b');
+    closePicker();
+    localStorage.removeItem('fmtv_active_profile');
+    bootProfiles(); closePicker();
+    eq('boot repairs a missing active id', activeProfileId(), 'a');
+    eq('boot lock after repair', state.locked, false);
+    // an unknown active id saves nobody
+    two(person('A'), person('B'));
+    localStorage.setItem('fmtv_active_profile', 'zzz');
+    state.userName = 'Stranger';
+    saveCurrentProfile();
+    eq('unknown active id does not overwrite the first person', readProfiles()[0].data.userName, 'A');
+    eq('unknown active id does not rename anybody', (syncProfileName(), readProfiles()[0].name), 'A');
+    // hdmi devices are not shared between people
+    two(person('A', false, { hdmiDevices: { 'com.webos.app.hdmi1': 'ps5' } }), person('B', false, { hdmiDevices: {} }));
+    localStorage.setItem('fmtv_active_profile', 'a');
+    applyProfile(person('A', false, { hdmiDevices: { 'com.webos.app.hdmi1': 'ps5' } }));
+    switchProfile('b');
+    eq('hdmi devices follow the person', JSON.stringify(state.hdmiDevices), '{}');
+    state.hdmiDevices['com.webos.app.hdmi2'] = 'xbox';
+    switchProfile('a');
+    eq('hdmi devices come back', JSON.stringify(state.hdmiDevices), JSON.stringify({ 'com.webos.app.hdmi1': 'ps5' }));
+    eq('hdmi devices of the other person were saved', JSON.stringify(readProfiles()[1].data.hdmiDevices), JSON.stringify({ 'com.webos.app.hdmi2': 'xbox' }));
+    // lat and lon stay numbers through a profile round trip
+    two(person('A', false, { lat: 38.72, lon: -9.14 }), person('B'));
+    localStorage.setItem('fmtv_active_profile', 'b');
+    switchProfile('a');
+    eq('lat is a number', typeof state.lat + state.lat, 'number38.72');
+    eq('lon is a number', typeof state.lon + state.lon, 'number-9.14');
+    eq('lat is stored', localStorage.getItem('fmtv_lat'), '38.72');
+    switchProfile('b');
+    switchProfile('a');
+    eq('lat survives a round trip', snapshotProfile().lat, 38.72);
+    // reset follows into the profile name
+    localStorage.setItem('fmtv_active_profile', 'a');
+    state.userName = 'Zed'; syncProfileName();
+    eq('profile name follows the typed name', readProfiles()[0].name, 'Zed');
+    var keepSet = {}; SETTINGS.forEach(function (d) { if (d.field) keepSet[d.field] = state[d.field]; });
+    var keepFavs = state.favorites.slice(), keepHdmi = JSON.stringify(state.hdmiDevices);
+    resetAllSettings();
+    eq('reset renames the stored person', readProfiles()[0].name, t('Person') + ' 1');
+    SETTINGS.forEach(function (d) { if (d.field) { state[d.field] = keepSet[d.field]; try { localStorage.setItem(d.store, keepSet[d.field]); } catch (e) {} } });
+    state.favorites = keepFavs; state.hdmiDevices = JSON.parse(keepHdmi); applyStaticTranslations();
+    // clean up
+    wizardAtBoot = keepBoot;
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    applyProfile(orig);
     done();
   });
 
   (function run(i) {
     if (i >= steps.length) { write(); return; }
-    steps[i](function () { setTimeout(function () { run(i + 1); }, 100); });
+    try { steps[i](function () { setTimeout(function () { run(i + 1); }, 100); }); }
+    catch (e) { fails.push('step ' + i + ' threw: ' + String(e && e.stack || e).slice(0, 400)); write(); }
   })(0);
 }, 2000);
 """
@@ -1286,7 +2152,7 @@ def find_chrome(explicit):
 def run_language(chrome, lang, workdir):
     with open(APP, encoding="utf-8") as f:
         html = f.read()
-    html = html.replace("<head>", f'<head>{ERROR_HOOK}<script>localStorage.setItem("fmtv_lang","{lang}")</script>', 1)
+    html = html.replace("<head>", f'<head>{ERROR_HOOK}<script>localStorage.setItem("fmtv_lang","{lang}");localStorage.setItem("fmtv_setup_done","1")</script>', 1)
     html = html.replace("</body>", f"<script>{PROBE}</script><script>{SCENARIO}</script></body>")
     page = os.path.join(workdir, f"app_{lang}.html")
     with open(page, "w", encoding="utf-8") as f:
@@ -1294,7 +2160,7 @@ def run_language(chrome, lang, workdir):
     shutil.copytree(os.path.join(REPO_DIR, "app", "assets"), os.path.join(workdir, "assets"), dirs_exist_ok=True)
     res = subprocess.run(
         [chrome, "--headless=new", "--disable-gpu", "--no-sandbox", "--window-size=1920,1080",
-         "--virtual-time-budget=25000", f"--user-data-dir={os.path.join(workdir, 'profile_' + lang)}",
+         "--virtual-time-budget=60000", f"--user-data-dir={os.path.join(workdir, 'profile_' + lang)}",
          "--dump-dom", f"file://{page}"],
         capture_output=True, text=True, timeout=120)
     m = re.search(r'<pre id="__result">(.*?)</pre>', res.stdout, re.S)

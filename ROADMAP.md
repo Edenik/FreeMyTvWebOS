@@ -49,6 +49,13 @@ flowchart LR
 - [ ] **Wake-on-LAN (WoL) PC Tile:** Turn on your gaming PC or home media server automatically when clicking the HDMI / Plex tile.
 - [ ] **System Debloat Helper:** Optional one-click toggle inside Settings to mute LG promotional notifications and clear background app memory. Needs root (Homebrew Channel) — this app runs unrooted, so it cannot touch system services on its own.
 
+### v1.5 — Personal TV (Released)
+- [x] **First-run setup wizard:** name, shelf apps, look, city and screensaver photos, all with the remote.
+- [x] **People:** several people on one TV, each with their own shelf, look, city and photos; a "Who is watching?" picker and a locked Kids profile that hides Customize.
+- [x] **Scenes and pick-up:** one-press scenes that open the app you use at that time of day, and a "Pick up where you left off" row built from what you opened last (kept only on this TV).
+- [x] **Night dim:** the home screen softens after sunset.
+- [x] **Customize reorganised:** seven categories, with Reset settings and Erase everything on this TV.
+
 ### v1.4 — Official Homebrew Channel Repo & Home Button Hook
 - [ ] **Publish to `webosbrew.org` Repository:** Manifest generation and the package entry are ready in [`homebrew/`](homebrew/README.md); what remains is the PR to `webosbrew/apps-repo`.
 - [ ] **Optional Physical Home Button Hijack (Root / Autostart):** For rooted TVs, optionally bind the physical `Home` button on the Magic Remote directly to **Free My TV** instead of `com.webos.app.home`.

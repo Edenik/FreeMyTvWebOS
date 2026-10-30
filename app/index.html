@@ -215,6 +215,8 @@
             transition: transform 0.22s cubic-bezier(0.3, 1.4, 0.5, 1), background 0.2s ease, border-color 0.2s ease;
         }
 
+        .header-btn[hidden] { display: none; }
+
         .header-btn:hover,
         .header-btn:focus,
         .header-btn.focused {
@@ -284,12 +286,16 @@
 
         /* Top Shelf Hero Details */
         .hero-shelf {
-            height: 140px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            transition: all 0.3s ease;
         }
+
+        .greeting { margin-bottom: 12px; }
+        .greeting-eyebrow { font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; color: #ffbd7a; font-weight: 600; }
+        .greeting-title { font-size: 44px; line-height: 1.08; font-weight: 700; margin-top: 4px; }
+        .greeting-sub { font-size: 18px; color: var(--text-secondary); margin-top: 2px; }
+        .greeting-sub:empty { display: none; }
+        .hero-desc { display: none; } /* the node stays in the DOM: setMainFocus writes to it */
 
         .hero-tag {
             font-size: 13px;
@@ -297,28 +303,36 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--accent);
-            margin-bottom: 6px;
+            margin-bottom: 2px;
         }
 
         .hero-title {
             font-size: 40px;
             font-weight: 700;
             letter-spacing: -1px;
-            margin-bottom: 6px;
+            margin-bottom: 0;
             line-height: 1.1;
         }
 
-        .hero-desc {
-            font-size: 16px;
-            font-weight: 400;
-            color: var(--text-secondary);
-            max-width: 820px;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+        .scenes-row { display: flex; gap: 10px; margin-bottom: 8px; }
+        .scenes-row[hidden] { display: none; }
+        .scene-chip { display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 20px; border-radius: 22px; background: rgba(255,255,255,0.12); border: 0; color: var(--text-primary); font-size: 17px; font-weight: 500; font-family: inherit; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease; }
+        .scene-chip.focused { transform: scale(1.06); background: rgba(255,255,255,0.22); }
+
+        /* Pick up where you left off: compact cards, name and time overlaid on the art */
+        .pickup-section { margin-bottom: 10px; }
+        .pickup-header { font-size: 18px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary); }
+        .pickup-row { display: flex; gap: 14px; }
+        .pickup-card { width: 300px; background: none; border: 0; padding: 0; color: inherit; text-align: left; cursor: pointer; font-family: inherit; position: relative; transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: 14px; }
+        .pickup-section[hidden] { display: none; }
+        .pickup-art { width: 300px; height: 110px; border-radius: 14px; overflow: hidden; position: relative; }
+        .pickup-art .app-icon { width: 100%; height: 100%; border-radius: 0; }
+        .pickup-art .app-icon img.tile-brand-logo { width: 46%; height: 58%; left: 27%; top: 8px; }
+        .pickup-art .app-art-fallback { font-size: 22px; padding-bottom: 28px; }
+        .pickup-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 12px 8px; background: linear-gradient(to top, rgba(0,0,0,.78), rgba(0,0,0,0)); }
+        .pickup-name { font-size: 16px; font-weight: 600; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pickup-when { font-size: 13px; color: rgba(255,255,255,.78); line-height: 1.2; }
+        .pickup-card.focused { transform: scale(1.06); box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 30px rgba(255,255,255,.25); }
 
         /* Glass App Shelf */
         .shelf-wrapper {
@@ -529,6 +543,79 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 20px rgba(255,255,255,0.2);
             background: rgba(255, 255, 255, 0.14);
         }
+
+        /* One focus language: white ring + size + glow. Colour alone never marks focus. */
+        .header-btn.focused, .weather-widget.focused, .app-tile.focused, .pick-card.focused,
+        .picks-tab.focused, .scene-chip.focused, .wz-item.focused, .profile-card.focused {
+            outline: 3px solid #ffffff;
+            outline-offset: 3px;
+        }
+        .pickup-card.focused { outline: 3px solid #ffffff; outline-offset: 6px; border-radius: 14px; }
+
+        .wizard { position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; z-index: 2500; display: flex; gap: 84px; padding: 72px 96px 60px; box-sizing: border-box; background: #04060a var(--bg-gradient); color: #f2f5fb; }
+        .wizard[hidden] { display: none; }
+        .profile-overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; z-index: 2500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 56px; padding: 64px; background: #04060a var(--bg-gradient); color: #f2f5fb; }
+        .profile-overlay[hidden] { display: none; }
+        .profile-title { font-size: 56px; font-weight: 700; }
+        .profile-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 48px; max-width: 1600px; }
+        .profile-card { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 24px; border: 0; border-radius: 32px; background: transparent; color: inherit; font: inherit; cursor: pointer; outline: none; transition: transform 0.2s ease; }
+        .profile-card.focused { transform: scale(1.08); background: rgba(255, 255, 255, 0.08); }
+        .profile-avatar { width: 170px; height: 170px; border-radius: 36px; display: flex; align-items: center; justify-content: center; font-size: 76px; font-weight: 700; color: #fff; }
+        .profile-name { font-size: 24px; font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .wz-rail { width: 390px; flex: none; display: flex; flex-direction: column; gap: 33px; }
+        .wz-brand { display: flex; align-items: center; gap: 18px; }
+        .wz-brand-tile { width: 48px; height: 48px; border-radius: 12px; background: #2a7de1; display: flex; align-items: center; justify-content: center; }
+        .wz-brand-name { font-size: 28px; font-weight: 600; }
+        .wz-minute { font-size: 19px; letter-spacing: 0.12em; text-transform: uppercase; color: #8fb8ff; font-weight: 600; }
+        .wz-steps { display: flex; flex-direction: column; gap: 6px; }
+        .wz-rail-row { display: flex; align-items: center; gap: 18px; height: 69px; font-size: 25px; color: #aeb8d0; box-sizing: border-box; }
+        .wz-rail-row.done { color: #8c97ae; }
+        .wz-rail-row.current { padding: 0 18px; margin: 0 -18px; border-radius: 15px; background: rgba(77,163,255,0.16); font-weight: 600; color: #fff; }
+        .wz-dot { width: 36px; height: 36px; flex: none; border-radius: 18px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 700; border: 3px solid #46536e; color: #aeb8d0; }
+        .wz-rail-row.done .wz-dot { background: #1f6b4b; border: 0; }
+        .wz-rail-row.current .wz-dot { background: #2a7de1; border: 0; color: #fff; }
+        .wz-note { margin-top: auto; font-size: 21px; line-height: 1.5; color: #98a3bb; }
+        .wz-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 30px; }
+        .wz-head { display: flex; flex-direction: column; gap: 9px; }
+        .wz-eyebrow { font-size: 19px; letter-spacing: 0.12em; text-transform: uppercase; color: #ffbd7a; font-weight: 600; }
+        .wz-title { overflow-wrap: anywhere; font-size: 66px; font-weight: 700; line-height: 1.05; }
+        .wz-lead { font-size: 27px; color: #b3bdd3; max-width: 1200px; }
+        .wz-fields { display: flex; flex-direction: column; gap: 24px; max-width: 900px; }
+        .wz-field { display: flex; flex-direction: column; gap: 9px; }
+        .wz-label { font-size: 21px; color: #aeb8d0; font-weight: 600; }
+        .wz-input { width: 100%; height: 96px; padding: 0 36px; border-radius: 24px; border: 2px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.08); color: inherit; font-size: 30px; font-family: inherit; box-sizing: border-box; }
+        .wz-input::placeholder { color: #7f8aa3; }
+        .wz-toggle { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: 100%; max-width: 900px; min-height: 96px; padding: 0 36px; border-radius: 24px; border: 0; background: rgba(255,255,255,0.06); color: inherit; font-size: 27px; font-weight: 600; font-family: inherit; text-align: left; box-sizing: border-box; }
+        .wz-pill { flex: none; min-width: 84px; height: 48px; padding: 0 24px; border-radius: 24px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 600; border: 2px solid #46536e; color: #aeb8d0; }
+        .wz-toggle.on .wz-pill { background: #2a7de1; border-color: #2a7de1; color: #fff; }
+        .wz-grid { display: flex; flex-wrap: wrap; display: grid; gap: 24px; }
+        .wz-apps { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+        .wz-looks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .wz-tile { display: flex; align-items: center; gap: 15px; min-height: 84px; border-radius: 21px; border: 0; padding: 12px 27px; background: rgba(255,255,255,0.06); color: inherit; font-size: 26px; font-family: inherit; text-align: left; }
+        .wz-tile.on { background: rgba(77,163,255,0.2); }
+        .wz-check svg, .wz-dot svg { display: block; }
+        .wz-tile-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .wz-check { flex: none; width: 30px; height: 30px; border-radius: 15px; background: #2a7de1; display: flex; align-items: center; justify-content: center; }
+        .wz-look { position: relative; display: flex; align-items: center; gap: 21px; border-radius: 21px; border: 3px solid transparent; padding: 15px; background: rgba(255,255,255,0.06); color: inherit; font-family: inherit; text-align: left; }
+        .wz-look.on { background: rgba(77,163,255,0.16); border-color: #4da3ff; }
+        .wz-sel { position: absolute; top: 12px; right: 14px; display: flex; align-items: center; gap: 9px; height: 36px; padding: 0 15px 0 6px; border-radius: 18px; background: #2a7de1; color: #fff; font-size: 19px; font-weight: 600; }
+        .wz-sel svg { display: block; }
+        .wz-scroll { flex: 1; min-height: 0; position: relative; overflow: hidden; padding: 10px; margin: -10px; }
+        .wz-thumb { width: 225px; height: 132px; flex: none; border-radius: 12px; position: relative; box-sizing: border-box; }
+        .wz-thumb-bar { position: absolute; left: 15px; top: 15px; width: 90px; height: 12px; border-radius: 6px; background: rgba(255,255,255,0.8); }
+        .wz-thumb-tiles { position: absolute; left: 15px; bottom: 15px; display: flex; gap: 9px; }
+        .wz-thumb-tiles span { width: 42px; height: 42px; border-radius: 8px; }
+        .wz-look-text { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+        .wz-look-name { font-size: 30px; font-weight: 600; }
+        .wz-look-desc { font-size: 21px; color: #b3bdd3; line-height: 1.35; }
+        .wz-footer { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+        .wz-hints { display: flex; gap: 33px; font-size: 21px; color: #aeb8d0; }
+        .wz-hints b { color: #e6ebf6; font-weight: 600; }
+        .wz-actions { display: flex; align-items: center; gap: 18px; }
+        .wz-primary, .wz-skip { display: flex; align-items: center; height: 78px; border-radius: 39px; font-size: 27px; font-weight: 600; font-family: inherit; color: #fff; box-sizing: border-box; }
+        .wz-primary { padding: 0 42px; border: 0; background: #2a7de1; }
+        .wz-skip { padding: 0 36px; font-size: 24px; background: transparent; border: 2px solid rgba(255,255,255,0.28); color: #aeb8d0; }
+        .wz-item.focused { outline: none; box-shadow: 0 0 0 6px #ffffff, 0 0 57px rgba(77,163,255,0.4); }
 
         .pick-poster {
             width: 92px;
@@ -864,7 +951,7 @@
             font-weight: 600;
             box-shadow: 0 15px 35px rgba(0,0,0,0.6);
             display: none;
-            z-index: 1000;
+            z-index: 2600; /* above the setup wizard (2500), below the screensaver (3000) */
         }
 
         /* Weather & Sun Drawer */
@@ -983,6 +1070,7 @@
         /* OLED-Safe Idle Screensaver */
         .screensaver {
             position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
             inset: 0;
             background: #000000;
             z-index: 3000;
@@ -1026,6 +1114,9 @@
             color: rgba(255, 255, 255, 0.4);
             margin-top: 6px;
         }
+
+        .screensaver-weather { font-size: 20px; color: rgba(255, 255, 255, 0.5); margin-top: 6px; }
+        .screensaver-weather:empty { display: none; }
 
         /* Ambient photo layer: dimmed photos behind the clock; only opacity and transform animate. */
         .screensaver .screensaver-clock-wrap {
@@ -1144,6 +1235,21 @@
         }
 
         .home-photo-credit:empty { display: none; }
+
+        /* Fixed footer at the bottom right: the home rows already fill the screen, and the photo credit sits bottom left */
+        .trust-line {
+            position: fixed;
+            right: 54px;
+            bottom: 10px;
+            z-index: 11;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            opacity: 0.75;
+            pointer-events: none;
+        }
     </style>
     <script>
         (function() {
@@ -1177,6 +1283,9 @@
                 <div class="tag-pill" id="themeBadge">60 FPS • Onboard</div>
             </div>
             <div class="header-info">
+                <button class="header-btn nav-item" id="profileBtn" hidden data-tag="Personalize" data-title="Switch person" data-desc="A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.">
+                    <span id="profileBtnLabel"></span>
+                </button>
                 <button class="header-btn nav-item" id="customizeBtn" data-tag="Personalize" data-title="Customize Shelf & Settings" data-desc="Choose which installed TV apps appear on your shelf, configure weather city, and TMDB key.">
                     <span>⚙️ Customize</span>
                 </button>
@@ -1199,9 +1308,22 @@
 
         <!-- Top Shelf (Hero Preview) -->
         <div class="hero-shelf">
+            <div class="greeting" id="greeting">
+                <div class="greeting-eyebrow" id="greetingEyebrow"></div>
+                <div class="greeting-title" id="greetingTitle"></div>
+                <div class="greeting-sub" id="greetingSub"></div>
+            </div>
             <div class="hero-tag" id="heroTag">App Launcher</div>
             <div class="hero-title" id="heroTitle">Clean & Ad-Free Home</div>
             <div class="hero-desc" id="heroDesc">Navigate smoothly with Magic Remote D-Pad or pointer. Launch apps in 100ms with zero ads.</div>
+        </div>
+
+        <div class="scenes-row" id="scenesRow"></div>
+
+        <!-- Pick up where you left off -->
+        <div class="pickup-section" id="pickupSection" hidden>
+            <div class="pickup-header">Pick up where you left off</div>
+            <div class="pickup-row" id="pickupRow"></div>
         </div>
 
         <!-- Glass Shelf: Apps -->
@@ -1230,6 +1352,22 @@
             </div>
             <div class="picks-grid" id="picksGrid"></div>
         </div>
+        <div class="trust-line" id="trustLine">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+            <span>No ads. No account. Your settings stay on this TV.</span>
+        </div>
+    </div>
+
+    <!-- Who is watching? -->
+    <div class="profile-overlay" id="profileOverlay" hidden>
+        <div class="profile-title">Who is watching?</div>
+        <div class="profile-cards" id="profileCards"></div>
+    </div>
+
+    <!-- First-run setup wizard -->
+    <div class="wizard" id="wizardOverlay" hidden>
+        <aside class="wz-rail" id="wizardRail"></aside>
+        <section class="wz-main" id="wizardMain"></section>
     </div>
 
     <!-- Customize Free My TV: categories, one row per setting, an apps page; every change applies at once -->
@@ -1303,6 +1441,7 @@
         <div class="screensaver-clock-wrap" id="screensaverClockWrap">
             <div class="screensaver-clock" id="screensaverClock">20:30</div>
             <div class="screensaver-date" id="screensaverDate">Mon, Oct 19</div>
+            <div class="screensaver-weather" id="screensaverWeather"></div>
             <div class="screensaver-credit" id="screensaverCredit"></div>
         </div>
     </div>
@@ -1413,6 +1552,9 @@
         ];
 
         // --- Persistent State ---
+        // Decided before anything at boot can write a fmtv_* key.
+        var wizardAtBoot = wizardNeeded();
+
         var state = {
             favorites: JSON.parse(localStorage.getItem('fmtv_favorites') || 'null') || DEFAULT_FAVORITES.slice(),
             hdmiDevices: readDeviceChoices(),
@@ -1434,10 +1576,16 @@
             homePhotos: localStorage.getItem('fmtv_home_photos') || 'off',
             keepAwake: localStorage.getItem('fmtv_keep_awake') || 'on',
             ambientBright: localStorage.getItem('fmtv_ambient_bright') || 'normal',
+            nightDim: localStorage.getItem('fmtv_night_dim') || 'on',
             ambientSpeed: localStorage.getItem('fmtv_ambient_speed') || 'normal',
             clockPos: localStorage.getItem('fmtv_clock_pos') || 'bl',
+            userName: localStorage.getItem('fmtv_user_name') || '',
             catalog: DEFAULT_CATALOG.slice(),
             showTrending: localStorage.getItem('fmtv_show_trending') || 'on',
+            pickup: localStorage.getItem('fmtv_pickup') || 'on',
+            scenes: localStorage.getItem('fmtv_scenes') || 'on',
+            askWho: localStorage.getItem('fmtv_ask_who') || 'on',
+            locked: false,
             picksTab: 'movies',
             hourlyForecast: [],
             sunrise: '',
@@ -1450,7 +1598,7 @@
         // English is the source language: every UI string below is looked up by its
         // English text, and anything without a translation simply stays English.
         // Written in plain ES5 for the Chromium 38 engine on webOS 3.x.
-        var APP_VERSION = '1.4.0'; // keep equal to app/appinfo.json (scripts/check.py enforces it)
+        var APP_VERSION = '1.5.0'; // keep equal to app/appinfo.json (scripts/check.py enforces it)
 
         var I18N = {
             pt: {
@@ -1516,16 +1664,16 @@
                 'Select a tile first': 'Escolha um bloco primeiro', 'Could not save the order. Please try again.': 'Não foi possível salvar a ordem. Tente novamente.',
                 'Tile order saved': 'Ordem salva', 'Reordering cancelled': 'Reordenação cancelada', 'Max 8 apps on shelf': 'Máximo de 8 apps na prateleira',
                 'Defaults restored': 'Padrões restaurados', 'Saved & Applied!': 'Salvo e aplicado!',
-                'Shelf & Inputs': 'Prateleira e Entradas', 'Look & Feel': 'Visual', 'Weather & Location': 'Clima e Local',
-                'Photos & Screensaver': 'Fotos e Protetor de Tela', 'Accounts & Keys': 'Contas e Chaves', 'Categories': 'Categorias',
+                'Look & Feel': 'Visual', 
+                'Photos & Screensaver': 'Fotos e Protetor de Tela', 'Accounts & Keys': 'Contas e Chaves', 
                 'Shelf apps': 'Apps da prateleira', 'OK to edit': 'OK para editar', 'OK to open': 'OK para abrir',
-                'Not set': 'Não definido', 'Saved': 'Salvo', 'Reset to defaults': 'Restaurar padrões',
+                'Not set': 'Não definido', 'Saved': 'Salvo', 
                 'Press OK again to confirm': 'Pressione OK de novo para confirmar', 'Up / Down: move': 'Cima / Baixo: mover', 'Left / Right: change value': 'Esquerda / Direita: mudar valor',
                 'OK: select or edit': 'OK: selecionar ou editar', 'Back: close': 'Voltar: fechar', 'Changes apply instantly': 'As mudanças são aplicadas na hora',
                 'Up / Down: move one row': 'Cima / Baixo: mover uma linha', 'OK: add or remove': 'OK: adicionar ou remover', 'Back: return': 'Voltar: retornar',
                 'Enter: save': 'Enter: salvar', 'Back: cancel': 'Voltar: cancelar', '%s of 8 selected': '%s de 8 selecionados',
                 'Keep at least one app on the shelf.': 'Mantenha pelo menos um app na prateleira.', 'Previous value': 'Valor anterior', 'Next value': 'Próximo valor',
-                'Show the movies and shows row on the home screen': 'Mostrar a linha de filmes e séries na tela inicial', 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posição do Relógio', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Photo Brightness': 'Brilho das Fotos', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Photos behind the clock when the TV is idle': 'Fotos atrás do relógio quando a TV está ociosa', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
+                'Show the movies and shows row on the home screen': 'Mostrar a linha de filmes e séries na tela inicial', 'Good morning': 'Bom dia', 'Good afternoon': 'Boa tarde', 'Good evening': 'Boa noite', 'Good night': 'Boa noite', 'Your Name': 'Seu Nome', 'e.g. Noa': 'ex.: Noa', 'Used in the greeting on the home screen': 'Usado na saudação da tela inicial', 'Pick up where you left off': 'Continue de onde parou', 'Today, %s': 'Hoje, %s', 'Yesterday, %s': 'Ontem, %s', 'Pick-up Row': 'Linha Continuar', 'Shows the apps you opened last, above the shelf': 'Mostra os apps abertos por último, acima da prateleira', 'Dim Photos at Night': 'Escurecer Fotos à Noite', 'A little dimmer after sunset, much dimmer after 23:00': 'Um pouco mais escuro após o pôr do sol, bem mais após 23:00', 'No ads. No account. Your settings stay on this TV.': 'Sem anúncios. Sem conta. Suas configurações ficam nesta TV.', 'Movie night': 'Noite de filme', 'Game on': 'Hora do jogo', 'Background music': 'Música de fundo', 'Scenes': 'Cenas', 'Scene': 'Cena', 'One-press Movie night, Game on and Music on the home screen': 'Noite de filme, jogo e música com um toque na tela inicial', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Abre o app certo e ajusta o visual. De volta a este app, tudo volta como era.', 'Name a device on an HDMI input in Customize first': 'Primeiro nomeie um dispositivo em uma entrada HDMI em Personalizar', 'Welcome to Free My TV': 'Bem-vindo ao Free My TV', 'A quiet home screen with no ads. This takes about a minute and every choice can be changed later in Customize.': 'Uma tela inicial tranquila, sem anúncios. Leva cerca de um minuto e tudo pode ser mudado depois em Personalizar.', 'Start': 'Começar', 'Continue': 'Continuar', 'Finish': 'Concluir', 'Skip setup': 'Pular configuração', 'Open my home screen': 'Abrir minha tela inicial', 'Welcome': 'Boas-vindas', 'Your name and city': 'Seu nome e cidade', 'Used for the greeting and the weather. Leave it empty to use São Paulo, or turn on Auto-locate by IP in Customize.': 'Usados na saudação e no clima. Deixe vazio para usar São Paulo ou ative a localização automática por IP em Personalizar.', 'Your apps': 'Seus apps', 'Pick up to 8 for your shelf.': 'Escolha até 8 para a prateleira.', 'Your look': 'Seu visual', 'How should it look?': 'Como deve ficar?', 'Pick one. The whole screen changes as you move over it.': 'Escolha um. A tela inteira muda ao passar por ele.', 'Follow the sun': 'Seguir o sol', 'Light by day, warm at sunset, dark at night.': 'Claro de dia, quente no pôr do sol, escuro à noite.', 'Deep Midnight': 'Meia-noite Profunda', 'Blue-black, easy on eyes in a dark room.': 'Azul-escuro, confortável em ambiente escuro.', 'Pure Black': 'Preto Puro', 'True black for movies and OLED panels.': 'Preto real para filmes e telas OLED.', 'Bright and airy for a sunny living room.': 'Claro e arejado para uma sala ensolarada.', 'Screensaver photos': 'Fotos do protetor de tela', 'When the TV is idle it shows photos behind the clock. You can add your free Unsplash key later in Customize.': 'Com a TV parada, mostra fotos atrás do relógio. Você pode adicionar sua chave Unsplash gratuita depois em Personalizar.', 'Photo screensaver: On': 'Protetor de fotos: Ligado', 'Photo screensaver: Off': 'Protetor de fotos: Desligado', 'Your TV is ready': 'Sua TV está pronta', 'Your settings stay on this TV. Change anything later in Customize.': 'Suas configurações ficam nesta TV. Mude o que quiser depois em Personalizar.', 'Run setup again': 'Repetir a configuração', 'OK to run': 'OK para executar', 'Who is watching?': 'Quem está assistindo?', 'Add person': 'Adicionar pessoa', 'Switch person': 'Trocar de pessoa', 'Ask who is watching': 'Perguntar quem está assistindo', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Um perfil é uma prateleira, um visual, uma cidade e um protetor de tela. Não é uma conta e fica guardado só nesta TV.', 'Shows the person picker when the app opens, if there is more than one person': 'Mostra a escolha de pessoa ao abrir o app, se houver mais de uma', 'You': 'Você', 'Person': 'Pessoa', 'Remove this person': 'Remover esta pessoa', 'Kids profile (hides settings)': 'Perfil infantil (oculta os ajustes)', 'Press OK again to remove %s': 'Pressione OK de novo para remover %s', 'Step %s of %s': 'Passo %s de %s', 'About a minute': 'Cerca de um minuto', 'Nothing here needs an account. You can change every choice later in Customize.': 'Nada aqui exige uma conta. Você pode mudar cada escolha depois em Personalizar.', 'How should it look, %s?': 'Como deve ficar, %s?', 'Your name': 'Seu nome', 'Your city': 'Sua cidade', 'Arrows': 'Setas', 'choose': 'escolher', 'continue': 'continuar', 'previous step': 'passo anterior', 'Photo screensaver': 'Protetor de fotos', 'OK': 'OK', 'Back': 'Voltar', 'Selected': 'Selecionado', 'Home screen': 'Tela inicial', 'People': 'Pessoas', 'Language & Location': 'Idioma e local', 'Reset & About': 'Redefinir e sobre', 'Reset settings': 'Redefinir configurações', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Volta todas as configurações e a prateleira ao padrão. Pessoas e histórico ficam.', 'Erase everything on this TV': 'Apagar tudo nesta TV', 'Deletes every person, setting, key and history, then starts first-run setup': 'Apaga todas as pessoas, configurações, chaves e o histórico, e inicia a configuração inicial', 'Press OK again to erase everything': 'Pressione OK novamente para apagar tudo', 'Version': 'Versão', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'O Free My TV é um app independente, sem afiliação com a LG. Sem anúncios. Sem conta. Suas configurações ficam nesta TV.', 'About': 'Sobre', 'Keep at least one grown-up profile': 'Mantenha pelo menos um perfil de adulto', 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posição do Relógio', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Photo Brightness': 'Brilho das Fotos', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Photos behind the clock when the TV is idle': 'Fotos atrás do relógio quando a TV está ociosa', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
                 'For the photos. Stored on this TV only': 'Para as fotos. Guardada só nesta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para filmes e séries em alta da semana', 'Back: categories': 'Voltar: categorias',
                 'OK or Right: open': 'OK ou Direita: abrir'
             },
@@ -1592,16 +1740,16 @@
                 'Select a tile first': 'Elige un mosaico primero', 'Could not save the order. Please try again.': 'No se pudo guardar el orden. Inténtalo de nuevo.',
                 'Tile order saved': 'Orden guardado', 'Reordering cancelled': 'Reordenación cancelada', 'Max 8 apps on shelf': 'Máximo 8 apps en el estante',
                 'Defaults restored': 'Valores restablecidos', 'Saved & Applied!': '¡Guardado y aplicado!',
-                'Shelf & Inputs': 'Estante y Entradas', 'Look & Feel': 'Aspecto', 'Weather & Location': 'Clima y Ubicación',
-                'Photos & Screensaver': 'Fotos y Salvapantallas', 'Accounts & Keys': 'Cuentas y Claves', 'Categories': 'Categorías',
+                'Look & Feel': 'Aspecto', 
+                'Photos & Screensaver': 'Fotos y Salvapantallas', 'Accounts & Keys': 'Cuentas y Claves', 
                 'Shelf apps': 'Apps del estante', 'OK to edit': 'OK para editar', 'OK to open': 'OK para abrir',
-                'Not set': 'Sin definir', 'Saved': 'Guardado', 'Reset to defaults': 'Restablecer valores',
+                'Not set': 'Sin definir', 'Saved': 'Guardado', 
                 'Press OK again to confirm': 'Pulsa OK otra vez para confirmar', 'Up / Down: move': 'Arriba / Abajo: mover', 'Left / Right: change value': 'Izquierda / Derecha: cambiar valor',
                 'OK: select or edit': 'OK: elegir o editar', 'Back: close': 'Atrás: cerrar', 'Changes apply instantly': 'Los cambios se aplican al instante',
                 'Up / Down: move one row': 'Arriba / Abajo: mover una fila', 'OK: add or remove': 'OK: añadir o quitar', 'Back: return': 'Atrás: volver',
                 'Enter: save': 'Enter: guardar', 'Back: cancel': 'Atrás: cancelar', '%s of 8 selected': '%s de 8 seleccionadas',
                 'Keep at least one app on the shelf.': 'Deja al menos una app en el estante.', 'Previous value': 'Valor anterior', 'Next value': 'Valor siguiente',
-                'Show the movies and shows row on the home screen': 'Mostrar la fila de películas y series en la pantalla de inicio', 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posición del Reloj', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Photo Brightness': 'Brillo de las Fotos', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Photos behind the clock when the TV is idle': 'Fotos tras el reloj cuando la TV está inactiva', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
+                'Show the movies and shows row on the home screen': 'Mostrar la fila de películas y series en la pantalla de inicio', 'Good morning': 'Buenos días', 'Good afternoon': 'Buenas tardes', 'Good evening': 'Buenas noches', 'Good night': 'Buenas noches', 'Your Name': 'Tu Nombre', 'e.g. Noa': 'p. ej. Noa', 'Used in the greeting on the home screen': 'Se usa en el saludo de la pantalla de inicio', 'Pick up where you left off': 'Sigue donde lo dejaste', 'Today, %s': 'Hoy, %s', 'Yesterday, %s': 'Ayer, %s', 'Pick-up Row': 'Fila Seguir viendo', 'Shows the apps you opened last, above the shelf': 'Muestra las últimas apps abiertas, sobre el estante', 'Dim Photos at Night': 'Atenuar Fotos de Noche', 'A little dimmer after sunset, much dimmer after 23:00': 'Algo más tenue tras la puesta de sol, mucho más tras las 23:00', 'No ads. No account. Your settings stay on this TV.': 'Sin anuncios. Sin cuenta. Tus ajustes se quedan en este TV.', 'Movie night': 'Noche de cine', 'Game on': 'A jugar', 'Background music': 'Música de fondo', 'Scenes': 'Escenas', 'Scene': 'Escena', 'One-press Movie night, Game on and Music on the home screen': 'Noche de cine, juego y música con una pulsación en el inicio', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Abre la app adecuada y ajusta el aspecto. Al volver a esta app, todo queda como estaba.', 'Name a device on an HDMI input in Customize first': 'Primero nombra un dispositivo en una entrada HDMI en Personalizar', 'Welcome to Free My TV': 'Te damos la bienvenida a Free My TV', 'A quiet home screen with no ads. This takes about a minute and every choice can be changed later in Customize.': 'Una pantalla de inicio tranquila y sin anuncios. Tarda un minuto y todo se puede cambiar luego en Personalizar.', 'Start': 'Empezar', 'Continue': 'Continuar', 'Finish': 'Terminar', 'Skip setup': 'Omitir configuración', 'Open my home screen': 'Abrir mi pantalla de inicio', 'Welcome': 'Bienvenida', 'Your name and city': 'Tu nombre y ciudad', 'Used for the greeting and the weather. Leave it empty to use São Paulo, or turn on Auto-locate by IP in Customize.': 'Se usan para el saludo y el tiempo. Déjala vacía para usar São Paulo o activa la ubicación automática por IP en Personalizar.', 'Your apps': 'Tus apps', 'Pick up to 8 for your shelf.': 'Elige hasta 8 para tu estante.', 'Your look': 'Tu aspecto', 'How should it look?': '¿Cómo quieres que se vea?', 'Pick one. The whole screen changes as you move over it.': 'Elige uno. Toda la pantalla cambia al pasar sobre él.', 'Follow the sun': 'Seguir al sol', 'Light by day, warm at sunset, dark at night.': 'Claro de día, cálido al atardecer, oscuro de noche.', 'Deep Midnight': 'Medianoche Profunda', 'Blue-black, easy on eyes in a dark room.': 'Azul oscuro, suave a la vista en una sala oscura.', 'Pure Black': 'Negro Puro', 'True black for movies and OLED panels.': 'Negro real para películas y paneles OLED.', 'Bright and airy for a sunny living room.': 'Luminoso y aireado para un salón soleado.', 'Screensaver photos': 'Fotos del protector', 'When the TV is idle it shows photos behind the clock. You can add your free Unsplash key later in Customize.': 'Con la TV en reposo muestra fotos tras el reloj. Puedes añadir tu clave gratuita de Unsplash luego en Personalizar.', 'Photo screensaver: On': 'Protector con fotos: Activado', 'Photo screensaver: Off': 'Protector con fotos: Desactivado', 'Your TV is ready': 'Tu TV está lista', 'Your settings stay on this TV. Change anything later in Customize.': 'Tus ajustes se quedan en este TV. Cambia lo que quieras luego en Personalizar.', 'Run setup again': 'Repetir la configuración', 'OK to run': 'OK para ejecutar', 'Who is watching?': '¿Quién está viendo?', 'Add person': 'Añadir persona', 'Switch person': 'Cambiar de persona', 'Ask who is watching': 'Preguntar quién está viendo', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Un perfil es un estante, un aspecto, una ciudad y un protector. No es una cuenta y se guarda solo en este TV.', 'Shows the person picker when the app opens, if there is more than one person': 'Muestra la elección de persona al abrir la app, si hay más de una', 'You': 'Tú', 'Person': 'Persona', 'Remove this person': 'Quitar a esta persona', 'Kids profile (hides settings)': 'Perfil infantil (oculta los ajustes)', 'Press OK again to remove %s': 'Pulsa OK otra vez para quitar a %s', 'Step %s of %s': 'Paso %s de %s', 'About a minute': 'Cerca de un minuto', 'Nothing here needs an account. You can change every choice later in Customize.': 'Nada aquí necesita una cuenta. Puedes cambiar cada elección luego en Personalizar.', 'How should it look, %s?': '¿Cómo quieres que se vea, %s?', 'Your name': 'Tu nombre', 'Your city': 'Tu ciudad', 'Arrows': 'Flechas', 'choose': 'elegir', 'continue': 'continuar', 'previous step': 'paso anterior', 'Photo screensaver': 'Protector con fotos', 'OK': 'OK', 'Back': 'Atrás', 'Selected': 'Seleccionado', 'Home screen': 'Pantalla de inicio', 'People': 'Personas', 'Language & Location': 'Idioma y ubicación', 'Reset & About': 'Restablecer y acerca de', 'Reset settings': 'Restablecer ajustes', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Devuelve todos los ajustes y la estantería a los valores por defecto. Las personas y el historial se conservan.', 'Erase everything on this TV': 'Borrar todo en este televisor', 'Deletes every person, setting, key and history, then starts first-run setup': 'Borra todas las personas, ajustes, claves y el historial, y inicia la configuración inicial', 'Press OK again to erase everything': 'Pulsa OK de nuevo para borrar todo', 'Version': 'Versión', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'Free My TV es una app independiente, sin afiliación con LG. Sin anuncios. Sin cuenta. Tus ajustes se quedan en este televisor.', 'About': 'Acerca de', 'Keep at least one grown-up profile': 'Mantén al menos un perfil de adulto', 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Clock Position': 'Posición del Reloj', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Photo Brightness': 'Brillo de las Fotos', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Photos behind the clock when the TV is idle': 'Fotos tras el reloj cuando la TV está inactiva', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
                 'For the photos. Stored on this TV only': 'Para las fotos. Se guarda solo en esta TV', 'Optional, for weekly trending movies and shows': 'Opcional, para las películas y series en tendencia de la semana', 'Back: categories': 'Atrás: categorías',
                 'OK or Right: open': 'OK o Derecha: abrir'
             },
@@ -1668,16 +1816,16 @@
                 'Select a tile first': 'Zuerst eine Kachel wählen', 'Could not save the order. Please try again.': 'Reihenfolge konnte nicht gespeichert werden. Bitte erneut versuchen.',
                 'Tile order saved': 'Reihenfolge gespeichert', 'Reordering cancelled': 'Sortieren abgebrochen', 'Max 8 apps on shelf': 'Maximal 8 Apps in der Leiste',
                 'Defaults restored': 'Standardwerte wiederhergestellt', 'Saved & Applied!': 'Gespeichert & angewendet!',
-                'Shelf & Inputs': 'Leiste & Eingänge', 'Look & Feel': 'Aussehen', 'Weather & Location': 'Wetter & Standort',
-                'Photos & Screensaver': 'Fotos & Bildschirmschoner', 'Accounts & Keys': 'Konten & Schlüssel', 'Categories': 'Kategorien',
+                'Look & Feel': 'Aussehen', 
+                'Photos & Screensaver': 'Fotos & Bildschirmschoner', 'Accounts & Keys': 'Konten & Schlüssel', 
                 'Shelf apps': 'Apps in der Leiste', 'OK to edit': 'OK zum Bearbeiten', 'OK to open': 'OK zum Öffnen',
-                'Not set': 'Nicht festgelegt', 'Saved': 'Gespeichert', 'Reset to defaults': 'Auf Standard zurücksetzen',
+                'Not set': 'Nicht festgelegt', 'Saved': 'Gespeichert', 
                 'Press OK again to confirm': 'Zum Bestätigen erneut OK drücken', 'Up / Down: move': 'Auf / Ab: bewegen', 'Left / Right: change value': 'Links / Rechts: Wert ändern',
                 'OK: select or edit': 'OK: auswählen oder bearbeiten', 'Back: close': 'Zurück: schließen', 'Changes apply instantly': 'Änderungen gelten sofort',
                 'Up / Down: move one row': 'Auf / Ab: eine Zeile bewegen', 'OK: add or remove': 'OK: hinzufügen oder entfernen', 'Back: return': 'Zurück: zurückkehren',
                 'Enter: save': 'Enter: speichern', 'Back: cancel': 'Zurück: abbrechen', '%s of 8 selected': '%s von 8 ausgewählt',
                 'Keep at least one app on the shelf.': 'Mindestens eine App in der Leiste behalten.', 'Previous value': 'Vorheriger Wert', 'Next value': 'Nächster Wert',
-                'Show the movies and shows row on the home screen': 'Die Zeile mit Filmen und Serien auf dem Startbildschirm zeigen', 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Clock Position': 'Uhrposition', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Photo Brightness': 'Fotohelligkeit', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Photos behind the clock when the TV is idle': 'Fotos hinter der Uhr, wenn der Fernseher ruht', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
+                'Show the movies and shows row on the home screen': 'Die Zeile mit Filmen und Serien auf dem Startbildschirm zeigen', 'Good morning': 'Guten Morgen', 'Good afternoon': 'Guten Tag', 'Good evening': 'Guten Abend', 'Good night': 'Gute Nacht', 'Your Name': 'Dein Name', 'e.g. Noa': 'z. B. Noa', 'Used in the greeting on the home screen': 'Wird in der Begrüßung auf dem Startbildschirm verwendet', 'Pick up where you left off': 'Dort weitermachen, wo du aufgehört hast', 'Today, %s': 'Heute, %s', 'Yesterday, %s': 'Gestern, %s', 'Pick-up Row': 'Weiterschauen-Zeile', 'Shows the apps you opened last, above the shelf': 'Zeigt zuletzt geöffnete Apps über der Leiste', 'Dim Photos at Night': 'Fotos nachts abdunkeln', 'A little dimmer after sunset, much dimmer after 23:00': 'Nach Sonnenuntergang etwas dunkler, nach 23:00 viel dunkler', 'No ads. No account. Your settings stay on this TV.': 'Keine Werbung. Kein Konto. Deine Einstellungen bleiben auf diesem Fernseher.', 'Movie night': 'Filmabend', 'Game on': 'Spielzeit', 'Background music': 'Hintergrundmusik', 'Scenes': 'Szenen', 'Scene': 'Szene', 'One-press Movie night, Game on and Music on the home screen': 'Filmabend, Spiel und Musik mit einem Tastendruck auf dem Startbildschirm', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Öffnet die passende App und stellt das Aussehen ein. Zurück in dieser App ist alles wie vorher.', 'Name a device on an HDMI input in Customize first': 'Benenne zuerst in Anpassen ein Gerät an einem HDMI-Eingang', 'Welcome to Free My TV': 'Willkommen bei Free My TV', 'A quiet home screen with no ads. This takes about a minute and every choice can be changed later in Customize.': 'Ein ruhiger Startbildschirm ohne Werbung. Das dauert etwa eine Minute und alles lässt sich später in Anpassen ändern.', 'Start': 'Los geht’s', 'Continue': 'Weiter', 'Finish': 'Fertig', 'Skip setup': 'Einrichtung überspringen', 'Open my home screen': 'Meinen Startbildschirm öffnen', 'Welcome': 'Willkommen', 'Your name and city': 'Dein Name und Ort', 'Used for the greeting and the weather. Leave it empty to use São Paulo, or turn on Auto-locate by IP in Customize.': 'Für Begrüßung und Wetter. Leer lassen für São Paulo oder in Anpassen die automatische Ortung per IP einschalten.', 'Your apps': 'Deine Apps', 'Pick up to 8 for your shelf.': 'Wähle bis zu 8 für deine Leiste.', 'Your look': 'Dein Look', 'How should it look?': 'Wie soll es aussehen?', 'Pick one. The whole screen changes as you move over it.': 'Wähle einen. Der ganze Bildschirm ändert sich, sobald du darüber gehst.', 'Follow the sun': 'Der Sonne folgen', 'Light by day, warm at sunset, dark at night.': 'Hell am Tag, warm bei Sonnenuntergang, dunkel in der Nacht.', 'Deep Midnight': 'Tiefe Mitternacht', 'Blue-black, easy on eyes in a dark room.': 'Blauschwarz, schonend für die Augen im dunklen Raum.', 'Pure Black': 'Reines Schwarz', 'True black for movies and OLED panels.': 'Echtes Schwarz für Filme und OLED-Displays.', 'Bright and airy for a sunny living room.': 'Hell und luftig für ein sonniges Wohnzimmer.', 'Screensaver photos': 'Bildschirmschoner-Fotos', 'When the TV is idle it shows photos behind the clock. You can add your free Unsplash key later in Customize.': 'Im Leerlauf zeigt der Fernseher Fotos hinter der Uhr. Deinen kostenlosen Unsplash-Schlüssel kannst du später in Anpassen eintragen.', 'Photo screensaver: On': 'Foto-Bildschirmschoner: An', 'Photo screensaver: Off': 'Foto-Bildschirmschoner: Aus', 'Your TV is ready': 'Dein Fernseher ist bereit', 'Your settings stay on this TV. Change anything later in Customize.': 'Deine Einstellungen bleiben auf diesem Fernseher. Ändere später alles in Anpassen.', 'Run setup again': 'Einrichtung erneut starten', 'OK to run': 'OK zum Starten', 'Who is watching?': 'Wer schaut gerade?', 'Add person': 'Person hinzufügen', 'Switch person': 'Person wechseln', 'Ask who is watching': 'Fragen, wer schaut', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Ein Profil ist eine Leiste, ein Look, ein Ort und ein Bildschirmschoner. Es ist kein Konto und wird nur auf diesem Fernseher gespeichert.', 'Shows the person picker when the app opens, if there is more than one person': 'Zeigt die Personenauswahl beim Start, wenn es mehr als eine Person gibt', 'You': 'Du', 'Person': 'Person', 'Remove this person': 'Diese Person entfernen', 'Kids profile (hides settings)': 'Kinderprofil (blendet Einstellungen aus)', 'Press OK again to remove %s': 'Zum Entfernen von %s erneut OK drücken', 'Step %s of %s': 'Schritt %s von %s', 'About a minute': 'Etwa eine Minute', 'Nothing here needs an account. You can change every choice later in Customize.': 'Hier ist kein Konto nötig. Du kannst jede Wahl später in Anpassen ändern.', 'How should it look, %s?': 'Wie soll es aussehen, %s?', 'Your name': 'Dein Name', 'Your city': 'Dein Ort', 'Arrows': 'Pfeile', 'choose': 'wählen', 'continue': 'weiter', 'previous step': 'vorheriger Schritt', 'Photo screensaver': 'Foto-Bildschirmschoner', 'OK': 'OK', 'Back': 'Zurück', 'Selected': 'Ausgewählt', 'Home screen': 'Startbildschirm', 'People': 'Personen', 'Language & Location': 'Sprache & Ort', 'Reset & About': 'Zurücksetzen & Info', 'Reset settings': 'Einstellungen zurücksetzen', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Setzt alle Einstellungen und das Regal auf die Standardwerte zurück. Personen und Verlauf bleiben.', 'Erase everything on this TV': 'Alles auf diesem Fernseher löschen', 'Deletes every person, setting, key and history, then starts first-run setup': 'Löscht alle Personen, Einstellungen, Schlüssel und den Verlauf und startet die Ersteinrichtung', 'Press OK again to erase everything': 'OK erneut drücken, um alles zu löschen', 'Version': 'Version', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'Free My TV ist eine unabhängige App und nicht mit LG verbunden. Keine Werbung. Kein Konto. Deine Einstellungen bleiben auf diesem Fernseher.', 'About': 'Info', 'Keep at least one grown-up profile': 'Behalte mindestens ein Erwachsenenprofil', 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Clock Position': 'Uhrposition', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Photo Brightness': 'Fotohelligkeit', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Photos behind the clock when the TV is idle': 'Fotos hinter der Uhr, wenn der Fernseher ruht', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
                 'For the photos. Stored on this TV only': 'Für die Fotos. Nur auf diesem Fernseher gespeichert', 'Optional, for weekly trending movies and shows': 'Optional, für wöchentlich angesagte Filme und Serien', 'Back: categories': 'Zurück: Kategorien',
                 'OK or Right: open': 'OK oder Rechts: öffnen'
             },
@@ -1744,16 +1892,16 @@
                 'Select a tile first': 'Choisissez d’abord une tuile', 'Could not save the order. Please try again.': 'Impossible d’enregistrer l’ordre. Veuillez réessayer.',
                 'Tile order saved': 'Ordre enregistré', 'Reordering cancelled': 'Réorganisation annulée', 'Max 8 apps on shelf': '8 applis maximum sur l’étagère',
                 'Defaults restored': 'Valeurs par défaut rétablies', 'Saved & Applied!': 'Enregistré et appliqué !',
-                'Shelf & Inputs': 'Étagère et Entrées', 'Look & Feel': 'Apparence', 'Weather & Location': 'Météo et Lieu',
-                'Photos & Screensaver': 'Photos et Économiseur d’écran', 'Accounts & Keys': 'Comptes et Clés', 'Categories': 'Catégories',
+                'Look & Feel': 'Apparence', 
+                'Photos & Screensaver': 'Photos et Économiseur d’écran', 'Accounts & Keys': 'Comptes et Clés', 
                 'Shelf apps': 'Applis de l’étagère', 'OK to edit': 'OK pour modifier', 'OK to open': 'OK pour ouvrir',
-                'Not set': 'Non défini', 'Saved': 'Enregistré', 'Reset to defaults': 'Rétablir les valeurs par défaut',
+                'Not set': 'Non défini', 'Saved': 'Enregistré', 
                 'Press OK again to confirm': 'Appuyez de nouveau sur OK pour confirmer', 'Up / Down: move': 'Haut / Bas : déplacer', 'Left / Right: change value': 'Gauche / Droite : changer la valeur',
                 'OK: select or edit': 'OK : sélectionner ou modifier', 'Back: close': 'Retour : fermer', 'Changes apply instantly': 'Les changements s’appliquent immédiatement',
                 'Up / Down: move one row': 'Haut / Bas : déplacer d’une ligne', 'OK: add or remove': 'OK : ajouter ou retirer', 'Back: return': 'Retour : revenir',
                 'Enter: save': 'Entrée : enregistrer', 'Back: cancel': 'Retour : annuler', '%s of 8 selected': '%s sur 8 sélectionnées',
                 'Keep at least one app on the shelf.': 'Gardez au moins une appli sur l’étagère.', 'Previous value': 'Valeur précédente', 'Next value': 'Valeur suivante',
-                'Show the movies and shows row on the home screen': 'Afficher la rangée de films et séries sur l’écran d’accueil', 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Clock Position': 'Position de l’horloge', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Photo Brightness': 'Luminosité des photos', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Photos behind the clock when the TV is idle': 'Photos derrière l’horloge quand la TV est inactive', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
+                'Show the movies and shows row on the home screen': 'Afficher la rangée de films et séries sur l’écran d’accueil', 'Good morning': 'Bonjour', 'Good afternoon': 'Bon après-midi', 'Good evening': 'Bonsoir', 'Good night': 'Bonne nuit', 'Your Name': 'Votre prénom', 'e.g. Noa': 'ex. : Noa', 'Used in the greeting on the home screen': 'Utilisé dans le message d’accueil de l’écran d’accueil', 'Pick up where you left off': 'Reprenez où vous en étiez', 'Today, %s': 'Aujourd’hui, %s', 'Yesterday, %s': 'Hier, %s', 'Pick-up Row': 'Rangée Reprendre', 'Shows the apps you opened last, above the shelf': 'Affiche les dernières applis ouvertes, au-dessus de l’étagère', 'Dim Photos at Night': 'Assombrir les photos la nuit', 'A little dimmer after sunset, much dimmer after 23:00': 'Un peu plus sombre après le coucher du soleil, bien plus après 23 h', 'No ads. No account. Your settings stay on this TV.': 'Pas de pub. Pas de compte. Vos réglages restent sur cette TV.', 'Movie night': 'Soirée cinéma', 'Game on': 'Place au jeu', 'Background music': 'Musique d’ambiance', 'Scenes': 'Scènes', 'Scene': 'Scène', 'One-press Movie night, Game on and Music on the home screen': 'Soirée cinéma, jeu et musique en une pression sur l’écran d’accueil', 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.': 'Ouvre la bonne appli et règle l’apparence. De retour ici, tout redevient comme avant.', 'Name a device on an HDMI input in Customize first': 'Nommez d’abord un appareil sur une entrée HDMI dans Personnaliser', 'Welcome to Free My TV': 'Bienvenue sur Free My TV', 'A quiet home screen with no ads. This takes about a minute and every choice can be changed later in Customize.': 'Un écran d’accueil calme, sans pub. Cela prend environ une minute et tout se change ensuite dans Personnaliser.', 'Start': 'Commencer', 'Continue': 'Continuer', 'Finish': 'Terminer', 'Skip setup': 'Passer la configuration', 'Open my home screen': 'Ouvrir mon écran d’accueil', 'Welcome': 'Bienvenue', 'Your name and city': 'Votre prénom et ville', 'Used for the greeting and the weather. Leave it empty to use São Paulo, or turn on Auto-locate by IP in Customize.': 'Utilisés pour l’accueil et la météo. Laissez vide pour utiliser São Paulo, ou activez la localisation automatique par IP dans Personnaliser.', 'Your apps': 'Vos applis', 'Pick up to 8 for your shelf.': 'Choisissez-en jusqu’à 8 pour votre étagère.', 'Your look': 'Votre style', 'How should it look?': 'Quel style voulez-vous ?', 'Pick one. The whole screen changes as you move over it.': 'Choisissez-en un. Tout l’écran change quand vous le survolez.', 'Follow the sun': 'Suivre le soleil', 'Light by day, warm at sunset, dark at night.': 'Clair le jour, chaud au coucher du soleil, sombre la nuit.', 'Deep Midnight': 'Minuit profond', 'Blue-black, easy on eyes in a dark room.': 'Bleu nuit, reposant dans une pièce sombre.', 'Pure Black': 'Noir pur', 'True black for movies and OLED panels.': 'Noir absolu pour les films et les écrans OLED.', 'Bright and airy for a sunny living room.': 'Lumineux et aéré pour un salon ensoleillé.', 'Screensaver photos': 'Photos de l’écran de veille', 'When the TV is idle it shows photos behind the clock. You can add your free Unsplash key later in Customize.': 'En veille, la TV affiche des photos derrière l’horloge. Vous pourrez ajouter votre clé Unsplash gratuite plus tard dans Personnaliser.', 'Photo screensaver: On': 'Écran de veille photo : activé', 'Photo screensaver: Off': 'Écran de veille photo : désactivé', 'Your TV is ready': 'Votre TV est prête', 'Your settings stay on this TV. Change anything later in Customize.': 'Vos réglages restent sur cette TV. Modifiez ce que vous voulez plus tard dans Personnaliser.', 'Run setup again': 'Relancer la configuration', 'OK to run': 'OK pour lancer', 'Who is watching?': 'Qui regarde ?', 'Add person': 'Ajouter une personne', 'Switch person': 'Changer de personne', 'Ask who is watching': 'Demander qui regarde', 'A profile is a shelf, a look, a city and a screensaver. It is not an account, and it is stored only on this TV.': 'Un profil, c’est une étagère, un style, une ville et un écran de veille. Ce n’est pas un compte et il reste sur cette TV.', 'Shows the person picker when the app opens, if there is more than one person': 'Affiche le choix de la personne à l’ouverture, s’il y en a plusieurs', 'You': 'Vous', 'Person': 'Personne', 'Remove this person': 'Retirer cette personne', 'Kids profile (hides settings)': 'Profil enfant (masque les réglages)', 'Press OK again to remove %s': 'Appuyez de nouveau sur OK pour retirer %s', 'Step %s of %s': 'Étape %s sur %s', 'About a minute': 'Environ une minute', 'Nothing here needs an account. You can change every choice later in Customize.': 'Rien ici ne demande de compte. Vous pourrez changer chaque choix plus tard dans Personnaliser.', 'How should it look, %s?': 'Quel style voulez-vous, %s ?', 'Your name': 'Votre prénom', 'Your city': 'Votre ville', 'Arrows': 'Flèches', 'choose': 'choisir', 'continue': 'continuer', 'previous step': 'étape précédente', 'Photo screensaver': 'Écran de veille photo', 'OK': 'OK', 'Back': 'Retour', 'Selected': 'Sélectionné', 'Home screen': 'Écran d’accueil', 'People': 'Personnes', 'Language & Location': 'Langue et lieu', 'Reset & About': 'Réinitialiser et infos', 'Reset settings': 'Réinitialiser les réglages', 'Puts every setting and the shelf back to defaults. People and history stay.': 'Remet tous les réglages et l’étagère par défaut. Les personnes et l’historique restent.', 'Erase everything on this TV': 'Tout effacer sur ce téléviseur', 'Deletes every person, setting, key and history, then starts first-run setup': 'Supprime toutes les personnes, réglages, clés et l’historique, puis lance la configuration initiale', 'Press OK again to erase everything': 'Appuyez à nouveau sur OK pour tout effacer', 'Version': 'Version', 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.': 'Free My TV est une application indépendante, non affiliée à LG. Sans publicité. Sans compte. Vos réglages restent sur ce téléviseur.', 'About': 'À propos', 'Keep at least one grown-up profile': 'Gardez au moins un profil adulte', 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Clock Position': 'Position de l’horloge', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Photo Brightness': 'Luminosité des photos', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Photos behind the clock when the TV is idle': 'Photos derrière l’horloge quand la TV est inactive', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
                 'For the photos. Stored on this TV only': 'Pour les photos. Stockée uniquement sur cette TV', 'Optional, for weekly trending movies and shows': 'Facultatif, pour les films et séries tendance de la semaine', 'Back: categories': 'Retour : catégories',
                 'OK or Right: open': 'OK ou Droite : ouvrir'
             }
@@ -1771,11 +1919,13 @@
         function t(text) {
             var dict = I18N[currentLang()];
             var out = (dict && Object.prototype.hasOwnProperty.call(dict, text)) ? dict[text] : text;
-            for (var i = 1; i < arguments.length; i++) out = out.replace('%s', arguments[i]);
+            var args = arguments;
+            // A function replacer keeps $&, $' and $` in names literal.
+            for (var i = 1; i < args.length; i++) out = out.replace('%s', (function(v) { return function() { return String(v); }; })(args[i]));
             return out;
         }
 
-        var I18N_SKIP_IDS = { appVersion: 1, themeBadge: 1, shelfCountHint: 1, picksSourceBadge: 1, toastMsg: 1 };
+        var I18N_SKIP_IDS = { profileBtnLabel: 1, appVersion: 1, themeBadge: 1, shelfCountHint: 1, picksSourceBadge: 1, toastMsg: 1 };
 
         // Static markup is written in English; remember each translatable leaf's
         // original text the first time through so switching languages is lossless.
@@ -1832,6 +1982,32 @@
             return copy;
         }
 
+        // 05-11 morning, 12-16 afternoon, 17-21 evening, otherwise night.
+        function greetingKey(hour) {
+            if (hour >= 5 && hour < 12) return 'Good morning';
+            if (hour >= 12 && hour < 17) return 'Good afternoon';
+            if (hour >= 17 && hour < 22) return 'Good evening';
+            return 'Good night';
+        }
+
+        function greetingText(hour, name) {
+            var base = t(greetingKey(hour));
+            return name ? base + ', ' + name : base;
+        }
+
+        // Greeting block above the hero: "Friday" / "Good evening, Noa" / weather line.
+        function updateGreeting() {
+            var now = new Date();
+            var weekday = now.toLocaleDateString(LANG_LOCALES[currentLang()], { weekday: 'long' });
+            document.getElementById('greetingEyebrow').textContent = weekday;
+            document.getElementById('greetingTitle').textContent = greetingText(now.getHours(), state.userName);
+            var weather = document.getElementById('weatherText').textContent;
+            var loaded = weather && weather !== 'Loading...' && weather !== t('Loading...');
+            var sub = loaded ? weather : '';
+            if (loaded && state.sunset) sub += ' \u00b7 ' + t('Sunset') + ' ' + state.sunset;
+            document.getElementById('greetingSub').textContent = sub;
+        }
+
         function updateClock() {
             var now = new Date();
             var rawHours = now.getHours();
@@ -1853,6 +2029,9 @@
 
             document.getElementById('screensaverClock').textContent = timeStr;
             document.getElementById('screensaverDate').textContent = dateStr;
+            var weatherNow = document.getElementById('weatherText').textContent;
+            document.getElementById('screensaverWeather').textContent = screensaverWeatherVisible(rawHours, weatherNow) ? weatherNow : '';
+            updateGreeting();
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -1925,6 +2104,9 @@
         // missing fetch() global, since both are absent on the Chromium 38
         // engine LG ships on webOS 3.x - either would otherwise throw
         // synchronously and abort the rest of the boot sequence below it.
+        // Only the newest request may paint: switching person starts a second fetch while the first is still in flight.
+        var weatherSeq = 0;
+
         function fetchWeather() {
             if (typeof fetch !== 'function') {
                 document.getElementById('weatherText').textContent = '22°C • ' + t('Clear');
@@ -1932,6 +2114,7 @@
                 return;
             }
 
+            var seq = ++weatherSeq;
             var lat = state.lat;
             var lon = state.lon;
             var cityLabel = state.city;
@@ -1980,6 +2163,7 @@
                     return fetch(url).then(function(res) { return res.json(); });
                 })
                 .then(function(data) {
+                    if (seq !== weatherSeq) return;
                     // Open-Meteo returns naive local wall-clock strings for the target city,
                     // so "now" must be shifted by the same UTC offset to compare correctly -
                     // comparing against the device's own local time would be wrong whenever
@@ -2011,6 +2195,7 @@
                         }
                         state.isNight = !isDay;
                         document.getElementById('weatherSub').textContent = cityLabel + sunsetStr;
+                        updateGreeting();
                         applyTheme();
                     }
 
@@ -2032,6 +2217,7 @@
                     renderDrawerForecast();
                 })
                 .catch(function(err) {
+                    if (seq !== weatherSeq) return;
                     document.getElementById('weatherText').textContent = '22°C • ' + t('Clear');
                     document.getElementById('weatherSub').textContent = state.city || t('Offline Mode');
                 });
@@ -2173,12 +2359,32 @@
         }
 
         // --- Discover Installed Apps from LG webOS ---
+        // This app is not offered to itself; one entry per app id and per name (the TV lists some apps twice).
+        var SELF_APP_ID = 'org.webos.freemytv';
+        function isSelfApp(id, title) {
+            return id === SELF_APP_ID || String(title || '').toLowerCase() === 'free my tv';
+        }
+        function wizardCatalog() {
+            var ids = {}, names = {}, list = [];
+            state.catalog.forEach(function(app) {
+                var name = String(app.title || '').toLowerCase();
+                if (isSelfApp(app.id, app.title) || ids[app.id] || names[name]) return;
+                ids[app.id] = true;
+                names[name] = true;
+                list.push(app);
+            });
+            return list;
+        }
+
         function addLaunchPoints(launchPoints) {
             var oldLength = state.catalog.length;
             launchPoints.forEach(function(lp) {
                 var appId = lp.appId || lp.id;
                 if (!appId) return;
+                if (isSelfApp(appId, lp.title)) return;
                 var exists = arrFind(state.catalog, function(c) { return c.id === appId; });
+                var sameName = !exists && arrFind(state.catalog, function(c) { return String(c.title || '').toLowerCase() === String(lp.title || lp.id).toLowerCase(); });
+                if (sameName) return;
                 var iconUrl = launchPointIcon(lp);
                 if (exists && iconUrl) exists.iconUrl = iconUrl;
                 if (lp.systemApp && !exists) return;
@@ -2269,7 +2475,7 @@
                         clearTimeout(timer);
                         showToast(t('Accept the request on screen so Free My TV can list your installed apps.'), 15000);
                     } else if (msg.type === 'registered') {
-                        try { localStorage.setItem('fmtv_ssap_key', msg.payload['client-key']); } catch (e) {}
+                        try { if (!erasing) localStorage.setItem('fmtv_ssap_key', msg.payload['client-key']); } catch (e) {}
                         ws.send(JSON.stringify({ id: 'apps', type: 'request', uri: 'ssap://com.webos.applicationManager/listLaunchPoints' }));
                         waitForReply();
                     } else if (msg.type === 'error') {
@@ -2292,9 +2498,89 @@
 
         var LG_SETTINGS_APP = 'com.palm.app.settings';
 
+        // --- Launch history: what you opened last, kept only on this TV ---
+        var LAUNCH_HIST_KEY = 'fmtv_launch_hist';
+        var LAUNCH_HIST_MAX = 30;
+
+        // Six-hour buckets of the local day: night 0-5, morning 6-11, afternoon 12-17, evening 18-23.
+        function launchBucket(nowMs) { return Math.floor(new Date(nowMs).getHours() / 6); }
+
+        // Always four finite non-negative numbers; anything malformed counts as zeros.
+        function normBuckets(b) {
+            var out = [0, 0, 0, 0];
+            if (b && Object.prototype.toString.call(b) === '[object Array]') {
+                for (var i = 0; i < 4; i++) {
+                    var v = b[i];
+                    if (typeof v === 'number' && isFinite(v) && v > 0) out[i] = Math.floor(v);
+                }
+            }
+            return out;
+        }
+
+        function readLaunchHist() {
+            try {
+                var h = JSON.parse(localStorage.getItem(LAUNCH_HIST_KEY) || '{}');
+                if (!h || typeof h !== 'object' || Array.isArray(h)) return {};
+                Object.keys(h).forEach(function(id) {
+                    if (!h[id] || typeof h[id] !== 'object' || typeof h[id].t !== 'number' || !isFinite(h[id].t)) delete h[id];
+                    else h[id].b = normBuckets(h[id].b);
+                });
+                return h;
+            } catch (e) { return {}; }
+        }
+
+        function recordLaunch(appId, nowMs) {
+            var hist = readLaunchHist();
+            var entry = hist[appId] || { t: 0, n: 0 };
+            entry.t = nowMs;
+            entry.n = (entry.n || 0) + 1;
+            entry.b = normBuckets(entry.b);
+            entry.b[launchBucket(nowMs)]++;
+            hist[appId] = entry;
+            var ids = Object.keys(hist);
+            if (ids.length > LAUNCH_HIST_MAX) {
+                ids.sort(function(a, b) { return hist[a].t - hist[b].t; });
+                for (var i = 0; i < ids.length - LAUNCH_HIST_MAX; i++) delete hist[ids[i]];
+            }
+            try { if (!erasing) localStorage.setItem(LAUNCH_HIST_KEY, JSON.stringify(hist)); } catch (e) {}
+        }
+
+        // Newest first, only apps that exist in the catalog. Habit rule: an app opened at least
+        // HABIT_MIN times in the current six-hour bucket, and last opened within HABIT_DAYS days,
+        // goes ahead of the others; within each group order is newest first, then catalog order.
+        // One launch is not a habit, and with no bucket data this is plain newest-first.
+        var HABIT_MIN = 2;
+        var HABIT_DAYS = 14;
+        function recentApps(hist, catalog, limit, nowMs) {
+            if (typeof nowMs !== 'number' || isNaN(nowMs)) nowMs = Date.now();
+            var bucket = launchBucket(nowMs), items = [];
+            catalog.forEach(function(app, idx) {
+                var e = hist[app.id];
+                if (!e) return;
+                var habit = normBuckets(e.b)[bucket];
+                var fresh = nowMs - e.t <= HABIT_DAYS * 86400000;
+                items.push({ app: app, t: e.t, idx: idx, hot: habit >= HABIT_MIN && fresh ? 1 : 0 });
+            });
+            items.sort(function(a, b) { return (b.hot - a.hot) || (b.t - a.t) || (a.idx - b.idx); });
+            return items.slice(0, limit);
+        }
+
+        function relativeWhen(ts, nowMs) {
+            var then = new Date(ts), now = new Date(nowMs);
+            var hhmm = pad2(then.getHours()) + ':' + pad2(then.getMinutes());
+            var dayStart = function(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); };
+            var days = Math.round((dayStart(now) - dayStart(then)) / 86400000);
+            if (days <= 0) return t('Today, %s', hhmm);
+            if (days === 1) return t('Yesterday, %s', hhmm);
+            var locale = LANG_LOCALES[currentLang()];
+            if (days < 7) return then.toLocaleDateString(locale, { weekday: 'long' });
+            return then.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+        }
+
         // titleOverride names apps that are not in the shelf catalog (the LG Settings app) in the toasts.
         function launchApp(appId, contentTarget, titleOverride) {
             var launchParams = { id: appId };
+            var track = appId !== LG_SETTINGS_APP; // the LG Settings app is not an app to pick up
             if (contentTarget && CONTENT_TARGET_RE.test(contentTarget)) launchParams.params = { contentTarget: contentTarget };
             else contentTarget = '';
             if (shelfEdit || pendingLaunch) return; // Ignore repeated remote presses while a request is pending.
@@ -2316,6 +2602,7 @@
                 showToast(message, 5000);
             }
             function failure(error) {
+                restoreScene(); // a scene's look goes back when its app did not open
                 var detail = error && error.errorText || '';
                 if (/not installed|not found|does not exist|unknown app/i.test(detail)) {
                     finish(t('%s is not installed or is unavailable on this TV.', title));
@@ -2336,7 +2623,7 @@
                             if (pendingLaunch !== request) return;
                             var reply = null;
                             try { reply = JSON.parse(result && result.stdout || ''); } catch (e) {}
-                            if (reply && reply.returnValue === true) finish(t('Opening %s…', title));
+                            if (reply && reply.returnValue === true) { if (track) recordLaunch(appId, Date.now()); finish(t('Opening %s…', title)); }
                             else if (reply && reply.returnValue === false) failure(reply);
                             else finish(t('Could not confirm %s opened. Please try again.', title));
                         },
@@ -2346,6 +2633,7 @@
             }
             showToast(t('Opening %s…', title), 8000);
             request.timer = setTimeout(function() {
+                if (pendingLaunch === request) restoreScene();
                 finish(t('No response opening %s. Please try again.', title));
             }, 8000);
             try {
@@ -2355,7 +2643,7 @@
                     onSuccess: function(result) {
                         if (pendingLaunch !== request) return;
                         if (result && result.returnValue === false) fallback(result);
-                        else finish(t('Opening %s…', title));
+                        else { if (track) recordLaunch(appId, Date.now()); finish(t('Opening %s…', title)); }
                     },
                     onFailure: fallback
                 });
@@ -2363,6 +2651,161 @@
         }
 
         // --- Render App Shelf & Trending Row ---
+        // The artwork block of a tile: HDMI device art, a brand logo, or the app title as readable fallback.
+        function buildAppIcon(app, device) {
+            var iconDiv = document.createElement('div');
+            iconDiv.className = 'app-icon';
+            iconDiv.style.background = app.bg || 'linear-gradient(135deg, #0a84ff, #0040a0)';
+            if (isHDMI(app)) {
+                iconDiv.style.background = device.color;
+                if (device.logo) {
+                    var fallback = document.createElement('span');
+                    fallback.className = 'app-art-fallback';
+                    fallback.textContent = device.title;
+                    iconDiv.appendChild(fallback);
+                    addTileImage(iconDiv, 'assets/brands/' + device.logo + '.svg', true);
+                } else {
+                    iconDiv.innerHTML = deviceArtwork(device.shape);
+                }
+            } else {
+                var fallback = document.createElement('span');
+                fallback.className = 'app-art-fallback';
+                fallback.textContent = app.title;
+                iconDiv.appendChild(fallback);
+                var logo = APP_LOGOS[app.id];
+                if (logo || app.iconUrl) {
+                    addTileImage(iconDiv, logo ? 'assets/brands/' + logo + '.svg' : app.iconUrl, !!logo);
+                }
+            }
+            return iconDiv;
+        }
+
+        // The "Pick up where you left off" row: the apps opened last, from the local launch history.
+        // --- Scenes: one press opens the right app and sets this app's own look ---
+        var STREAMING_APPS = ['netflix', 'youtube.leanback.v4', 'amazon', 'com.disney.disneyplus-prod', 'com.crunchyroll.webapp', 'cdp-30'];
+        var SCENES = [
+            { id: 'movie', label: 'Movie night', icon: 'M3 5h18v14H3zM10 9l5 3-5 3z', look: { theme: 'oled', homePhotos: 'off' }, open: 'streaming' },
+            { id: 'game', label: 'Game on', icon: 'M2 8h20v10H2zM7 11v4M5 13h4M16 12h.01M18 14h.01', look: { homePhotos: 'off' }, open: 'game' },
+            { id: 'music', label: 'Background music', icon: 'M9 18V6l11-2v12M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM17 19a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', look: {}, open: 'spotify-beehive' }
+        ];
+
+        // spec: 'streaming' (last used streaming app, else the first one in the catalog), 'game' (first HDMI input
+        // you named as a console or PC), or an app id.
+        function pickSceneApp(spec, hist, catalog, hdmiChoices) {
+            function find(id) { return arrFind(catalog, function(c) { return c.id === id; }) || null; }
+            if (spec === 'streaming') {
+                var ids = catalog.map(function(c) { return c.id; }).filter(function(id) { return STREAMING_APPS.indexOf(id) !== -1; });
+                var rank = {};
+                ids.forEach(function(id, i) { rank[id] = i; });
+                ids.sort(function(a, b) { return (((hist[b] && hist[b].t) || 0) - ((hist[a] && hist[a].t) || 0)) || (rank[a] - rank[b]); });
+                return ids.length ? find(ids[0]) : null;
+            }
+            if (spec === 'game') {
+                return arrFind(catalog, function(c) { return isHDMI(c) && !!hdmiChoices[c.id] && hdmiChoices[c.id] !== 'default'; }) || null;
+            }
+            return find(spec);
+        }
+
+        function settingDef(id) { return arrFind(SETTINGS, function(d) { return d.id === id; }); }
+
+        // Saved as { field: { from: valueBefore, to: valueTheSceneSet } }.
+        // The look changes only after the launch request is really under way, and only if the way back is saved.
+        function runScene(id) {
+            var scene = arrFind(SCENES, function(s) { return s.id === id; });
+            if (!scene) return;
+            if (shelfEdit || pendingLaunch) return;
+            var app = pickSceneApp(scene.open, readLaunchHist(), state.catalog, state.hdmiDevices);
+            if (!app) { showToast(t('Name a device on an HDMI input in Customize first'), 4000); return; }
+            restoreScene(); // a scene left over from a closed app goes back first, so "from" is always the user's own value
+            var canLaunch = !!(window.webOS && window.webOS.service && typeof window.webOS.service.request === 'function');
+            launchApp(app.id);
+            if (!canLaunch || !pendingLaunch) return; // nothing opened (or it already failed): leave the look alone
+            var restore = {};
+            Object.keys(scene.look).forEach(function(field) {
+                if (state[field] !== scene.look[field]) { restore[field] = { from: state[field], to: scene.look[field] }; }
+            });
+            if (!Object.keys(restore).length) return;
+            try { localStorage.setItem('fmtv_scene_restore', JSON.stringify(restore)); } catch (e) { return; } // no way back: do not change the look
+            Object.keys(restore).forEach(function(field) { var def = settingDef(field); if (def) setSettingValue(def, restore[field].to); });
+        }
+
+        // When the app comes back to the front (or starts again), put the look back the way it was before the scene.
+        // A field the user changed in the meantime keeps their choice.
+        function restoreScene() {
+            var restore = null;
+            try { restore = JSON.parse(localStorage.getItem('fmtv_scene_restore') || 'null'); } catch (e) {}
+            if (!restore) return;
+            try { localStorage.removeItem('fmtv_scene_restore'); } catch (e) {}
+            Object.keys(restore).forEach(function(field) {
+                var def = settingDef(field), entry = restore[field];
+                if (def && entry && state[field] === entry.to) setSettingValue(def, entry.from);
+            });
+        }
+
+        function renderScenes(quiet) {
+            var row = document.getElementById('scenesRow');
+            row.innerHTML = '';
+            row.hidden = state.scenes === 'off';
+            if (state.scenes !== 'off') {
+                SCENES.forEach(function(scene) {
+                    var chip = document.createElement('button');
+                    chip.className = 'scene-chip nav-item';
+                    chip.dataset.tag = 'Scene';
+                    chip.dataset.title = scene.label;
+                    chip.dataset.desc = 'Opens the right app and sets the look for it. Back in this app, everything returns as it was.';
+                    chip.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + scene.icon + '"/></svg>';
+                    var label = document.createElement('span');
+                    label.textContent = t(scene.label);
+                    chip.appendChild(label);
+                    chip.addEventListener('mouseenter', function() { setMainFocus(chip); });
+                    chip.addEventListener('click', function() { runScene(scene.id); });
+                    row.appendChild(chip);
+                });
+            }
+            if (!quiet) refreshMainNavList(); // renderAppsShelf passes quiet: renderPickup refreshes right after
+        }
+
+        function renderPickup() {
+            var section = document.getElementById('pickupSection');
+            var row = document.getElementById('pickupRow');
+            row.innerHTML = '';
+            var recent = state.pickup === 'on' && !shelfEdit ? recentApps(readLaunchHist(), state.catalog, 3, Date.now()) : [];
+            section.hidden = recent.length === 0;
+            var now = Date.now();
+            recent.forEach(function(item) {
+                var app = item.app;
+                var device = devicePreset(app, state.hdmiDevices);
+                var title = device.title || app.title;
+                var card = document.createElement('button');
+                card.className = 'pickup-card nav-item';
+                card.dataset.id = app.id;
+                card.dataset.tag = app.tag;
+                card.dataset.title = title;
+                card.dataset.desc = app.desc;
+                card.dataset.color = app.color;
+                card.setAttribute('aria-label', title);
+                var art = document.createElement('div');
+                art.className = 'pickup-art';
+                art.appendChild(buildAppIcon(app, device));
+                var caption = document.createElement('div');
+                caption.className = 'pickup-caption';
+                var name = document.createElement('div');
+                name.className = 'pickup-name';
+                name.textContent = title;
+                var when = document.createElement('div');
+                when.className = 'pickup-when';
+                when.textContent = relativeWhen(item.t, now);
+                caption.appendChild(name);
+                caption.appendChild(when);
+                art.appendChild(caption);
+                card.appendChild(art);
+                card.addEventListener('mouseenter', function() { setMainFocus(card); });
+                card.addEventListener('click', function() { launchApp(app.id); });
+                row.appendChild(card);
+            });
+            refreshMainNavList();
+        }
+
         function renderAppsShelf() {
             var grid = document.getElementById('appsGrid');
             grid.innerHTML = '';
@@ -2385,30 +2828,7 @@
                 btn.setAttribute('aria-label', title + (device.title ? ' — ' + app.title : ''));
                 btn.dataset.color = app.color;
 
-                var iconDiv = document.createElement('div');
-                iconDiv.className = 'app-icon';
-                iconDiv.style.background = app.bg || 'linear-gradient(135deg, #0a84ff, #0040a0)';
-                if (isHDMI(app)) {
-                    iconDiv.style.background = device.color;
-                    if (device.logo) {
-                        var fallback = document.createElement('span');
-                        fallback.className = 'app-art-fallback';
-                        fallback.textContent = device.title;
-                        iconDiv.appendChild(fallback);
-                        addTileImage(iconDiv, 'assets/brands/' + device.logo + '.svg', true);
-                    } else {
-                        iconDiv.innerHTML = deviceArtwork(device.shape);
-                    }
-                } else {
-                    var fallback = document.createElement('span');
-                    fallback.className = 'app-art-fallback';
-                    fallback.textContent = app.title;
-                    iconDiv.appendChild(fallback);
-                    var logo = APP_LOGOS[app.id];
-                    if (logo || app.iconUrl) {
-                        addTileImage(iconDiv, logo ? 'assets/brands/' + logo + '.svg' : app.iconUrl, !!logo);
-                    }
-                }
+                var iconDiv = buildAppIcon(app, device);
 
                 var labelDiv = document.createElement('div');
                 labelDiv.className = 'app-label';
@@ -2426,7 +2846,8 @@
             });
 
             document.getElementById('shelfCountHint').textContent = shelfEdit ? (movingTileId ? t('← / → Move • OK Place • Back Cancel') : t('Select a tile • OK Pick up • Done to save')) : t('%s Apps • Instant Launch', favItems.length);
-            refreshMainNavList();
+            renderScenes(true); // also follows language changes and Reset
+            renderPickup(); // keeps the pick-up row in step with the catalog; it also refreshes the nav list
         }
 
         // Curated entries store 'Watch on X' in English; API-built ones are already localized.
@@ -2523,6 +2944,8 @@
         var mainNavItems = [];
         var curIndex = 0;
         var modalOpen = false;
+        var wizard = { open: false, step: 0, focus: 0, items: [], add: null };
+        var picker = { open: false, focus: 0 };
 
         var heroTag = document.getElementById('heroTag');
         var heroTitle = document.getElementById('heroTitle');
@@ -2548,7 +2971,7 @@
             item.classList.add('focused');
             // While the Customize screen is open, background renders (shelf, picks, new apps) only move the class:
             // a DOM focus() would blur its inline editor and commit half-typed text.
-            if (!modalOpen) item.focus({ preventScroll: true });
+            if (!modalOpen && !wizard.open && !picker.open) item.focus({ preventScroll: true });
             curIndex = mainNavItems.indexOf(item);
 
             heroTag.textContent = t(item.dataset.tag || 'Selection');
@@ -2601,7 +3024,7 @@
         }
 
         // --- Settings schema: one entry per setting; the Customize screen and the persistence both use it ---
-        var SETTING_CATEGORIES = ['Shelf & Inputs', 'Look & Feel', 'Weather & Location', 'Photos & Screensaver', 'Accounts & Keys'];
+        var SETTING_CATEGORIES = ['Home screen', 'Look & Feel', 'People', 'Language & Location', 'Photos & Screensaver', 'Accounts & Keys', 'Reset & About'];
         var ON_OFF = [['on', 'On'], ['off', 'Off']];
         var SECRET_DOTS = '••••••••';
 
@@ -2609,62 +3032,84 @@
         // field = the state field, store = its localStorage key, def = default, apply(previous) = side effects.
         var SETTINGS = [
             { id: 'shelf', cat: 0, type: 'link', label: 'Shelf apps' },
-            { id: 'theme', cat: 1, type: 'choice', field: 'theme', store: 'fmtv_theme', def: 'auto', label: 'Theme Mode',
-              options: [['auto', 'Auto (Follows Sunset)'], ['night', 'Deep Midnight (Default)'], ['oled', 'Pure OLED Black'], ['day', 'Daylight Blue']],
-              apply: function() { applyTheme(); } },
-            { id: 'clockFormat', cat: 1, type: 'choice', field: 'clockFormat', store: 'fmtv_clock_format', def: '24h', label: 'Clock Format',
-              options: [['24h', '24-Hour (20:30)'], ['12h', '12-Hour (8:30 PM)']],
-              apply: function() { updateClock(); } },
-            { id: 'showTrending', cat: 1, type: 'choice', field: 'showTrending', store: 'fmtv_show_trending', def: 'on', label: 'Trending This Week',
+            { id: 'showTrending', cat: 0, type: 'choice', field: 'showTrending', store: 'fmtv_show_trending', def: 'on', label: 'Trending This Week',
               hint: 'Show the movies and shows row on the home screen',
               options: ON_OFF,
               apply: function() { applyTrendingClass(); refreshMainNavList(); fetchTrendingPicks(); } },
+            { id: 'pickup', cat: 0, type: 'choice', field: 'pickup', store: 'fmtv_pickup', def: 'on', label: 'Pick-up Row',
+              hint: 'Shows the apps you opened last, above the shelf',
+              options: ON_OFF,
+              apply: function() { renderPickup(); } },
+            { id: 'scenes', cat: 0, type: 'choice', field: 'scenes', store: 'fmtv_scenes', def: 'on', label: 'Scenes',
+              hint: 'One-press Movie night, Game on and Music on the home screen',
+              options: ON_OFF,
+              apply: function() { renderScenes(); } },
+            { id: 'theme', cat: 1, type: 'choice', field: 'theme', store: 'fmtv_theme', def: 'auto', label: 'Theme Mode',
+              options: [['auto', 'Auto (Follows Sunset)'], ['night', 'Deep Midnight (Default)'], ['oled', 'Pure OLED Black'], ['day', 'Daylight Blue']],
+              apply: function() { applyTheme(); } },
             { id: 'textSize', cat: 1, type: 'choice', field: 'textSize', store: 'fmtv_text_size', def: 'normal', label: 'Text Size (weather & clock)',
               options: [['normal', 'Normal'], ['large', 'Large'], ['xlarge', 'Extra large']],
               apply: function() { applyTextSize(); } },
             { id: 'perfMode', cat: 1, type: 'choice', field: 'perfMode', store: 'fmtv_perf_mode', def: 'standard', label: 'Performance Mode',
               options: [['standard', 'Standard (Glass & Glow)'], ['high', 'High Performance (60 FPS Boost)']],
               apply: function() { applyPerfMode(); applyHomePhotosSettings(); applyTheme(); } },
-            { id: 'lang', cat: 1, type: 'choice', field: 'lang', store: 'fmtv_lang', def: 'auto', label: 'Language',
+            { id: 'clockFormat', cat: 1, type: 'choice', field: 'clockFormat', store: 'fmtv_clock_format', def: '24h', label: 'Clock Format',
+              options: [['24h', '24-Hour (20:30)'], ['12h', '12-Hour (8:30 PM)']],
+              apply: function() { updateClock(); } },
+            { id: 'userName', cat: 2, type: 'text', field: 'userName', store: 'fmtv_user_name', def: '', label: 'Your Name',
+              placeholder: 'e.g. Noa', hint: 'Used in the greeting on the home screen',
+              apply: function() { updateGreeting(); syncProfileName(); } },
+            { id: 'askWho', cat: 2, type: 'choice', field: 'askWho', store: 'fmtv_ask_who', def: 'on', label: 'Ask who is watching',
+              hint: 'Shows the person picker when the app opens, if there is more than one person',
+              options: ON_OFF },
+            { id: 'switchPerson', cat: 2, type: 'run', label: 'Switch person', show: function() { return readProfiles().length >= 2; },
+              run: function() { closeSettingsModal(); openPicker(); } },
+            { id: 'addPerson', cat: 2, type: 'run', label: 'Add person', run: function() { closeSettingsModal(); startAddPerson(); } },
+            { id: 'removePerson', cat: 2, type: 'pick', label: 'Remove this person',
+              show: function() { return readProfiles().length >= 2 && !state.locked && removeTargets().length > 0; } },
+            { id: 'lang', cat: 3, type: 'choice', field: 'lang', store: 'fmtv_lang', def: 'auto', label: 'Language',
               options: [['auto', 'Auto (TV language)'], ['en', 'English'], ['pt', 'Português (Brasil)'], ['es', 'Español'], ['de', 'Deutsch'], ['fr', 'Français']],
               apply: function() { applyStaticTranslations(); renderAppsShelf(); updateClock(); applyTheme(); scheduleSettingsNetwork(true, true); } },
-            { id: 'city', cat: 2, type: 'text', field: 'city', store: 'fmtv_city', def: '', label: 'City Name (or leave Auto)',
+            { id: 'city', cat: 3, type: 'text', field: 'city', store: 'fmtv_city', def: '', label: 'City Name (or leave Auto)',
               placeholder: 'e.g. Sao Paulo, Lisbon, NYC',
               apply: function() { scheduleSettingsNetwork(true, false); } },
-            { id: 'ipLocate', cat: 2, type: 'choice', field: 'ipLocate', store: 'fmtv_ip_locate', def: 'off', label: 'Auto-locate by IP (sends your IP to ipapi.co)',
+            { id: 'ipLocate', cat: 3, type: 'choice', field: 'ipLocate', store: 'fmtv_ip_locate', def: 'off', label: 'Auto-locate by IP (sends your IP to ipapi.co)',
               options: [['off', 'Off (use the city above)'], ['on', 'On']],
               apply: function() { scheduleSettingsNetwork(true, false); } },
-            { id: 'homePhotos', cat: 3, type: 'choice', field: 'homePhotos', store: 'fmtv_home_photos', def: 'off', label: 'Photos on Home Screen',
+            { id: 'homePhotos', cat: 4, type: 'choice', field: 'homePhotos', store: 'fmtv_home_photos', def: 'off', label: 'Photos on Home Screen',
               hint: 'Dimmed, slowly moving photos behind the dashboard',
               options: [['off', 'Off'], ['on', 'On']],
               apply: function() { ambientRefresh(false); applyHomePhotosSettings(); } },
-            { id: 'ambient', cat: 3, type: 'choice', field: 'ambient', store: 'fmtv_ambient', def: 'on', label: 'Ambient Photo Screensaver',
+            { id: 'ambient', cat: 4, type: 'choice', field: 'ambient', store: 'fmtv_ambient', def: 'on', label: 'Ambient Photo Screensaver',
               hint: 'Photos behind the clock when the TV is idle',
               options: ON_OFF,
               apply: function() { ambientRefresh(false); } },
-            { id: 'idleMins', cat: 3, type: 'choice', field: 'idleMins', store: 'fmtv_idle_mins', def: '3', label: 'Screensaver Starts After',
+            { id: 'idleMins', cat: 4, type: 'choice', field: 'idleMins', store: 'fmtv_idle_mins', def: '3', label: 'Screensaver Starts After',
               options: [['1', '1 minute'], ['3', '3 minutes'], ['5', '5 minutes'], ['10', '10 minutes'], ['30', '30 minutes']] },
-            { id: 'ambientSecs', cat: 3, type: 'choice', field: 'ambientSecs', store: 'fmtv_ambient_secs', def: '90', label: 'Photo Duration',
+            { id: 'ambientSecs', cat: 4, type: 'choice', field: 'ambientSecs', store: 'fmtv_ambient_secs', def: '90', label: 'Photo Duration',
               options: [['30', '30 seconds'], ['90', '90 seconds'], ['300', '5 minutes']],
               apply: function() { applyHomePhotosSettings(); } },
-            { id: 'ambientMotion', cat: 3, type: 'choice', field: 'ambientMotion', store: 'fmtv_ambient_motion', def: 'drift', label: 'Photo Motion',
+            { id: 'ambientMotion', cat: 4, type: 'choice', field: 'ambientMotion', store: 'fmtv_ambient_motion', def: 'drift', label: 'Photo Motion',
               options: [['drift', 'Continuous drift'], ['kenburns', 'Ken Burns'], ['panels', 'Sliding panels'], ['none', 'None']],
               apply: function() { applyHomePhotosSettings(); } },
-            { id: 'ambientSpeed', cat: 3, type: 'choice', field: 'ambientSpeed', store: 'fmtv_ambient_speed', def: 'normal', label: 'Drift Speed',
+            { id: 'ambientSpeed', cat: 4, type: 'choice', field: 'ambientSpeed', store: 'fmtv_ambient_speed', def: 'normal', label: 'Drift Speed',
               options: [['slow', 'Slow'], ['normal', 'Normal'], ['fast', 'Fast']],
               apply: function() { applyHomePhotosSettings(); } },
-            { id: 'ambientBright', cat: 3, type: 'choice', field: 'ambientBright', store: 'fmtv_ambient_bright', def: 'normal', label: 'Photo Brightness',
+            { id: 'ambientBright', cat: 4, type: 'choice', field: 'ambientBright', store: 'fmtv_ambient_bright', def: 'normal', label: 'Photo Brightness',
               hint: 'How strongly the photos show behind the clock',
               options: [['soft', 'Soft'], ['normal', 'Normal'], ['bright', 'Bright']] },
-            { id: 'clockPos', cat: 3, type: 'choice', field: 'clockPos', store: 'fmtv_clock_pos', def: 'bl', label: 'Clock Position',
+            { id: 'nightDim', cat: 4, type: 'choice', field: 'nightDim', store: 'fmtv_night_dim', def: 'on', label: 'Dim Photos at Night',
+              hint: 'A little dimmer after sunset, much dimmer after 23:00',
+              options: ON_OFF },
+            { id: 'clockPos', cat: 4, type: 'choice', field: 'clockPos', store: 'fmtv_clock_pos', def: 'bl', label: 'Clock Position',
               hint: 'Where the clock and date sit; in the corners they move only a few pixels',
               options: [['bl', 'Bottom Left'], ['br', 'Bottom Right'], ['tl', 'Top Left'], ['tr', 'Top Right'], ['center', 'Center (drifts slowly)']],
               apply: function() { applyClockPosition(); } },
-            { id: 'keepAwake', cat: 3, type: 'choice', field: 'keepAwake', store: 'fmtv_keep_awake', def: 'on', label: 'Keep LG Screensaver Away',
+            { id: 'keepAwake', cat: 4, type: 'choice', field: 'keepAwake', store: 'fmtv_keep_awake', def: 'on', label: 'Keep LG Screensaver Away',
               hint: 'Plays a hidden video so LG does not cover ours',
               options: ON_OFF,
               apply: function() { keepAwakeSync(); } },
-            { id: 'unsplashKey', cat: 4, type: 'text', secret: true, field: 'unsplashKey', store: 'fmtv_unsplash_key', def: '', label: 'Unsplash Access Key (Optional)',
+            { id: 'unsplashKey', cat: 5, type: 'text', secret: true, field: 'unsplashKey', store: 'fmtv_unsplash_key', def: '', label: 'Unsplash Access Key (Optional)',
               hint: 'For the photos. Stored on this TV only',
               apply: function(previous) {
                   if (previous !== state.unsplashKey) {
@@ -2673,10 +3118,16 @@
                   ambientRefresh(false);
                   applyHomePhotosSettings();
               } },
-            { id: 'tmdbKey', cat: 4, type: 'text', secret: true, field: 'tmdbKey', store: 'fmtv_tmdb_key', def: '', label: 'TMDB API Key (Optional)',
+            { id: 'tmdbKey', cat: 5, type: 'text', secret: true, field: 'tmdbKey', store: 'fmtv_tmdb_key', def: '', label: 'TMDB API Key (Optional)',
               hint: 'Optional, for weekly trending movies and shows',
               apply: function() { scheduleSettingsNetwork(false, true); } },
-            { id: 'reset', cat: 4, type: 'action', label: 'Reset to defaults' }
+            { id: 'runSetup', cat: 6, type: 'run', label: 'Run setup again', run: function() { closeSettingsModal(); openWizard(); } },
+            { id: 'reset', cat: 6, type: 'action', label: 'Reset settings',
+              hint: 'Puts every setting and the shelf back to defaults. People and history stay.' },
+            { id: 'eraseAll', cat: 6, type: 'action', label: 'Erase everything on this TV',
+              hint: 'Deletes every person, setting, key and history, then starts first-run setup' },
+            { id: 'version', cat: 6, type: 'info', label: 'Version', value: function() { return APP_VERSION; } },
+            { id: 'about', cat: 6, type: 'info', label: 'About', hint: 'Free My TV is an independent app, not affiliated with LG. No ads. No account. Your settings stay on this TV.' }
         ];
 
         // Settings that hit the network wait 700 ms after the last change, so holding Right on Language
@@ -2721,6 +3172,7 @@
             var list = [];
             SETTINGS.forEach(function(def) {
                 if (def.cat !== cat) return;
+                if (def.show && !def.show()) return;
                 list.push(def);
                 if (def.id === 'shelf') hdmiSettings().forEach(function(h) { list.push(h); });
             });
@@ -2815,12 +3267,39 @@
             fetchTrendingPicks();
             ambientRefresh(false);
             applyHomePhotosSettings();
+            syncProfileName();
             showToast(t('Defaults restored'));
+        }
+
+        // Deletes every fmtv_* key (people, settings, keys, history), forgets the in-memory values and reloads,
+        // which starts the first-run setup because no fmtv_* key is left. Nothing is written in between.
+        function reloadApp() { location.reload(); }
+
+        var erasing = false; // set once Erase everything runs, so late async writers cannot recreate a key before the reload
+        function eraseEverything() {
+            erasing = true;
+            clearTimeout(settingsNetTimer);
+            settingsNetTimer = null;
+            settingsNetPending.weather = false;
+            settingsNetPending.picks = false;
+            try {
+                var keys = [], i, k;
+                for (i = 0; i < localStorage.length; i++) {
+                    k = localStorage.key(i);
+                    if (k && k.indexOf('fmtv_') === 0) keys.push(k);
+                }
+                keys.forEach(function(key) { localStorage.removeItem(key); });
+            } catch (e) {}
+            SETTINGS.forEach(function(def) { if (def.field) state[def.field] = def.def; });
+            state.favorites = DEFAULT_FAVORITES.slice();
+            state.hdmiDevices = {};
+            state.locked = false;
+            reloadApp();
         }
 
         // --- Customize Shelf & Settings Modal ---
         var settingsModal = document.getElementById('settingsModal');
-        var settingsUi = { zone: 'cats', cat: 0, catFocus: 0, row: 1, appIdx: 0, confirmReset: false, message: '' };
+        var settingsUi = { zone: 'cats', cat: 0, catFocus: 0, row: 0, appIdx: 0, confirmReset: false, message: '' };
         var settingsSavedTimer = null;
         // Hover moves focus only while the pointer really moves; a key press hands control back to the remote.
         // (Browsers fire synthetic mouseover when content under a resting cursor scrolls or is replaced.)
@@ -2841,9 +3320,9 @@
             return node;
         }
 
-        // The "Categories" row comes first, then the category's settings (HDMI rows follow "Shelf apps").
+        // The category's settings (HDMI rows follow "Shelf apps"). Back or Up from the first row returns to the category list.
         function settingsRowsFor(cat) {
-            return [{ id: 'back', type: 'back', label: 'Categories' }].concat(settingsForCategory(cat));
+            return settingsForCategory(cat);
         }
 
         function flashSaved() {
@@ -2867,10 +3346,11 @@
             settingsUi.zone = 'cats';
             settingsUi.cat = 0;
             settingsUi.catFocus = 0;
-            settingsUi.row = 1;
+            settingsUi.row = 0;
             settingsUi.appIdx = 0;
             settingsUi.confirmReset = false;
             settingsUi.message = '';
+            removeTarget = '';
             document.getElementById('settingsSaved').textContent = '';
             settingsModal.classList.add('active');
             renderSettings();
@@ -2896,7 +3376,7 @@
                 var button = sEl('button', 'settings-cat' + (i === settingsUi.cat ? ' selected' : ''));
                 button.setAttribute('data-i', String(i));
                 button.appendChild(sEl('span', 'sc-name', t(name)));
-                button.appendChild(sEl('span', 'sc-count', String(settingsRowsFor(i).length - 1)));
+                button.appendChild(sEl('span', 'sc-count', String(settingsRowsFor(i).length)));
                 button.onmouseover = function() {
                     if (!settingsPointerLive || (settingsUi.zone !== 'cats' && settingsUi.zone !== 'rows')) return;
                     if (settingsUi.zone === 'cats' && settingsUi.catFocus === i) return; // child spans re-fire mouseover
@@ -2939,7 +3419,7 @@
                 var row = sEl('div', 'settings-row');
                 row.setAttribute('data-i', String(i));
                 row.setAttribute('data-id', def.id);
-                var label = def.type === 'back' ? '‹ ' + t(def.label) : t(def.label);
+                var label = t(def.label);
                 var mainButton = sEl('button', 'sr-main');
                 mainButton.appendChild(sEl('span', 'sr-label', label));
                 if (def.hint) mainButton.appendChild(sEl('span', 'sr-hint', t(def.hint)));
@@ -2967,11 +3447,28 @@
                 } else if (def.type === 'text') {
                     row.appendChild(sEl('span', 'sr-value', settingValueText(def)));
                     row.appendChild(sEl('span', 'sr-edit', t('OK to edit')));
+                } else if (def.type === 'pick') {
+                    var pickPrev = sEl('button', 'sr-arrow', '◀');
+                    pickPrev.setAttribute('data-dir', '-1');
+                    pickPrev.setAttribute('aria-label', t('Previous value'));
+                    pickPrev.onclick = function(ev) { ev.stopPropagation(); settingsUi.zone = 'rows'; settingsUi.row = i; cyclePick(-1); renderSettings(); };
+                    var pickNext = sEl('button', 'sr-arrow', '▶');
+                    pickNext.setAttribute('data-dir', '1');
+                    pickNext.setAttribute('aria-label', t('Next value'));
+                    pickNext.onclick = function(ev) { ev.stopPropagation(); settingsUi.zone = 'rows'; settingsUi.row = i; cyclePick(1); renderSettings(); };
+                    var target = removeTargetProfile();
+                    row.appendChild(pickPrev);
+                    row.appendChild(sEl('span', 'sr-value', target ? (settingsUi.confirmReset === def.id ? t('Press OK again to remove %s', target.name) : target.name) : ''));
+                    row.appendChild(pickNext);
+                } else if (def.type === 'run') {
+                    row.appendChild(sEl('span', 'sr-edit', t('OK to run')));
                 } else if (def.type === 'link') {
                     row.appendChild(sEl('span', 'sr-value', t('%s of 8 selected', String(state.favorites.length))));
                     row.appendChild(sEl('span', 'sr-edit', t('OK to open')));
-                } else if (def.type === 'action' && settingsUi.confirmReset) {
-                    row.appendChild(sEl('span', 'sr-value', t('Press OK again to confirm')));
+                } else if (def.type === 'info') {
+                    if (def.value) row.appendChild(sEl('span', 'sr-value', def.value()));
+                } else if (def.type === 'action' && settingsUi.confirmReset === def.id) {
+                    row.appendChild(sEl('span', 'sr-value', t(def.id === 'eraseAll' ? 'Press OK again to erase everything' : 'Press OK again to confirm')));
                 }
                 list.appendChild(row);
             });
@@ -3038,19 +3535,33 @@
 
         function enterRows() {
             settingsUi.zone = 'rows';
-            settingsUi.row = 1;
+            settingsUi.row = 0;
             settingsUi.confirmReset = false;
             renderSettings();
         }
 
         function activateRow(def) {
-            if (def.type === 'back') { settingsUi.zone = 'cats'; settingsUi.catFocus = settingsUi.cat; settingsUi.confirmReset = false; }
-            else if (def.type === 'choice') { cycleSetting(def, 1); flashSaved(); }
+            if (def.type === 'choice') { cycleSetting(def, 1); flashSaved(); }
             else if (def.type === 'text') { settingsUi.confirmReset = false; renderSettings(); startEdit(def); return; }
+            else if (def.type === 'run') { def.run(); return; }
+            else if (def.type === 'pick') {
+                if (settingsUi.confirmReset === def.id) {
+                    var victim = removeTargetProfile();
+                    settingsUi.confirmReset = false;
+                    if (victim) removeProfileById(victim.id);
+                    removeTarget = '';
+                    settingsUi.row = Math.min(settingsUi.row, settingsRowsFor(settingsUi.cat).length - 1);
+                    flashSaved();
+                } else settingsUi.confirmReset = def.id;
+            }
             else if (def.type === 'link') { settingsUi.zone = 'apps'; settingsUi.appIdx = 0; settingsUi.message = ''; }
             else if (def.type === 'action') {
-                if (settingsUi.confirmReset) { settingsUi.confirmReset = false; resetAllSettings(); flashSaved(); }
-                else settingsUi.confirmReset = true;
+                if (settingsUi.confirmReset === def.id) {
+                    settingsUi.confirmReset = false;
+                    if (def.id === 'eraseAll') { eraseEverything(); return; }
+                    resetAllSettings();
+                    flashSaved();
+                } else settingsUi.confirmReset = def.id;
             }
             renderSettings();
         }
@@ -3138,6 +3649,12 @@
                 if (key === 'ArrowDown' || key === 'ArrowUp') {
                     // Moving only repaints the ring, so the list keeps its scroll; a pending reset question is dropped.
                     asked = ui.confirmReset;
+                    if (key === 'ArrowUp' && ui.row === 0) { // above the first row is the category list
+                        ui.zone = 'cats'; ui.catFocus = ui.cat; ui.confirmReset = false;
+                        e.preventDefault();
+                        renderSettings();
+                        return;
+                    }
                     ui.row = key === 'ArrowDown' ? Math.min(ui.row + 1, rows.length - 1) : Math.max(ui.row - 1, 0);
                     ui.confirmReset = false;
                     e.preventDefault();
@@ -3145,6 +3662,7 @@
                     return;
                 }
                 if ((key === 'ArrowLeft' || key === 'ArrowRight') && def.type === 'choice') { cycleSetting(def, key === 'ArrowRight' ? 1 : -1); flashSaved(); }
+                else if ((key === 'ArrowLeft' || key === 'ArrowRight') && def.type === 'pick') cyclePick(key === 'ArrowRight' ? 1 : -1);
                 else if (key === 'Enter') { activateRow(def); e.preventDefault(); return; }
                 else return;
                 e.preventDefault();
@@ -3169,6 +3687,10 @@
         document.getElementById('customizeBtn').addEventListener('click', openSettingsModal);
         document.getElementById('customizeBtn').addEventListener('mouseenter', function() {
             setMainFocus(document.getElementById('customizeBtn'));
+        });
+        document.getElementById('profileBtn').addEventListener('click', openPicker);
+        document.getElementById('profileBtn').addEventListener('mouseenter', function() {
+            setMainFocus(document.getElementById('profileBtn'));
         });
         document.getElementById('tvSettingsBtn').addEventListener('click', function() { launchApp(LG_SETTINGS_APP, '', t('TV Settings')); });
         document.getElementById('tvSettingsBtn').addEventListener('mouseenter', function() {
@@ -3264,6 +3786,24 @@
             return state.ambientBright === 'soft' ? 0.75 : (state.ambientBright === 'bright' ? 1.25 : 1);
         }
 
+        // Evening dimming: 0.75 from sunset (18:00 if unknown) until 23:00, 0.5 from 23:00 until 05:00, else 1.
+        function nightFactor(now, sunsetStr) {
+            var h = now.getHours();
+            if (h >= 23 || h < 5) return 0.5;
+            var m = /^(\d{1,2}):(\d{2})$/.exec(sunsetStr || '');
+            var sunsetMin = m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : 18 * 60;
+            return h * 60 + now.getMinutes() >= sunsetMin ? 0.75 : 1;
+        }
+
+        function ambientNightFactor() {
+            return state.nightDim === 'off' ? 1 : nightFactor(new Date(), state.sunset);
+        }
+
+        // The screensaver weather line stays quiet from 23:00 to 04:59 and while the weather is still loading.
+        function screensaverWeatherVisible(hour, weatherText) {
+            return !(hour >= 23 || hour < 5 || weatherText === 'Loading...');
+        }
+
         // log = timestamps (ms) of earlier calls; true while fewer than `limit` happened in the last hour.
         function ambientBudgetAllows(log, now, limit) {
             var recent = 0;
@@ -3331,7 +3871,7 @@
             }
             try {
                 log.push(now);
-                localStorage.setItem('fmtv_ambient_calls', JSON.stringify(log));
+                if (!erasing) localStorage.setItem('fmtv_ambient_calls', JSON.stringify(log));
             } catch (e) {
                 done(e);
                 return;
@@ -3339,7 +3879,7 @@
             fetch(url, { headers: { 'Authorization': 'Client-ID ' + state.unsplashKey, 'Accept-Version': 'v1' } }).then(function(res) {
                 var remaining = parseInt(res.headers.get('X-Ratelimit-Remaining'), 10);
                 if (res.status === 403 || res.status === 429 || remaining < AMBIENT_MIN_REMAINING) {
-                    try { localStorage.setItem('fmtv_ambient_pause', String(Date.now() + AMBIENT_HOUR_MS)); } catch (e) {}
+                    try { if (!erasing) localStorage.setItem('fmtv_ambient_pause', String(Date.now() + AMBIENT_HOUR_MS)); } catch (e) {}
                 }
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 return res.json();
@@ -3357,7 +3897,7 @@
             function finish() {
                 ambientRefreshing = false;
                 if (photos.length >= AMBIENT_MIN_CACHED) {
-                    try { localStorage.setItem('fmtv_ambient_cache', JSON.stringify({ photos: photos, at: Date.now() })); } catch (e) {}
+                    try { if (!erasing) localStorage.setItem('fmtv_ambient_cache', JSON.stringify({ photos: photos, at: Date.now() })); } catch (e) {}
                     syncHomePhotos();
                 }
             }
@@ -3446,7 +3986,7 @@
             if (pinged.indexOf(p.id) !== -1) return;
             if (ambientPaused() || !ambientBudgetAllows(ambientCalls(), Date.now(), AMBIENT_PING_CAP)) return;
             pinged.push(p.id);
-            try { localStorage.setItem('fmtv_ambient_pinged', JSON.stringify(pinged.slice(-300))); } catch (e) {}
+            try { if (!erasing) localStorage.setItem('fmtv_ambient_pinged', JSON.stringify(pinged.slice(-300))); } catch (e) {}
             ambientApi(p.dl, AMBIENT_PING_CAP, function() {});
         }
 
@@ -3509,7 +4049,7 @@
                 pre.onload = function() {
                     if (!player.on || run !== player.run) return;
                     player.failures = 0;
-                    var opacity = String(Math.min(1, Math.round(ambientDim(photo.color) * cfg.dimScale * ambientBrightness() * 100) / 100));
+                    var opacity = String(Math.min(1, Math.round(ambientDim(photo.color) * cfg.dimScale * ambientBrightness() * ambientNightFactor() * 100) / 100));
                     clearTimeout(player.panelTimer);
                     removePanels();
                     next.src = pre.src;
@@ -3694,7 +4234,7 @@
         // In the background (another app launched): stop downloading, pinging and holding the TV awake.
         function onVisibilityChange() {
             if (document.hidden) { if (screensaverOn) exitScreensaver(); syncHomePhotos(); keepAwakeStop(); }
-            else { lastActivity = Date.now(); syncHomePhotos(); keepAwakeSync(); }
+            else { lastActivity = Date.now(); restoreScene(); renderPickup(); syncHomePhotos(); keepAwakeSync(); }
         }
         document.addEventListener('visibilitychange', onVisibilityChange);
 
@@ -3718,6 +4258,691 @@
         setTimeout(syncHomePhotos, 2000);
         setInterval(function() { if (!screensaverOn) ambientRefresh(false); }, 30 * 60 * 1000);
 
+        // --- Profiles: a person is a stored snapshot of shelf, look, city and screensaver. Local to this TV, never an account. ---
+        var PROFILE_FIELDS = ['userName', 'theme', 'city', 'lat', 'lon', 'ambient', 'homePhotos'];
+        var PROFILE_COLORS = ['#2a7de1', '#1fa05a', '#ff9f43', '#7a4de0', '#ee5a8b'];
+
+        function snapshotProfile() {
+            var p = { favorites: state.favorites.slice(), hdmiDevices: JSON.parse(JSON.stringify(state.hdmiDevices)), locked: !!state.locked };
+            PROFILE_FIELDS.forEach(function(f) { p[f] = state[f]; });
+            return p;
+        }
+
+        // Write a snapshot into state + storage, then refresh everything that shows it. Fields missing from the snapshot stay as they are.
+        function applyProfile(p) {
+            PROFILE_FIELDS.forEach(function(f) {
+                if (p[f] === undefined) return;
+                state[f] = p[f];
+                var def = settingDef(f);
+                var store = def ? def.store : (f === 'lat' ? 'fmtv_lat' : (f === 'lon' ? 'fmtv_lon' : ''));
+                if (store) { try { localStorage.setItem(store, String(p[f])); } catch (e) {} }
+            });
+            if (p.favorites) { state.favorites = p.favorites.slice(); try { localStorage.setItem('fmtv_favorites', JSON.stringify(state.favorites)); } catch (e) {} }
+            if (p.hdmiDevices) { state.hdmiDevices = JSON.parse(JSON.stringify(p.hdmiDevices)); try { localStorage.setItem('fmtv_hdmi_devices', JSON.stringify(state.hdmiDevices)); } catch (e) {} }
+            state.locked = !!p.locked;
+            if (state.locked && modalOpen) closeSettingsModal(); // a locked person must not keep Customize open
+            applyTheme(); renderAppsShelf(); renderPickup(); updateGreeting(); applyLock(true);
+            fetchWeather(); applyHomePhotosSettings(); ambientRefresh(false);
+        }
+
+        function readProfiles() {
+            try {
+                var list = JSON.parse(localStorage.getItem('fmtv_profiles') || '[]');
+                return Array.isArray(list) ? list.filter(function(p) { return p && p.id && p.name && p.data; }) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveProfiles(list) {
+            try { localStorage.setItem('fmtv_profiles', JSON.stringify(list)); } catch (e) {}
+        }
+
+        function activeProfileId() {
+            try { return localStorage.getItem('fmtv_active_profile') || ''; } catch (e) { return ''; }
+        }
+
+        // The active person's id; a missing or unknown id means the first person.
+        function currentProfileId(list) {
+            var id = activeProfileId();
+            if (arrFind(list, function(p) { return p.id === id; })) return id;
+            return list.length ? list[0].id : '';
+        }
+
+        function shouldAskWho() {
+            return readProfiles().length >= 2 && state.askWho === 'on';
+        }
+
+        // Show or hide the settings buttons for a locked (kids) profile, and the "who" pill when there is more than one person.
+        function applyLock(refocus) {
+            ['customizeBtn', 'tvSettingsBtn'].forEach(function(id) { document.getElementById(id).hidden = !!state.locked; });
+            var list = readProfiles();
+            var current = arrFind(list, function(p) { return p.id === currentProfileId(list); });
+            document.getElementById('profileBtn').hidden = list.length < 2;
+            document.getElementById('profileBtnLabel').textContent = '👤 ' + (current ? current.name : '');
+            refreshMainNavList();
+            if (refocus) focusStable();
+        }
+
+        // After the set of buttons changed, a numeric index may point at another element: focus the pill, else the first app tile.
+        function focusStable() {
+            var pill = document.getElementById('profileBtn');
+            var target = pill.offsetParent !== null ? pill : arrFind(mainNavItems, function(el) { return el.classList.contains('app-tile'); });
+            if (target) setMainFocus(target);
+        }
+
+        // Keep the stored name of the active person in step with the name typed in Customize or the wizard.
+        function syncProfileName() {
+            var list = readProfiles();
+            var id = activeProfileId();
+            var index = arrFindIndex(list, function(p) { return p.id === id; });
+            if (index === -1) return;
+            list[index].name = state.userName || (id === 'p0' ? t('You') : t('Person') + ' ' + (index + 1));
+            saveProfiles(list);
+            applyLock();
+        }
+
+        // Store the current person's state in their profile; the very first time the current state becomes the first person.
+        function saveCurrentProfile() {
+            var list = readProfiles();
+            if (!list.length) {
+                list.push({ id: 'p0', name: state.userName || t('You'), color: PROFILE_COLORS[0], data: snapshotProfile() });
+            } else {
+                var id = activeProfileId(); // an unknown id saves nobody; boot repairs the key
+                list.forEach(function(p) { if (p.id === id) p.data = snapshotProfile(); });
+            }
+            saveProfiles(list);
+            if (!activeProfileId()) { try { localStorage.setItem('fmtv_active_profile', currentProfileId(list)); } catch (e) {} }
+            return list;
+        }
+
+        // Save the current person first (nothing is ever lost), then load the chosen one.
+        function switchProfile(id) {
+            var list = readProfiles();
+            var target = arrFind(list, function(p) { return p.id === id; });
+            if (!target) return;
+            var current = activeProfileId(); // the raw id: a person just deleted must not be saved over somebody else
+            list.forEach(function(p) { if (p.id === current) p.data = snapshotProfile(); });
+            saveProfiles(list);
+            try { localStorage.setItem('fmtv_active_profile', id); } catch (e) {}
+            applyProfile(target.data);
+        }
+
+        // A new person starts from the app defaults, not from the current person's choices.
+        function defaultProfileData() {
+            var p = { favorites: DEFAULT_FAVORITES.slice(), hdmiDevices: {}, locked: false };
+            PROFILE_FIELDS.forEach(function(f) {
+                var def = settingDef(f);
+                p[f] = def ? def.def : (f === 'lat' || f === 'lon' ? 0 : '');
+            });
+            return p;
+        }
+
+        // Creates the person (and the first person from the current state if this is the first time); returns the new id.
+        function addProfile(name) {
+            var list = saveCurrentProfile();
+            var id = 'p' + Date.now();
+            while (arrFind(list, function(p) { return p.id === id; })) id += 'x';
+            var data = defaultProfileData();
+            data.userName = name || '';
+            list.push({ id: id, name: name || t('Person') + ' ' + (list.length + 1), color: PROFILE_COLORS[list.length % PROFILE_COLORS.length], data: data });
+            saveProfiles(list);
+            return id;
+        }
+
+        // With a single person left there is nothing to choose between: forget the list so the TV is exactly as before profiles.
+        function dropLonelyProfile() {
+            if (readProfiles().length > 1) return;
+            try { localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile'); } catch (e) {}
+            state.locked = false; // a lone person is never locked, or the TV could end up with no way to Customize
+            applyLock();
+        }
+
+        // Add person: keep the current person, make the new one active, and run the wizard from the name step.
+        function startAddPerson() {
+            var previous = currentProfileId(saveCurrentProfile());
+            var id = addProfile('');
+            switchProfile(id);
+            openWizard({ previous: previous, id: id });
+        }
+
+        // The wizard finished (or was skipped): the new person keeps what was chosen, named after the typed name.
+        function finishAddPerson() {
+            var add = wizard.add;
+            wizard.add = null;
+            var list = readProfiles();
+            list.forEach(function(p) {
+                if (p.id !== add.id) return;
+                p.data = snapshotProfile();
+                if (state.userName) p.name = state.userName;
+            });
+            saveProfiles(list);
+            applyLock();
+        }
+
+        // Back on the first step: the new person is deleted and the previous one comes back exactly as they were.
+        function cancelAddPerson() {
+            wizardRestoreLook();
+            var add = wizard.add;
+            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+            wizard.add = null;
+            saveProfiles(readProfiles().filter(function(p) { return p.id !== add.id; }));
+            switchProfile(add.previous);
+            dropLonelyProfile();
+            closeWizard();
+        }
+
+        // A person is locked when their profile says so; the active person's live state wins over a stale snapshot.
+        function isLockedProfile(list, p) {
+            return p.id === currentProfileId(list) ? !!state.locked : !!(p.data && p.data.locked);
+        }
+
+        // True when this is the only unlocked person in the list.
+        function isLastGrownUp(list, id) {
+            var open = list.filter(function(p) { return !isLockedProfile(list, p); });
+            return open.length === 1 && open[0].id === id;
+        }
+
+        // Delete the active person and load the first one left.
+        function removeActiveProfile() {
+            var list = readProfiles();
+            var id = currentProfileId(list);
+            var rest = list.filter(function(p) { return p.id !== id; });
+            if (!rest.length || rest.length === list.length) return;
+            saveProfiles(rest);
+            switchProfile(rest[0].id);
+            dropLonelyProfile();
+        }
+
+        // Delete anyone: the active person loads the first one left; another person just leaves the list.
+        function removeProfileById(id) {
+            var list = readProfiles();
+            if (!arrFind(list, function(p) { return p.id === id; })) return;
+            if (isLastGrownUp(list, id)) { showToast(t('Keep at least one grown-up profile')); return; }
+            if (id === currentProfileId(list)) { removeActiveProfile(); return; }
+            saveProfiles(list.filter(function(p) { return p.id !== id; }));
+            dropLonelyProfile();
+            applyLock();
+        }
+
+        // The people "Remove this person" can pick: everyone else first, then the active person.
+        var removeTarget = '';
+
+        function removeTargets() {
+            var list = readProfiles();
+            var active = currentProfileId(list);
+            // The last unlocked person is never offered: without them nobody could reach Customize or Erase.
+            list = list.filter(function(p) { return !isLastGrownUp(list, p.id); });
+            return list.filter(function(p) { return p.id !== active; }).concat(list.filter(function(p) { return p.id === active; }));
+        }
+
+        function removeTargetProfile() {
+            var list = removeTargets();
+            return arrFind(list, function(p) { return p.id === removeTarget; }) || list[0];
+        }
+
+        function cyclePick(step) {
+            var list = removeTargets();
+            if (!list.length) return;
+            var current = removeTargetProfile();
+            var index = arrFindIndex(list, function(p) { return p.id === current.id; });
+            removeTarget = list[(index + step + list.length) % list.length].id;
+            settingsUi.confirmReset = false;
+        }
+
+        // "Who is watching?" overlay: one card per person; Left/Right choose, OK enters, Back keeps the current person.
+        function renderPicker() {
+            var host = document.getElementById('profileCards');
+            host.innerHTML = '';
+            readProfiles().forEach(function(p, i) {
+                var card = document.createElement('button');
+                card.className = 'profile-card' + (i === picker.focus ? ' focused' : '');
+                card.setAttribute('type', 'button');
+                card.setAttribute('data-id', p.id);
+                var avatar = document.createElement('div');
+                avatar.className = 'profile-avatar';
+                avatar.style.background = p.color || PROFILE_COLORS[0];
+                avatar.textContent = p.name.charAt(0).toUpperCase();
+                var name = document.createElement('div');
+                name.className = 'profile-name';
+                name.textContent = p.name;
+                card.appendChild(avatar);
+                card.appendChild(name);
+                card.onclick = function() { switchProfile(p.id); closePicker(); };
+                host.appendChild(card);
+            });
+        }
+
+        function openPicker() {
+            var list = readProfiles();
+            if (list.length < 2) return;
+            var id = currentProfileId(list);
+            picker.focus = Math.max(0, arrFindIndex(list, function(p) { return p.id === id; }));
+            picker.open = true;
+            document.getElementById('profileOverlay').hidden = false;
+            renderPicker();
+        }
+
+        function closePicker() {
+            picker.open = false;
+            document.getElementById('profileOverlay').hidden = true;
+            refreshMainNavList();
+            focusStable();
+        }
+
+        function handlePickerKey(e) {
+            var list = readProfiles();
+            var back = e.keyCode === 461 || e.key === 'Escape' || e.key === 'GoBack';
+            if (list.length < 2 || back) closePicker();
+            else if (e.key === 'ArrowRight') picker.focus = Math.min(picker.focus + 1, list.length - 1);
+            else if (e.key === 'ArrowLeft') picker.focus = Math.max(picker.focus - 1, 0);
+            else if (e.key === 'Enter') { var p = list[picker.focus]; if (p) { switchProfile(p.id); closePicker(); } }
+            else { e.preventDefault(); return; }
+            if (picker.open) renderPicker();
+            e.preventDefault();
+        }
+
+        // At boot the stored settings already are the active person's; only the lock comes from the profile.
+        function bootProfiles() {
+            var list = readProfiles();
+            if (list.length) {
+                var id = currentProfileId(list);
+                var current = arrFind(list, function(p) { return p.id === id; });
+                try { localStorage.setItem('fmtv_active_profile', id); } catch (e) {}
+                state.locked = !!(current && current.data && current.data.locked);
+            }
+            applyLock();
+            if (!wizardAtBoot && shouldAskWho()) openPicker();
+        }
+
+        // --- First-run setup ---
+        var WIZARD_STEPS = ['welcome', 'who', 'apps', 'look', 'photos', 'done'];
+        var WIZARD_LOOKS = [
+            { key: 'auto', label: 'Follow the sun', desc: 'Light by day, warm at sunset, dark at night.' },
+            { key: 'night', label: 'Deep Midnight', desc: 'Blue-black, easy on eyes in a dark room.' },
+            { key: 'oled', label: 'Pure Black', desc: 'True black for movies and OLED panels.' },
+            { key: 'day', label: 'Daylight Blue', desc: 'Bright and airy for a sunny living room.' }
+        ];
+        // A fresh install has no fmtv_* key at all; any stored setting means an existing install (never show). Storage trouble means never show.
+        function wizardNeeded() {
+            try {
+                for (var i = 0; i < localStorage.length; i++) {
+                    var k = localStorage.key(i);
+                    if (k && k.indexOf('fmtv_') === 0) return false;
+                }
+            } catch (e) { return false; }
+            return true;
+        }
+
+        function wzEl(tag, cls, text) {
+            var e = document.createElement(tag);
+            if (cls) e.className = cls;
+            if (text !== undefined) e.textContent = text;
+            return e;
+        }
+
+        function wzButton(label, onOk, cls) {
+            var b = wzEl('button', 'wz-item ' + (cls || 'wz-primary'), t(label));
+            b.onOk = onOk;
+            b.onclick = function() { onOk(); };
+            return b;
+        }
+
+        // A card row with a label and an On/Off pill (kids profile, photo screensaver).
+        function wzToggle(label, on, onOk) {
+            var b = wzEl('button', 'wz-item wz-toggle' + (on ? ' on' : ''));
+            b.appendChild(wzEl('span', 'wz-toggle-label', label));
+            b.appendChild(wzEl('span', 'wz-pill', t(on ? 'On' : 'Off')));
+            b.setAttribute('aria-pressed', String(!!on));
+            b.onOk = onOk;
+            b.onclick = function() { onOk(); };
+            return b;
+        }
+
+        var WZ_CHECK_SVG = '<svg width="{n}" height="{n}" viewBox="0 0 24 24" fill="none" stroke="{c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+        function wzCheck(n, c) { return WZ_CHECK_SVG.replace(/\{n\}/g, n).replace('{c}', c); }
+
+        // Preview thumbnail for a look card: the theme gradient, a title bar and (except Follow the sun) three mini tiles.
+        var WZ_THUMBS = {
+            auto: { bg: 'linear-gradient(90deg, #dbe9ff 0%, #6a3d6b 55%, #0a1028 100%)', tiles: false },
+            night: { bg: 'linear-gradient(160deg, #1a2a55, #0a1028)', tiles: true },
+            oled: { bg: '#000', border: '1px solid #2c3345', tiles: true },
+            day: { bg: 'linear-gradient(160deg, #dbe9ff, #9ec2f2)', bar: 'rgba(10,30,70,0.75)', tiles: true }
+        };
+        function wzThumb(key) {
+            var spec = WZ_THUMBS[key] || WZ_THUMBS.night;
+            var th = wzEl('div', 'wz-thumb');
+            th.style.background = spec.bg;
+            if (spec.border) th.style.border = spec.border;
+            var bar = wzEl('div', 'wz-thumb-bar');
+            if (spec.bar) bar.style.background = spec.bar;
+            th.appendChild(bar);
+            if (spec.tiles) {
+                var row = wzEl('div', 'wz-thumb-tiles');
+                ['#c01c28', '#2a7de1', '#1fa05a'].forEach(function(c) {
+                    var sp = document.createElement('span');
+                    sp.style.background = c;
+                    row.appendChild(sp);
+                });
+                th.appendChild(row);
+            }
+            return th;
+        }
+
+        // The look step previews a card without saving it; leaving the cards puts the saved theme back.
+        function wizardRestoreLook(stayOnLook) {
+            var saved = wizard.lookSaved;
+            if (!stayOnLook) wizard.lookSaved = null;
+            if (saved != null && state.theme !== saved) { state.theme = saved; applyTheme(); }
+        }
+
+        function wizardGo(step) {
+            wizardRestoreLook();
+            wizard.step = Math.max(0, Math.min(step, WIZARD_STEPS.length - 1));
+            wizard.focus = 0;
+            if (WIZARD_STEPS[wizard.step] === 'look') {
+                wizard.lookSaved = state.theme;
+                // Focus starts on the card of the saved look.
+                for (var li = 0; li < WIZARD_LOOKS.length; li++) if (WIZARD_LOOKS[li].key === state.theme) wizard.focus = li;
+            }
+            renderWizard();
+        }
+
+        function paintWizardFocus() {
+            wizard.items.forEach(function(item, i) { item.classList.toggle('focused', i === wizard.focus); });
+            var scroller = document.getElementById('wzScroll');
+            var cur = wizard.items[wizard.focus];
+            if (scroller && cur && cur.parentNode === scroller.firstChild) {
+                var pad = 12;
+                var top = cur.offsetTop, bottom = top + cur.offsetHeight;
+                if (top - pad < scroller.scrollTop) scroller.scrollTop = Math.max(0, top - pad);
+                else if (bottom + pad > scroller.scrollTop + scroller.clientHeight) scroller.scrollTop = bottom + pad - scroller.clientHeight;
+            }
+        }
+
+        function wizardMove(delta) {
+            var next = Math.max(0, Math.min(wizard.focus + delta, wizard.items.length - 1));
+            if (next === wizard.focus) return;
+            var fromLook = !!wizard.items[wizard.focus].dataset.look;
+            wizard.focus = next;
+            paintWizardFocus();
+            var look = wizard.items[next].dataset.look;
+            // Moving between look cards previews the look; arriving from Continue must not switch the theme silently.
+            if (look && fromLook) { state.theme = look; applyTheme(); }
+            else if (fromLook && !look) wizardRestoreLook(true);
+        }
+
+        function renderWizard() {
+            var main = document.getElementById('wizardMain');
+            var rail = document.getElementById('wizardRail');
+            main.innerHTML = '';
+            rail.innerHTML = '';
+            var name = WIZARD_STEPS[wizard.step];
+            var items = [];
+            wizard.gridCount = 0;
+            var railLabels = ['Welcome', 'Your name and city', 'Your apps', 'Your look', 'Screensaver photos'];
+            var brand = wzEl('div', 'wz-brand');
+            var tile = wzEl('div', 'wz-brand-tile');
+            tile.innerHTML = '<svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>';
+            brand.appendChild(tile);
+            brand.appendChild(wzEl('div', 'wz-brand-name', 'Free My TV'));
+            rail.appendChild(brand);
+            rail.appendChild(wzEl('div', 'wz-minute', t('About a minute')));
+            var steps = wzEl('div', 'wz-steps');
+            var shown = 0;
+            railLabels.forEach(function(label, i) {
+                if (wizard.add && i === 0) return; // adding a person never shows the welcome step
+                shown++;
+                var r = wzEl('div', 'wz-rail-row' + (i === wizard.step ? ' current' : (i < wizard.step ? ' done' : '')));
+                var dot = wzEl('div', 'wz-dot');
+                if (i < wizard.step) dot.innerHTML = wzCheck(21, '#bdf3d6');
+                else dot.textContent = String(shown);
+                r.appendChild(dot);
+                r.appendChild(wzEl('span', 'wz-rail-label', t(label)));
+                steps.appendChild(r);
+            });
+            rail.appendChild(steps);
+            rail.appendChild(wzEl('div', 'wz-note', t('Nothing here needs an account. You can change every choice later in Customize.')));
+
+            var head = wzEl('div', 'wz-head');
+            main.appendChild(head);
+            // The finish screen keeps an empty eyebrow so the title does not jump.
+            head.appendChild(wzEl('div', 'wz-eyebrow', name === 'done' ? '\u00a0' : t('Step %s of %s', wizard.step + 1 - (wizard.add ? 1 : 0), railLabels.length - (wizard.add ? 1 : 0))));
+            function title(text) { head.appendChild(wzEl('div', 'wz-title', text)); }
+            function lead(text) { head.appendChild(wzEl('div', 'wz-lead', text)); }
+            function add(el, parent) { items.push(el); (parent || main).appendChild(el); }
+            // The primary and Skip buttons live in the footer; items keep the order content, primary, skip.
+            var primary = null, skip = null;
+            function addPrimary(label, fn) { primary = wzButton(label, fn, 'wz-primary'); items.push(primary); }
+            function addSkip() { skip = wzButton('Skip setup', function() { closeWizard(false); }, 'wz-skip'); items.push(skip); }
+
+            if (name === 'welcome') {
+                title(t('Welcome to Free My TV'));
+                lead(t('A quiet home screen with no ads. This takes about a minute and every choice can be changed later in Customize.'));
+                addPrimary('Start', function() { wizardGo(1); });
+                addSkip();
+            } else if (name === 'who') {
+                title(t('Your name and city'));
+                lead(t('Used for the greeting and the weather. Leave it empty to use São Paulo, or turn on Auto-locate by IP in Customize.'));
+                var fields = wzEl('div', 'wz-fields');
+                main.appendChild(fields);
+                var nameInput = wzEl('input', 'wz-item wz-input');
+                nameInput.id = 'wzName';
+                nameInput.placeholder = t('e.g. Noa');
+                nameInput.value = state.userName || '';
+                // The TV keyboard does not always fire input when text is deleted, so also save on change and blur.
+                function saveName() { if (nameInput.value !== state.userName) setSettingValue(settingDef('userName'), nameInput.value); }
+                nameInput.oninput = nameInput.onchange = nameInput.onblur = saveName;
+                var cityInput = wzEl('input', 'wz-item wz-input');
+                cityInput.id = 'wzCity';
+                cityInput.placeholder = t('e.g. Sao Paulo, Lisbon, NYC');
+                cityInput.value = state.city || '';
+                function saveCity() { state.city = cityInput.value.replace(/^\s+|\s+$/g, ''); try { localStorage.setItem('fmtv_city', state.city); } catch (e) {} }
+                cityInput.oninput = cityInput.onchange = cityInput.onblur = saveCity;
+                nameInput.onOk = function() { nameInput.focus(); };
+                cityInput.onOk = function() { cityInput.focus(); };
+                var nameField = wzEl('div', 'wz-field');
+                nameField.appendChild(wzEl('div', 'wz-label', t('Your name')));
+                add(nameInput, nameField);
+                fields.appendChild(nameField);
+                var cityField = wzEl('div', 'wz-field');
+                cityField.appendChild(wzEl('div', 'wz-label', t('Your city')));
+                add(cityInput, cityField);
+                fields.appendChild(cityField);
+                if (wizard.add) {
+                    var kids = wzToggle(t('Kids profile (hides settings)'), !!state.locked, function() {
+                        state.locked = !state.locked;
+                        applyLock(true);
+                        var keep = wizard.focus;
+                        renderWizard();
+                        wizard.focus = keep;
+                        paintWizardFocus();
+                    });
+                    add(kids, fields);
+                }
+                addPrimary('Continue', function() { saveName(); saveCity(); scheduleSettingsNetwork(true, false); wizardGo(2); });
+                addSkip();
+            } else if (name === 'apps') {
+                title(t('Your apps'));
+                lead(t('Pick up to 8 for your shelf.'));
+                var grid = wzEl('div', 'wz-grid wz-apps');
+                wizardCatalog().forEach(function(app) {
+                    var on = state.favorites.indexOf(app.id) !== -1;
+                    var tileBtn = wzEl('button', 'wz-item wz-tile' + (on ? ' on' : ''));
+                    if (on) {
+                        var chk = wzEl('span', 'wz-check');
+                        chk.innerHTML = wzCheck(18, '#fff');
+                        tileBtn.appendChild(chk);
+                    }
+                    tileBtn.appendChild(wzEl('span', 'wz-tile-name', app.title));
+                    tileBtn.setAttribute('aria-pressed', String(on));
+                    tileBtn.onOk = function() {
+                        var result = toggleFavorite(app.id);
+                        if (result === 'full') showToast(t('Max 8 apps on shelf'), 3000);
+                        else if (result === 'last') showToast(t('Keep at least one app on the shelf.'), 3000);
+                        var keep = wizard.focus;
+                        renderWizard();
+                        wizard.focus = keep;
+                        paintWizardFocus();
+                    };
+                    tileBtn.onclick = tileBtn.onOk;
+                    items.push(tileBtn);
+                    grid.appendChild(tileBtn);
+                });
+                var scroller = wzEl('div', 'wz-scroll');
+                scroller.id = 'wzScroll';
+                scroller.appendChild(grid);
+                main.appendChild(scroller);
+                wizard.gridCount = items.length;
+                addPrimary('Continue', function() { wizardGo(3); });
+            } else if (name === 'look') {
+                title(state.userName ? t('How should it look, %s?', state.userName) : t('How should it look?'));
+                lead(t('Pick one. The whole screen changes as you move over it.'));
+                var cards = wzEl('div', 'wz-grid wz-looks');
+                WIZARD_LOOKS.forEach(function(look) {
+                    var isSel = (wizard.lookSaved != null ? wizard.lookSaved : state.theme) === look.key;
+                    var card = wzEl('button', 'wz-item wz-look' + (isSel ? ' on' : ''));
+                    card.dataset.look = look.key;
+                    if (isSel) {
+                        var selBadge = wzEl('span', 'wz-sel');
+                        selBadge.innerHTML = wzCheck(24, '#fff');
+                        selBadge.appendChild(document.createTextNode(t('Selected')));
+                        card.setAttribute('aria-pressed', 'true');
+                        card.appendChild(selBadge);
+                    }
+                    card.appendChild(wzThumb(look.key));
+                    var txt = wzEl('div', 'wz-look-text');
+                    txt.appendChild(wzEl('div', 'wz-look-name', t(look.label)));
+                    txt.appendChild(wzEl('div', 'wz-look-desc', t(look.desc)));
+                    card.appendChild(txt);
+                    card.onOk = function() {
+                        setSettingValue(settingDef('theme'), look.key);
+                        wizard.lookSaved = look.key;
+                        renderWizard();
+                        wizard.focus = wizard.items.length - 1; // on to Continue, as before
+                        paintWizardFocus();
+                    };
+                    card.onclick = card.onOk;
+                    items.push(card);
+                    cards.appendChild(card);
+                });
+                main.appendChild(cards);
+                wizard.gridCount = items.length;
+                addPrimary('Continue', function() { wizardGo(4); });
+            } else if (name === 'photos') {
+                title(t('Screensaver photos'));
+                lead(t('When the TV is idle it shows photos behind the clock. You can add your free Unsplash key later in Customize.'));
+                var toggle = wzToggle(t('Photo screensaver'), state.ambient === 'on', function() {
+                    setSettingValue(settingDef('ambient'), state.ambient === 'on' ? 'off' : 'on');
+                    var keep = wizard.focus;
+                    renderWizard();
+                    wizard.focus = keep;
+                    paintWizardFocus();
+                });
+                add(toggle);
+                addPrimary('Finish', function() { wizardGo(5); });
+                addSkip();
+            } else {
+                title(t('Your TV is ready'));
+                lead(t('Your settings stay on this TV. Change anything later in Customize.'));
+                addPrimary('Open my home screen', function() { closeWizard(true); });
+            }
+
+            var footer = wzEl('div', 'wz-footer');
+            var hints = wzEl('div', 'wz-hints');
+            [['Arrows', 'choose'], ['OK', 'continue'], ['Back', 'previous step']].forEach(function(h) {
+                var sp = document.createElement('span');
+                sp.appendChild(wzEl('b', '', t(h[0])));
+                sp.appendChild(document.createTextNode(' ' + t(h[1])));
+                hints.appendChild(sp);
+            });
+            footer.appendChild(hints);
+            var actions = wzEl('div', 'wz-actions');
+            if (skip) actions.appendChild(skip);
+            if (primary) actions.appendChild(primary);
+            footer.appendChild(actions);
+            main.appendChild(footer);
+            wizard.items = items;
+            if (wizard.focus >= items.length) wizard.focus = 0;
+            paintWizardFocus();
+        }
+
+        function openWizard(add) {
+            wizard.open = true;
+            wizard.add = add || null;
+            wizard.step = add ? 1 : 0;
+            wizard.focus = 0;
+            wizard.lookSaved = null;
+            document.getElementById('wizardOverlay').hidden = false;
+            renderWizard();
+        }
+
+        function closeWizard() {
+            wizardRestoreLook();
+            if (wizard.add) finishAddPerson();
+            wizard.open = false;
+            document.getElementById('wizardOverlay').hidden = true;
+            try { localStorage.setItem('fmtv_setup_done', '1'); } catch (e) {}
+            scheduleSettingsNetwork(true, false); // a city typed on the way out still refreshes the weather
+            applyTheme(); renderAppsShelf(); renderPickup(); updateGreeting();
+            refreshMainNavList();
+            setMainFocus(mainNavItems[curIndex]);
+        }
+
+        function handleWizardKey(e) {
+            var key = e.key;
+            var active = document.activeElement;
+            var typing = active && active.tagName === 'INPUT';
+            var back = e.keyCode === 461 || key === 'Escape' || key === 'GoBack';
+            if (typing) {
+                if (key === 'Enter') { active.blur(); wizardMove(1); e.preventDefault(); }
+                else if (back) { active.blur(); e.preventDefault(); }
+                // The TV keyboard takes the arrows while it is open, so an Up/Down that reaches us means it is closed:
+                // leave the field instead of leaving the remote stuck on it.
+                else if (key === 'ArrowDown' || key === 'ArrowUp') { active.blur(); wizardMove(key === 'ArrowDown' ? 1 : -1); e.preventDefault(); }
+                return;
+            }
+            var name = WIZARD_STEPS[wizard.step];
+            var cols = name === 'apps' ? 4 : (name === 'look' ? 2 : 1);
+            var inGrid = name === 'apps' || name === 'look';
+            var gridCount = wizard.gridCount || 0;
+            if (back) {
+                // Adding a person: Back on the first step walks away from the new person, restoring the previous one.
+                if (wizard.add && wizard.step <= 1) cancelAddPerson();
+                else if (wizard.step === 0) closeWizard();
+                else wizardGo(wizard.step - 1);
+                e.preventDefault();
+                return;
+            }
+            if (key === 'Enter') {
+                var item = wizard.items[wizard.focus];
+                if (item && item.onOk) item.onOk();
+                e.preventDefault();
+                return;
+            }
+            // The footer shows Skip on the left and the primary button on the right, while items keep primary before Skip.
+            var cur = wizard.items[wizard.focus];
+            if ((key === 'ArrowLeft' || key === 'ArrowRight') && cur && (cur.classList.contains('wz-primary') || cur.classList.contains('wz-skip'))) {
+                var other = null;
+                wizard.items.forEach(function(it) {
+                    if (key === 'ArrowLeft' && cur.classList.contains('wz-primary') && it.classList.contains('wz-skip')) other = it;
+                    if (key === 'ArrowRight' && cur.classList.contains('wz-skip') && it.classList.contains('wz-primary')) other = it;
+                });
+                if (other) { wizard.focus = wizard.items.indexOf(other); paintWizardFocus(); }
+                e.preventDefault();
+                return;
+            }
+            var delta = 0;
+            if (key === 'ArrowRight') delta = 1;
+            else if (key === 'ArrowLeft') delta = -1;
+            else if (key === 'ArrowDown') delta = inGrid && wizard.focus < gridCount ? cols : 1;
+            else if (key === 'ArrowUp') delta = inGrid && wizard.focus < gridCount ? -cols : -1;
+            else return;
+            if (!inGrid && (key === 'ArrowLeft' || key === 'ArrowRight')) { e.preventDefault(); return; }
+            // From the last grid row, Down lands on the button after the grid.
+            if (inGrid && key === 'ArrowDown' && wizard.focus < gridCount && wizard.focus + cols >= gridCount) delta = gridCount - wizard.focus;
+            wizardMove(delta);
+            e.preventDefault();
+        }
+
         // --- Remote Control Key Handler ---
         document.addEventListener('keydown', function(e) {
             lastActivity = Date.now();
@@ -3726,6 +4951,9 @@
                 e.preventDefault();
                 return;
             }
+
+            if (wizard.open) { handleWizardKey(e); return; }
+            if (picker.open) { handlePickerKey(e); return; }
 
             if (shelfEdit) {
                 if (e.keyCode === 461 || e.key === 'Escape' || e.key === 'GoBack') {
@@ -3800,8 +5028,11 @@
         applyPerfMode();
         applyTextSize();
         applyTrendingClass();
+        restoreScene();
         renderAppsShelf();
         renderPicks(FALLBACK_MOVIES);
+        if (wizardAtBoot) openWizard();
+        bootProfiles();
         applyTheme();
         fetchWeather();
         fetchTrendingPicks();
