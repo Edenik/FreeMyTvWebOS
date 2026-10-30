@@ -336,6 +336,23 @@ setTimeout(function () {
     window.fetch = realFetch;
     done();
   });
+  steps.push(function (done) { // Back (461): steps out of Customize one level at a time, and leaves the app from the home screen
+    var oldWebOS = window.webOS, left = 0;
+    function back() { document.dispatchEvent(new KeyboardEvent('keydown', { keyCode: 461, key: 'GoBack', bubbles: true, cancelable: true })); }
+    window.webOS = { platformBack: function () { left++; } };
+    openSettingsModal();
+    settingsUi.zone = 'rows';
+    back();
+    eq('back rows to cats', settingsUi.zone, 'cats');
+    eq('back keeps modal', modalOpen, true);
+    back();
+    eq('back cats closes', modalOpen, false);
+    eq('back no leave in modal', left, 0);
+    back();
+    eq('back home leaves app', left, 1);
+    window.webOS = oldWebOS;
+    done();
+  });
   steps.push(function (done) { // the TV Settings button launches the LG Settings app
     var btn = document.getElementById('tvSettingsBtn'), got = null, oldWebOS = window.webOS;
     eq('tv settings button', !!btn, true);

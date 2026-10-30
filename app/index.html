@@ -3755,6 +3755,10 @@
                 if (drawerOpen) {
                     closeDrawer();
                     e.preventDefault();
+                } else if (window.webOS && typeof window.webOS.platformBack === 'function') {
+                    // appinfo disableBackHistoryAPI hands Back to the app, so on the home screen it leaves the app.
+                    e.preventDefault();
+                    window.webOS.platformBack();
                 }
                 return;
             }
