@@ -107,15 +107,16 @@ setTimeout(function () {
     eq('idle bad', idleTimeoutMs(), 180000);
     state.idleMins = keepIdle;
   }
-  ['cfgIdleMins', 'cfgAmbient', 'cfgAmbientSecs', 'cfgAmbientMotion', 'cfgUnsplashKey'].forEach(function (id) {
+  ['settingsModal', 'settingsCats', 'settingsMain', 'settingsHints', 'settingsSaved'].forEach(function (id) {
     if (!document.getElementById(id)) out.ambient.push('missing #' + id);
   });
+  ['cfgCity', 'cfgTheme', 'cfgUnsplashKey', 'saveModalBtn', 'resetDefaultBtn', 'closeModalBtn'].forEach(function (id) {
+    if (document.getElementById(id)) out.ambient.push('old control still present: #' + id);
+  });
   eq('state keep awake', state.keepAwake, 'on');
-  if (!document.getElementById('cfgKeepAwake')) out.ambient.push('missing #cfgKeepAwake');
   if (!document.getElementById('keepAwakeVideo')) out.ambient.push('missing #keepAwakeVideo');
   if (!Object.prototype.hasOwnProperty.call(I18N.pt, 'Keep LG Screensaver Away')) out.ambient.push('no translation: Keep LG Screensaver Away');
   eq('state home photos', state.homePhotos, 'off');
-  if (!document.getElementById('cfgHomePhotos')) out.ambient.push('missing #cfgHomePhotos');
   if (!document.getElementById('homePhotos')) out.ambient.push('missing #homePhotos');
   if (!Object.prototype.hasOwnProperty.call(I18N.pt, 'Photos on Home Screen')) out.ambient.push('no translation: Photos on Home Screen');
   if (typeof SETTINGS !== 'object' || !SETTINGS.length) {
@@ -126,8 +127,6 @@ setTimeout(function () {
       if (d.type === 'choice' && !d.options) out.ambient.push('no options: ' + d.id);
     });
   }
-  var keyField = document.getElementById('cfgUnsplashKey');
-  eq('unsplash key field masked', keyField && keyField.type, 'password');
   ['Screensaver Starts After', '1 minute', '3 minutes', '5 minutes', '10 minutes', '30 minutes',
    'Ambient Photo Screensaver', 'Off', 'Photo Duration', '30 seconds', '90 seconds', 'Photo Motion',
    'Ken Burns (zoom & drift)', 'Drift only', 'None', 'Unsplash Access Key (Optional)',
@@ -738,6 +737,201 @@ setTimeout(function () {
         if (extra[k] === null) localStorage.removeItem(k); else localStorage.setItem(k, extra[k]);
       });
     }
+    done();
+  });
+
+  if (typeof handleSettingsKey !== 'function') { fails.push('handleSettingsKey missing'); write(); return; }
+
+  function press(key) {
+    var ev = new KeyboardEvent('keydown', { key: key, bubbles: true, cancelable: true });
+    document.dispatchEvent(ev);
+    return ev;
+  }
+  function modalEl() { return document.getElementById('settingsModal'); }
+  function sfCount() { return modalEl().querySelectorAll('.sf').length; }
+  function focusedText() { var n = modalEl().querySelector('.sf'); return n ? n.textContent : ''; }
+  function inView(node, box) {
+    var a = node.getBoundingClientRect(), b = box.getBoundingClientRect();
+    return a.top >= b.top - 1 && a.bottom <= b.bottom + 1;
+  }
+  function rowIndexOf(id) {
+    var rows = settingsForCategory(settingsUi.cat);
+    for (var i = 0; i < rows.length; i++) if (rows[i].id === id) return i + 1; // +1: the "Categories" row comes first
+    return -1;
+  }
+  function goToRow(id) { var n = rowIndexOf(id), guard = 40; while (settingsUi.row < n && guard--) press('ArrowDown'); while (settingsUi.row > n && guard--) press('ArrowUp'); }
+
+  var uiReal = {};
+  ['fetchWeather', 'fetchTrendingPicks', 'ambientRefresh'].forEach(function (n) { uiReal[n] = window[n]; });
+
+  steps.push(function (done) { // opening: category list focused, one visible focus mark, old controls gone
+    window.fetch = fakeFetch(200, '49', []);
+    ['fetchWeather', 'fetchTrendingPicks', 'ambientRefresh'].forEach(function (n) { window[n] = function () {}; }); // no network from these steps
+    openSettingsModal();
+    eq('modal open', modalOpen, true);
+    eq('zone cats', settingsUi.zone, 'cats');
+    eq('one focus mark', sfCount(), 1);
+    eq('first category focused', focusedText().indexOf(t('Shelf & Inputs')) !== -1, true);
+    press('ArrowDown'); press('ArrowDown'); press('ArrowDown');
+    eq('down x3 selects category 3', settingsUi.cat, 3);
+    eq('rows show that category', !!modalEl().querySelector('.settings-row[data-id="homePhotos"]'), true);
+    press('ArrowDown'); press('ArrowDown');
+    eq('down reaches Close', settingsUi.catFocus, 5);
+    press('ArrowDown');
+    eq('no wrap past Close', settingsUi.catFocus, 5);
+    press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp'); press('ArrowUp');
+    eq('no wrap above first', settingsUi.catFocus, 0);
+    done();
+  });
+  steps.push(function (done) { // entering a category, choice rows change with Left and Right and save at once
+    settingsUi.cat = 3; settingsUi.catFocus = 3; renderSettings();
+    press('ArrowRight');
+    eq('zone rows', settingsUi.zone, 'rows');
+    eq('lands on first setting', settingsUi.row, 1);
+    eq('one focus mark rows', sfCount(), 1);
+    state.idleMins = '3';
+    goToRow('idleMins');
+    press('ArrowRight');
+    eq('right changes value', state.idleMins, '5');
+    eq('value saved at once', localStorage.getItem('fmtv_idle_mins'), '5');
+    eq('saved message', document.getElementById('settingsSaved').textContent, t('Saved'));
+    press('ArrowLeft'); press('ArrowLeft');
+    eq('left changes value (wraps)', state.idleMins, '1');
+    press('Enter');
+    eq('OK cycles forward', state.idleMins, '3');
+    eq('still one focus mark', sfCount(), 1);
+    done();
+  });
+  steps.push(function (done) { // back chain: rows -> categories -> closes
+    press('Escape');
+    eq('back from rows', settingsUi.zone, 'cats');
+    press('Escape');
+    eq('back from cats closes', modalOpen, false);
+    openSettingsModal();
+    settingsUi.cat = 3; settingsUi.catFocus = 3; renderSettings(); press('Enter');
+    goToRow('keepAwake'); // then up to the "Categories" row
+    var guard = 20; while (settingsUi.row > 0 && guard--) press('ArrowUp');
+    eq('categories row first', settingsUi.row, 0);
+    press('Enter');
+    eq('Categories row returns', settingsUi.zone, 'cats');
+    press('ArrowDown'); press('ArrowDown');
+    eq('Close item closes', (function () { settingsUi.catFocus = 5; press('Enter'); return modalOpen; })(), false);
+    done();
+  });
+  steps.push(function (done) { // text rows: inline editor, commit, cancel; secrets are masked everywhere
+    openSettingsModal();
+    settingsUi.cat = 2; settingsUi.catFocus = 2; renderSettings(); press('Enter');
+    goToRow('city');
+    press('Enter');
+    var input = document.getElementById('settingsEditInput');
+    eq('editor opens', !!input && settingsUi.zone === 'edit', true);
+    eq('city editor is text', input && input.type, 'text');
+    input.value = 'Haifa';
+    press('Enter');
+    eq('city committed', state.city, 'Haifa');
+    eq('city saved', localStorage.getItem('fmtv_city'), 'Haifa');
+    eq('back in rows', settingsUi.zone, 'rows');
+    press('Enter');
+    document.getElementById('settingsEditInput').value = 'Eilat';
+    press('Escape');
+    eq('escape cancels', state.city, 'Haifa');
+    eq('modal stays open after cancel', modalOpen, true);
+
+    settingsUi.cat = 4; settingsUi.catFocus = 4; settingsUi.zone = 'cats'; renderSettings(); press('Enter');
+    goToRow('unsplashKey');
+    press('Enter');
+    var secret = document.getElementById('settingsEditInput');
+    eq('secret editor is password', secret && secret.type, 'password');
+    secret.value = 'SECRET-KEY-12345';
+    press('Enter');
+    eq('secret committed', state.unsplashKey, 'SECRET-KEY-12345');
+    eq('secret never shown in rows', modalEl().textContent.indexOf('SECRET-KEY-12345'), -1);
+    eq('secret shows dots', modalEl().querySelector('.settings-row[data-id="unsplashKey"]').textContent.indexOf('••••••••') !== -1, true);
+    state.unsplashKey = ''; localStorage.removeItem('fmtv_unsplash_key'); state.city = ''; localStorage.removeItem('fmtv_city');
+    closeSettingsModal();
+    done();
+  });
+  steps.push(function (done) { // long lists scroll to keep the focused row in view (Photos & Screensaver has 7 rows, taller than the list at 1080p)
+    openSettingsModal();
+    settingsUi.cat = 3; settingsUi.catFocus = 3; renderSettings(); press('Enter');
+    var rows = document.getElementById('settingsRows'), last = settingsForCategory(3).length, guard = 60;
+    while (settingsUi.row < last && guard--) press('ArrowDown');
+    var focused = modalEl().querySelector('.settings-row.sf');
+    eq('focused last row exists', !!focused, true);
+    eq('focused row in view', !!focused && inView(focused, rows), true);
+    closeSettingsModal();
+    done();
+  });
+  steps.push(function (done) { // apps page: rows by 5, toggle, limits, Done and Back return
+    var keep = state.favorites.slice();
+    state.favorites = [state.catalog[0].id];
+    openSettingsModal();
+    settingsUi.cat = 0; settingsUi.catFocus = 0; renderSettings(); press('Enter');
+    press('Enter'); // "Shelf apps" is the first setting
+    eq('apps zone', settingsUi.zone, 'apps');
+    eq('apps page shown', !!document.getElementById('appsPage'), true);
+    eq('apps one focus', sfCount(), 1);
+    settingsUi.appIdx = 0; paintFocus();
+    press('ArrowDown');
+    eq('down moves one row (5)', settingsUi.appIdx, 5);
+    press('ArrowRight');
+    eq('right moves one tile', settingsUi.appIdx, 6);
+    press('ArrowUp');
+    eq('up moves one row back', settingsUi.appIdx, 1);
+    settingsUi.appIdx = 1; paintFocus(); press('Enter');
+    eq('OK adds the app', state.favorites.indexOf(state.catalog[1].id) !== -1, true);
+    eq('apps saved at once', localStorage.getItem('fmtv_favorites'), JSON.stringify(state.favorites));
+    eq('tile marked on', document.querySelectorAll('.apps-tile.on').length, state.favorites.length);
+    state.favorites = [state.catalog[0].id];
+    renderSettings();
+    settingsUi.appIdx = 0; paintFocus(); press('Enter');
+    eq('last app cannot be removed', state.favorites.length, 1);
+    eq('last app message', document.getElementById('appsMessage').textContent, t('Keep at least one app on the shelf.'));
+    state.favorites = state.catalog.slice(0, 8).map(function (a) { return a.id; });
+    renderSettings();
+    settingsUi.appIdx = 9; paintFocus(); press('Enter');
+    eq('ninth app refused', state.favorites.length, 8);
+    eq('full message', document.getElementById('appsMessage').textContent, t('Max 8 apps on shelf'));
+    var n = state.catalog.length, guard = 10;
+    while (settingsUi.appIdx < n && guard--) press('ArrowDown');
+    eq('down reaches Done', settingsUi.appIdx, n);
+    press('Enter');
+    eq('Done returns to rows', settingsUi.zone, 'rows');
+    press('Enter');
+    eq('reopen apps', settingsUi.zone, 'apps');
+    press('Escape');
+    eq('back returns to rows', settingsUi.zone, 'rows');
+    state.favorites = keep; localStorage.setItem('fmtv_favorites', JSON.stringify(keep));
+    closeSettingsModal();
+    done();
+  });
+  steps.push(function (done) { // reset needs a second OK
+    state.theme = 'day'; localStorage.setItem('fmtv_theme', 'day');
+    openSettingsModal();
+    settingsUi.cat = 4; settingsUi.catFocus = 4; renderSettings(); press('Enter');
+    goToRow('reset');
+    press('Enter');
+    eq('first OK only asks', state.theme, 'day');
+    eq('asks to confirm', modalEl().querySelector('.settings-row[data-id="reset"]').textContent.indexOf(t('Press OK again to confirm')) !== -1, true);
+    press('ArrowUp'); goToRow('reset');
+    eq('moving away cancels the ask', modalEl().querySelector('.settings-row[data-id="reset"]').textContent.indexOf(t('Press OK again to confirm')), -1);
+    press('Enter'); press('Enter');
+    eq('second OK resets', state.theme, 'auto');
+    closeSettingsModal();
+    done();
+  });
+  steps.push(function (done) { // the idle screensaver does not start while the screen is open; hover only moves focus
+    openSettingsModal();
+    var before = settingsUi.catFocus;
+    var cats = modalEl().querySelectorAll('.settings-cat');
+    cats[2].dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    eq('hover focuses without rebuilding', modalEl().querySelectorAll('.settings-cat')[2] === cats[2], true);
+    eq('hover focus moved', settingsUi.catFocus, 2);
+    cats[2].click();
+    eq('click enters the category', settingsUi.zone, 'rows');
+    eq('click selected category', settingsUi.cat, 2);
+    closeSettingsModal();
+    ['fetchWeather', 'fetchTrendingPicks', 'ambientRefresh'].forEach(function (n) { window[n] = uiReal[n]; });
     done();
   });
 
