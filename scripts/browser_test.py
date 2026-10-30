@@ -1463,6 +1463,9 @@ setTimeout(function () {
     eq('independence note is not focusable', !!note && note.tagName === 'DIV' && !note.classList.contains('nav-item') && !note.classList.contains('settings-cat') && !note.hasAttribute('tabindex') && !note.hasAttribute('data-i'), true);
     var nr = note.getBoundingClientRect(), clr = modalEl().querySelector('.settings-close').getBoundingClientRect(), lcr = modalEl().querySelectorAll('.settings-cat')[6].getBoundingClientRect();
     eq('note sits between the categories and Close without overlap', nr.top >= lcr.bottom - 1 && nr.bottom <= clr.top + 1 && nr.height > 0, true);
+    var hr = document.getElementById('settingsHints').getBoundingClientRect(), pr = modalEl().querySelector('.settings-panel').getBoundingClientRect();
+    eq('Close ends above the hint bar', clr.bottom <= hr.top - 4, true);
+    eq('note is fully inside the modal', nr.top >= pr.top && nr.bottom <= pr.bottom && nr.left >= pr.left && nr.right <= pr.right, true);
     closeSettingsModal();
 
     // Reset keeps people and history
