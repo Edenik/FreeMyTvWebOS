@@ -563,8 +563,24 @@ setTimeout(function () {
     eq('quiet: class without a key', ov.classList.contains('ss-quiet'), true);
     eq('quiet: background', cs(ov, 'backgroundColor'), 'rgb(11, 13, 18)');
     eq('quiet: clock 192px weight 300 #D3D8E1', cs(clock, 'fontSize') + '|' + cs(clock, 'fontWeight') + '|' + cs(clock, 'color'), '192px|300|rgb(211, 216, 225)');
-    var r = wrap.getBoundingClientRect();
-    eq('quiet: clock centered even with a corner setting', Math.abs((r.left + r.width / 2) - window.innerWidth / 2) < 3 && Math.abs((r.top + r.height / 2) - window.innerHeight / 2) < 3, true);
+    var POS = { bl: function (r) { return r.left < window.innerWidth / 3 && r.bottom > window.innerHeight * 0.66; },
+      br: function (r) { return r.right > window.innerWidth * 0.66 && r.bottom > window.innerHeight * 0.66; },
+      tl: function (r) { return r.left < window.innerWidth / 3 && r.top < window.innerHeight / 3; },
+      tr: function (r) { return r.right > window.innerWidth * 0.66 && r.top < window.innerHeight / 3; },
+      center: function (r) { return Math.abs((r.left + r.width / 2) - window.innerWidth / 2) < 3 && Math.abs((r.top + r.height / 2) - window.innerHeight / 2) < 3; } };
+    ['bl', 'br', 'tl', 'tr', 'center'].forEach(function (pos) {
+      state.clockPos = pos; applyClockPosition(); still();
+      eq('quiet: clock position ' + pos + ' applies', POS[pos](wrap.getBoundingClientRect()), true);
+      eq('quiet: ' + pos + ' keeps the quiet sizes', cs(clock, 'fontSize') + '|' + cs(ov, 'backgroundColor'), '192px|rgb(11, 13, 18)');
+    });
+    state.clockPos = 'center'; applyClockPosition();
+    var seen = {}, drifted = false;
+    for (var q = 0; q < 12; q++) { shiftScreensaverClock(); var mm = /translate\((-?\d+)px, (-?\d+)px\)/.exec(wrap.style.transform); if (mm && (Math.abs(+mm[1]) > 6 || Math.abs(+mm[2]) > 6)) drifted = true; }
+    eq('quiet: center keeps the wide slow drift', drifted, true);
+    state.clockPos = 'bl'; applyClockPosition(); shiftScreensaverClock();
+    var m6 = /translate\((-?\d+)px, (-?\d+)px\)/.exec(wrap.style.transform);
+    eq('quiet: a corner drifts only a few pixels', !!m6 && Math.abs(+m6[1]) <= 6 && Math.abs(+m6[2]) <= 6, true);
+    still();
     eq('quiet: hint shown with its text', cs(hint, 'display') + '|' + hint.textContent, 'block|' + t('Add photos in Settings, Screensaver'));
     eq('quiet: hint 22px #8C95A4', cs(hint, 'fontSize') + '|' + cs(hint, 'color'), '22px|rgb(140, 149, 164)');
     eq('quiet: date line has the long date', document.getElementById('screensaverDate').textContent.length > 8, true);
@@ -2028,18 +2044,45 @@ setTimeout(function () {
             finishShelfEdit();
             eq('left clean', !shelfEdit && !document.body.classList.contains('arranging'), true);
             function rawDown() { document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })); }
-            // Kids lock: nothing can be arranged or added
+            // Kids lock: apps can be moved (long press), never removed or added, and Settings stays out of reach
             setFav(ids); state.locked = true; renderAppsShelf();
             eq('locked: no Add app tile on an empty shelf', (setFav([]), document.querySelectorAll('#appsGrid .tile-add').length), 0);
             setFav(ids);
             openShelfPicker(false); eq('locked: picker does not open', modalOpen, false);
-            arrangeFromSettings(); startArranging(ids[0]);
-            eq('locked: no arranging', !shelfEdit && !document.body.classList.contains('arranging'), true);
+            arrangeFromSettings();
+            eq('locked: Arrange on Home in Settings stays closed', !shelfEdit && !modalOpen, true);
             launched.length = 0; setMainFocus(tileOf(ids[1]));
+            kd('Enter'); settle(); ku('Enter');
+            eq('locked: a short press still launches', launched.join(), ids[1]);
+            settle();
+            setMainFocus(tileOf(ids[1]));
             kd('Enter');
-            eq('locked: a shelf tile launches on keydown', launched.join(), ids[1]);
-            settle(); ku('Enter');
-            state.locked = false; renderAppsShelf();
+            setTimeout(function () {
+              eq('locked: long press arranges', !!shelfEdit && document.body.classList.contains('arranging'), true);
+              eq('locked: the lifted app is the held one', movingTileId, ids[1]);
+              ku('Enter');
+              eq('locked: no Add app tile while arranging', document.querySelectorAll('#appsGrid .tile-add').length, 0);
+              eq('locked: arrange hint has no Down remove', document.getElementById('arrangeHint').textContent, t('Left / Right move · OK done'));
+              kd('ArrowRight');
+              eq('locked: Right moves and persists', stored().join(), [ids[0], ids[2], ids[1], ids[3], ids[4]].join());
+              kd('ArrowLeft'); kd('ArrowLeft');
+              eq('locked: Left moves and persists', stored().join(), [ids[1], ids[0], ids[2], ids[3], ids[4]].join());
+              kd('ArrowDown');
+              eq('locked: Down keeps the app', stored().length + ':' + state.favorites.length, '5:5');
+              eq('locked: Down toasts', document.getElementById('toastMsg').textContent, t('Ask a grown-up to remove apps'));
+              movingTileId = shelfEdit[shelfEdit.length - 1]; renderAppsShelf();
+              kd('ArrowRight');
+              eq('locked: Right past the last app does not reach an Add tile', !!movingTileId && document.querySelectorAll('#appsGrid .tile-add').length, 0);
+              openShelfPicker(true);
+              eq('locked: the apps picker stays closed while arranging', modalOpen, false);
+              kd('Enter'); ku('Enter');
+              eq('locked: OK finishes arranging', !shelfEdit && !document.body.classList.contains('arranging'), true);
+              eq('locked: the order stayed saved', stored().join(), [ids[1], ids[0], ids[2], ids[3], ids[4]].join());
+              setFav(ids);
+              state.locked = false; renderAppsShelf();
+              rest();
+            }, 800);
+            function rest() {
             // a TV that never sends keyup launches on keydown, no timer
             keyupSeen = false; launched.length = 0; setMainFocus(tileOf(ids[2]));
             rawDown();
@@ -2073,6 +2116,7 @@ setTimeout(function () {
             if (keepStore === null) localStorage.removeItem('fmtv_favorites'); else localStorage.setItem('fmtv_favorites', keepStore);
             localStorage.removeItem('fmtv_launch_hist'); renderAppsShelf();
             done();
+            }
           }, 700);
         }, 700);
       }, 700);

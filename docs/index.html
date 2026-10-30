@@ -1094,10 +1094,8 @@
         .screensaver-weather:empty { display: none; }
         .screensaver-weather:before { content: '\0000b7'; margin: 0 14px; }
 
-        /* Without photos: a calm blue-black screen, the clock centered and quiet (position setting applies to the photo look). */
-        .screensaver.ss-quiet.active, .screensaver.ss-quiet.active.pos-tl, .screensaver.ss-quiet.active.pos-tr,
-        .screensaver.ss-quiet.active.pos-bl, .screensaver.ss-quiet.active.pos-br { background: #0B0D12; align-items: center; justify-content: center; }
-        .screensaver.ss-quiet.active .screensaver-clock-wrap { text-align: center; padding: 0; }
+        /* Without photos: a calm blue-black screen; the clock keeps its position setting (centered drifts widely). */
+        .screensaver.ss-quiet { background: #0B0D12; }
         .screensaver.ss-quiet .screensaver-clock { font-size: 192px; font-weight: 300; color: #D3D8E1; }
         .screensaver.ss-quiet .screensaver-date, .screensaver.ss-quiet .screensaver-weather { color: #8C95A4; }
         .screensaver-hint { display: none; position: absolute; left: 0; right: 0; bottom: 64px; text-align: center; font-size: 22px; color: #8C95A4; z-index: 1; }
@@ -1659,7 +1657,7 @@
                 'For movies and OLED screens': 'Para filmes e telas OLED',
                 'Bright and airy for a sunny room': 'Claro e leve para uma sala ensolarada',
                 'Photos need a free Unsplash key. Add it later in Settings, Screensaver.': 'As fotos precisam de uma chave gratuita do Unsplash. Adicione depois em Ajustes, Protetor de tela.',
-                'Add photos in Settings, Screensaver': 'Adicione fotos em Ajustes, Protetor de tela', 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
+                'Add photos in Settings, Screensaver': 'Adicione fotos em Ajustes, Protetor de tela', 'Left / Right move · OK done': 'Esquerda / Direita mover · OK concluir', 'Ask a grown-up to remove apps': 'Peça a um adulto para remover apps', 'Drift Speed': 'Velocidade da Deriva', 'Continuous drift': 'Deriva contínua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Painéis deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Center (drifts slowly)': 'Centro (move devagar)', 'Top Left': 'Superior Esquerdo', 'Top Right': 'Superior Direito', 'Bottom Left': 'Inferior Esquerdo', 'Bottom Right': 'Inferior Direito', 'Where the clock and date sit; in the corners they move only a few pixels': 'Onde ficam o relógio e a data; nos cantos só se movem alguns pixels', 'Soft': 'Suave', 'Bright': 'Brilhante', 'How strongly the photos show behind the clock': 'Quanto as fotos aparecem atrás do relógio', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos suaves e em lento movimento atrás do painel', 'Plays a hidden video so LG does not cover ours': 'Reproduz um vídeo oculto para a LG não cobrir o nosso',
                 'Optional, for weekly trending movies and shows': 'Opcional, para filmes e séries em alta da semana', 
             },
             es: {
@@ -1747,7 +1745,7 @@
                 'For movies and OLED screens': 'Para películas y pantallas OLED',
                 'Bright and airy for a sunny room': 'Luminoso y ligero para una sala soleada',
                 'Photos need a free Unsplash key. Add it later in Settings, Screensaver.': 'Las fotos necesitan una clave gratuita de Unsplash. Añádela después en Ajustes, Protector de pantalla.',
-                'Add photos in Settings, Screensaver': 'Añade fotos en Ajustes, Protector de pantalla', 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
+                'Add photos in Settings, Screensaver': 'Añade fotos en Ajustes, Protector de pantalla', 'Left / Right move · OK done': 'Izquierda / Derecha mover · OK listo', 'Ask a grown-up to remove apps': 'Pide a un adulto que quite apps', 'Drift Speed': 'Velocidad de la Deriva', 'Continuous drift': 'Deriva continua', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Paneles deslizantes', 'Slow': 'Lenta', 'Fast': 'Rápida', 'Center (drifts slowly)': 'Centro (se mueve despacio)', 'Top Left': 'Arriba a la Izquierda', 'Top Right': 'Arriba a la Derecha', 'Bottom Left': 'Abajo a la Izquierda', 'Bottom Right': 'Abajo a la Derecha', 'Where the clock and date sit; in the corners they move only a few pixels': 'Dónde se muestran el reloj y la fecha; en las esquinas solo se mueven unos píxeles', 'Soft': 'Suave', 'Bright': 'Brillante', 'How strongly the photos show behind the clock': 'Qué tan visibles son las fotos detrás del reloj', 'Dimmed, slowly moving photos behind the dashboard': 'Fotos tenues y en lento movimiento tras el panel', 'Plays a hidden video so LG does not cover ours': 'Reproduce un vídeo oculto para que LG no tape el nuestro',
                 'Optional, for weekly trending movies and shows': 'Opcional, para las películas y series en tendencia de la semana', 
             },
             de: {
@@ -1835,7 +1833,7 @@
                 'For movies and OLED screens': 'Für Filme und OLED-Bildschirme',
                 'Bright and airy for a sunny room': 'Hell und luftig für ein sonniges Zimmer',
                 'Photos need a free Unsplash key. Add it later in Settings, Screensaver.': 'Fotos brauchen einen kostenlosen Unsplash-Schlüssel. Du kannst ihn später unter Einstellungen, Bildschirmschoner eintragen.',
-                'Add photos in Settings, Screensaver': 'Fotos in den Einstellungen unter Bildschirmschoner hinzufügen', 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
+                'Add photos in Settings, Screensaver': 'Fotos in den Einstellungen unter Bildschirmschoner hinzufügen', 'Left / Right move · OK done': 'Links / Rechts bewegen · OK fertig', 'Ask a grown-up to remove apps': 'Bitte einen Erwachsenen, Apps zu entfernen', 'Drift Speed': 'Drift-Tempo', 'Continuous drift': 'Stetige Bewegung', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Gleitende Streifen', 'Slow': 'Langsam', 'Fast': 'Schnell', 'Center (drifts slowly)': 'Mitte (wandert langsam)', 'Top Left': 'Oben links', 'Top Right': 'Oben rechts', 'Bottom Left': 'Unten links', 'Bottom Right': 'Unten rechts', 'Where the clock and date sit; in the corners they move only a few pixels': 'Wo Uhr und Datum stehen; in den Ecken bewegen sie sich nur wenige Pixel', 'Soft': 'Sanft', 'Bright': 'Hell', 'How strongly the photos show behind the clock': 'Wie deutlich die Fotos hinter der Uhr zu sehen sind', 'Dimmed, slowly moving photos behind the dashboard': 'Gedimmte, langsam bewegte Fotos hinter dem Dashboard', 'Plays a hidden video so LG does not cover ours': 'Spielt ein verstecktes Video ab, damit LG unseres nicht überdeckt',
                 'Optional, for weekly trending movies and shows': 'Optional, für wöchentlich angesagte Filme und Serien', 
             },
             fr: {
@@ -1923,7 +1921,7 @@
                 'For movies and OLED screens': 'Pour les films et les écrans OLED',
                 'Bright and airy for a sunny room': 'Lumineux et aéré pour une pièce ensoleillée',
                 'Photos need a free Unsplash key. Add it later in Settings, Screensaver.': 'Les photos demandent une clé Unsplash gratuite. Ajoutez-la plus tard dans Réglages, Écran de veille.',
-                'Add photos in Settings, Screensaver': 'Ajoutez des photos dans Réglages, Écran de veille', 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
+                'Add photos in Settings, Screensaver': 'Ajoutez des photos dans Réglages, Écran de veille', 'Left / Right move · OK done': 'Gauche / Droite déplacer · OK terminé', 'Ask a grown-up to remove apps': 'Demandez à un adulte de retirer des applis', 'Drift Speed': 'Vitesse de la dérive', 'Continuous drift': 'Dérive continue', 'Ken Burns': 'Ken Burns', 'Sliding panels': 'Panneaux coulissants', 'Slow': 'Lente', 'Fast': 'Rapide', 'Center (drifts slowly)': 'Centre (se déplace lentement)', 'Top Left': 'Haut gauche', 'Top Right': 'Haut droite', 'Bottom Left': 'Bas gauche', 'Bottom Right': 'Bas droite', 'Where the clock and date sit; in the corners they move only a few pixels': 'Où se placent l’heure et la date ; dans les coins elles ne bougent que de quelques pixels', 'Soft': 'Doux', 'Bright': 'Vif', 'How strongly the photos show behind the clock': 'Visibilité des photos derrière l’horloge', 'Dimmed, slowly moving photos behind the dashboard': 'Photos atténuées en lent mouvement derrière le tableau de bord', 'Plays a hidden video so LG does not cover ours': 'Lit une vidéo cachée pour que LG ne couvre pas la nôtre',
                 'Optional, for weekly trending movies and shows': 'Facultatif, pour les films et séries tendance de la semaine', 
             }
         };
@@ -2968,10 +2966,11 @@
             return true;
         }
         function startArranging(id) {
-            if (shelfEdit || state.locked || !state.favorites.length) return; // Kids lock: the shelf cannot be changed
+            if (shelfEdit || !state.favorites.length) return; // a Kids profile may arrange (move only); removing and adding stay blocked
             shelfEdit = state.favorites.slice();
             movingTileId = id && shelfEdit.indexOf(id) !== -1 ? id : shelfEdit[0];
             document.body.classList.add('arranging');
+            document.getElementById('arrangeHint').textContent = state.locked ? t('Left / Right move · OK done') : t('Left / Right move · Down remove · OK done');
             guardEnter();
             renderAppsShelf();
             focusShelfTile(movingTileId);
@@ -3009,6 +3008,7 @@
         }
         function removeLiftedTile() {
             if (!shelfEdit || !movingTileId) return;
+            if (state.locked) { showToast(t('Ask a grown-up to remove apps')); return; }
             var id = movingTileId, index = shelfEdit.indexOf(id);
             if (index < 0) return;
             if (shelfEdit.length <= 1) { showToast(t('Keep at least one app on the shelf.')); return; } // same rule as the picker
@@ -3089,7 +3089,7 @@
                 var held = enterTile;
                 enterTimer = null;
                 enterTile = null;
-                if (!held || !document.body.contains(held) || !homeIsFree() || state.locked) return;
+                if (!held || !document.body.contains(held) || !homeIsFree()) return;
                 swallowEnterUp = true;
                 swallowAt = Date.now();
                 startArranging(held.dataset.id);
@@ -4488,7 +4488,7 @@
         }
 
         function shiftScreensaverClock() {
-            var corner = state.clockPos !== 'center' && !screensaverIsQuiet();
+            var corner = state.clockPos !== 'center';
             var maxX = corner ? 6 : Math.min(window.innerWidth * 0.28, 260);
             var maxY = corner ? 6 : Math.min(window.innerHeight * 0.28, 160);
             var x = Math.round((Math.random() - 0.5) * 2 * maxX);
@@ -5396,8 +5396,8 @@
                     e.preventDefault();
                     if (enterGate(e)) return; // a held key neither relaunches nor restarts the long-press timer
                     // A shelf tile launches on release; holding it for 600 ms arranges instead.
-                    // Without any keyup seen (a TV that only sends keydown) and under the Kids lock, launch at once.
-                    if (cur.classList.contains('app-tile') && cur.dataset.id && !cur.classList.contains('tile-recent') && keyupSeen && !state.locked) {
+                    // Without any keyup seen (a TV that only sends keydown), launch at once.
+                    if (cur.classList.contains('app-tile') && cur.dataset.id && !cur.classList.contains('tile-recent') && keyupSeen) {
                         if (!enterTimer) startEnterTimer(cur); // extra keydowns of the same press never restart the timer
                     } else cur.click();
                 }
