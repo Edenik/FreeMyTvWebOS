@@ -448,21 +448,25 @@
 
         /* One focus language: white ring + size + glow. Colour alone never marks focus. */
         .header-btn.focused, .weather-widget.focused, .app-tile.focused, .pick-card.focused,
-        .picks-tab.focused, .scene-chip.focused, .wz-item.focused, .profile-card.focused {
+        .picks-tab.focused, .scene-chip.focused, .wz-item.focused {
             outline: 3px solid #ffffff;
             outline-offset: 3px;
         }
 
         .wizard { position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; z-index: 2500; display: flex; flex-direction: column; align-items: center; padding: 72px 96px 60px; box-sizing: border-box; background: #04060a var(--bg-gradient); color: #f2f5fb; }
         .wizard[hidden] { display: none; }
-        .profile-overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; z-index: 2500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 56px; padding: 64px; background: #04060a var(--bg-gradient); color: #f2f5fb; }
+        .profile-overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; z-index: 2500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 56px; padding: 64px; background: #0F1115; color: #f2f5fb; }
         .profile-overlay[hidden] { display: none; }
-        .profile-title { font-size: 56px; font-weight: 700; }
-        .profile-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 48px; max-width: 1600px; }
-        .profile-card { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 24px; border: 0; border-radius: 32px; background: transparent; color: inherit; font: inherit; cursor: pointer; outline: none; transition: transform 0.2s ease; }
-        .profile-card.focused { transform: scale(1.08); background: rgba(255, 255, 255, 0.08); }
-        .profile-avatar { width: 170px; height: 170px; border-radius: 36px; display: flex; align-items: center; justify-content: center; font-size: 76px; font-weight: 700; color: #fff; }
-        .profile-name { font-size: 24px; font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .profile-title { font-size: 60px; font-weight: 700; }
+        .profile-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 64px; max-width: 1700px; }
+        .profile-card { display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 20px; border: 0; border-radius: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; outline: none; }
+        .profile-card.focused .profile-avatar { box-shadow: 0 0 0 7px #0F1115, 0 0 0 13px #FFFFFF; }
+        .profile-avatar { width: 198px; height: 198px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 84px; font-weight: 700; color: #fff; box-sizing: border-box; }
+        .profile-name { display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 600; max-width: 260px; }
+        .profile-name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .profile-lock { width: 26px; height: 26px; margin-right: 10px; flex: none; fill: #B7BFCC; }
+        .profile-add .profile-avatar { background: transparent; border: 3px dashed #8C95A4; color: #B7BFCC; font-size: 96px; font-weight: 300; }
+        .profile-add .profile-name { color: #B7BFCC; }
         .wz-main { width: 100%; max-width: 960px; flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 30px; }
         .wizard.wide .wz-main { max-width: 1440px; }
         .wz-bars { display: flex; gap: 9px; flex: none; }
@@ -4660,6 +4664,7 @@
 
         // Add person: keep the current person, make the new one active, and run the wizard from the name step.
         function startAddPerson() {
+            if (state.locked) return; // a Kids profile can never add people
             var previous = currentProfileId(saveCurrentProfile());
             var id = addProfile('');
             switchProfile(id);
@@ -4751,10 +4756,14 @@
         }
 
         // "Who is watching?" overlay: one card per person; Left/Right choose, OK enters, Back keeps the current person.
+        // The Add circle is offered only while the active person is unlocked: a Kids profile can never reach add-person from here.
+        function pickerCanAdd() { return !state.locked; }
+
         function renderPicker() {
             var host = document.getElementById('profileCards');
             host.innerHTML = '';
-            readProfiles().forEach(function(p, i) {
+            var people = readProfiles();
+            people.forEach(function(p, i) {
                 var card = document.createElement('button');
                 card.className = 'profile-card' + (i === picker.focus ? ' focused' : '');
                 card.setAttribute('type', 'button');
@@ -4765,12 +4774,43 @@
                 avatar.textContent = p.name.charAt(0).toUpperCase();
                 var name = document.createElement('div');
                 name.className = 'profile-name';
-                name.textContent = p.name;
+                if (isLockedProfile(people, p)) {
+                    card.setAttribute('data-locked', '1');
+                    name.innerHTML = '<svg class="profile-lock" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V11a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 0 1 6 0v3H9z"/></svg>';
+                }
+                var label = document.createElement('span');
+                label.className = 'profile-name-text';
+                label.textContent = p.name;
+                name.appendChild(label);
                 card.appendChild(avatar);
                 card.appendChild(name);
                 card.onclick = function() { switchProfile(p.id); closePicker(); };
                 host.appendChild(card);
             });
+            if (pickerCanAdd()) {
+                var add = document.createElement('button');
+                add.className = 'profile-card profile-add' + (picker.focus === people.length ? ' focused' : '');
+                add.setAttribute('type', 'button');
+                var plus = document.createElement('div');
+                plus.className = 'profile-avatar';
+                plus.textContent = '+';
+                var addName = document.createElement('div');
+                addName.className = 'profile-name';
+                var addLabel = document.createElement('span');
+                addLabel.className = 'profile-name-text';
+                addLabel.textContent = t('Add person');
+                addName.appendChild(addLabel);
+                add.appendChild(plus);
+                add.appendChild(addName);
+                add.onclick = function() { pickerAdd(); };
+                host.appendChild(add);
+            }
+        }
+
+        function pickerAdd() {
+            if (!pickerCanAdd()) return;
+            closePicker();
+            startAddPerson();
         }
 
         function openPicker() {
@@ -4794,9 +4834,13 @@
             var list = readProfiles();
             var back = e.keyCode === 461 || e.key === 'Escape' || e.key === 'GoBack';
             if (list.length < 2 || back) closePicker();
-            else if (e.key === 'ArrowRight') picker.focus = Math.min(picker.focus + 1, list.length - 1);
+            else if (e.key === 'ArrowRight') picker.focus = Math.min(picker.focus + 1, list.length - (pickerCanAdd() ? 0 : 1));
             else if (e.key === 'ArrowLeft') picker.focus = Math.max(picker.focus - 1, 0);
-            else if (e.key === 'Enter') { var p = list[picker.focus]; if (p) { switchProfile(p.id); closePicker(); } }
+            else if (e.key === 'Enter') {
+                var p = list[picker.focus];
+                if (p) { switchProfile(p.id); closePicker(); }
+                else if (picker.focus === list.length) pickerAdd();
+            }
             else { e.preventDefault(); return; }
             if (picker.open) renderPicker();
             e.preventDefault();

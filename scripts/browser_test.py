@@ -2672,10 +2672,12 @@ setTimeout(function () {
     function press(k) { document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true })); }
     openPicker();
     eq('picker open', picker.open && !document.getElementById('profileOverlay').hidden, true);
-    eq('picker lists everyone', document.querySelectorAll('#profileCards .profile-card').length, 2);
+    eq('picker lists everyone', document.querySelectorAll('#profileCards .profile-card:not(.profile-add)').length, 2);
+    eq('locked active person: no Add circle', document.querySelectorAll('#profileCards .profile-add').length, 0);
+    eq('locked active person: Right stops at the last person', (press('ArrowRight'), picker.focus), 1);
     eq('picker starts on the active person', picker.focus, 1);
     eq('picker is above the home screen', parseInt(getComputedStyle(document.getElementById('profileOverlay')).zIndex, 10) >= 2500, true);
-    eq('picker focus ring', getComputedStyle(document.querySelector('.profile-card.focused')).outlineStyle, 'solid');
+    eq('picker focus ring is a box-shadow on the avatar', getComputedStyle(document.querySelector('.profile-card.focused .profile-avatar')).boxShadow.indexOf('rgb(255, 255, 255)') !== -1, true);
     press('ArrowLeft');
     eq('picker Left moves', picker.focus, 0);
     press('Escape');
@@ -2771,6 +2773,59 @@ setTimeout(function () {
     applyProfile(orig);
     eq('cleanup hides the pill', document.getElementById('profileBtn').offsetParent, null);
     if (keepSetup === null) localStorage.removeItem('fmtv_setup_done'); else localStorage.setItem('fmtv_setup_done', keepSetup);
+    done();
+  });
+
+  steps.push(function (done) { // who is watching: round even avatars, white ring, lock icon, Add circle that never bypasses the Kids lock
+    var orig = snapshotProfile();
+    var base = JSON.parse(JSON.stringify(orig));
+    function pd(name, locked) { var d = JSON.parse(JSON.stringify(base)); d.userName = name; d.locked = !!locked; return d; }
+    function press(k) { document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true })); }
+    saveProfiles([{ id: 'a', name: 'Noa', color: '#2a7de1', data: pd('Noa') }, { id: 'b', name: 'Kid', color: '#ff9f43', data: pd('Kid', true) }]);
+    localStorage.setItem('fmtv_active_profile', 'a');
+    applyProfile(pd('Noa'));
+    openPicker();
+    var avs = document.querySelectorAll('#profileCards .profile-avatar');
+    eq('who: avatars and the Add circle', avs.length, 3);
+    var sizes = [];
+    for (var i = 0; i < avs.length; i++) { var r = avs[i].getBoundingClientRect(); sizes.push(Math.round(r.width) + 'x' + Math.round(r.height)); }
+    eq('who: every circle is 198x198', sizes.join(','), '198x198,198x198,198x198');
+    eq('who: avatars are round', getComputedStyle(avs[0]).borderRadius, '50%');
+    eq('who: background', getComputedStyle(document.getElementById('profileOverlay')).backgroundColor, 'rgb(15, 17, 21)');
+    eq('who: title 60px', getComputedStyle(document.querySelector('.profile-title')).fontSize, '60px');
+    eq('who: name 30px', getComputedStyle(document.querySelector('.profile-name')).fontSize, '30px');
+    eq('who: focus starts on the active person', picker.focus, 0);
+    var focusedAv = document.querySelector('.profile-card.focused .profile-avatar');
+    eq('who: focus ring 7px gap then 13px white', getComputedStyle(focusedAv).boxShadow.replace(/\s+/g, ' '), 'rgb(15, 17, 21) 0px 0px 0px 7px, rgb(255, 255, 255) 0px 0px 0px 13px');
+    eq('who: unfocused avatar has no ring', getComputedStyle(avs[1]).boxShadow, 'none');
+    var a = focusedAv.getBoundingClientRect(), before = a.width + 'x' + a.height;
+    press('ArrowRight');
+    var c = document.querySelectorAll('#profileCards .profile-avatar')[0].getBoundingClientRect();
+    eq('who: size does not change with focus', c.width + 'x' + c.height, before);
+    eq('who: lock icon only on the locked person', document.querySelectorAll('#profileCards .profile-lock').length + ':' + document.querySelectorAll('#profileCards .profile-card[data-id="b"] .profile-lock').length + ':' + document.querySelectorAll('#profileCards .profile-card[data-id="a"] .profile-lock').length, '1:1:0');
+    eq('who: lock icon comes before the name', document.querySelector('#profileCards .profile-card[data-id="b"] .profile-name').firstChild.nodeName.toLowerCase(), 'svg');
+    eq('who: Add circle is dashed', getComputedStyle(document.querySelector('#profileCards .profile-add .profile-avatar')).borderTopStyle, 'dashed');
+    press('ArrowRight'); press('ArrowRight');
+    eq('who: Right reaches Add and stops', picker.focus, 2);
+    eq('who: Add is focused', document.querySelectorAll('#profileCards .profile-add.focused').length, 1);
+    press('Enter');
+    eq('who: Add closes the picker and opens the person wizard', !picker.open && wizard.open && !!wizard.add, true);
+    handleWizardKey({ key: 'Escape', keyCode: 0, preventDefault: function () {} });
+    eq('who: Back cancels the new person', readProfiles().length + ':' + activeProfileId() + ':' + wizard.open, '2:a:false');
+    switchProfile('b');
+    eq('who: Kids active', state.locked, true);
+    openPicker();
+    eq('who: no Add circle for a locked active person', document.querySelectorAll('#profileCards .profile-add').length, 0);
+    press('ArrowRight'); press('ArrowRight');
+    eq('who: Right stops on the last person', picker.focus, 1);
+    var n = readProfiles().length;
+    startAddPerson();
+    eq('who: startAddPerson refused while locked', readProfiles().length + ':' + wizard.open + ':' + activeProfileId(), n + ':false:b');
+    pickerAdd();
+    eq('who: Add path refused while locked', wizard.open || readProfiles().length !== n, false);
+    closePicker();
+    localStorage.removeItem('fmtv_profiles'); localStorage.removeItem('fmtv_active_profile');
+    applyProfile(orig);
     done();
   });
 
