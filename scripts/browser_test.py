@@ -257,8 +257,7 @@ setTimeout(function () {
   }
   ['Starts after', '1 minute', '3 minutes', '5 minutes', '10 minutes', '30 minutes',
    'Photo screensaver', 'Off', 'Photo length', '30 seconds', '90 seconds', 'Motion',
-   'Ken Burns (zoom & drift)', 'Drift only', 'None', 'Photos from',
-   'Optional for photo screensaver', 'Photo by %s on Unsplash',
+   'None', 'Photos from', 'Photo by %s on Unsplash', 'now %s', 'Night', 'Daylight', '%s, opened on %s',
    'Home', 'Look', 'Screensaver', 'You and this TV', 'People', 'HDMI names', 'Close', 'More options',
    'Apps on Home', '%s apps', '1 app', 'Not set', 'Saved', 'Reset settings', 'Puts every setting and the shelf back to defaults. People and history stay.',
    'Erase everything on this TV', 'Deletes every person, setting, key and history, then starts first-run setup',
@@ -1734,6 +1733,56 @@ setTimeout(function () {
     eq('greeting no name', document.getElementById('greetingTitle').textContent, t(greetingKey(new Date().getHours())));
     done();
   });
+  steps.push(function (done) { // the greeting only repaints when the minute changes
+    var origGreeting = updateGreeting, calls = 0, keepKey = lastGreetKey;
+    updateGreeting = function () { calls++; origGreeting(); };
+    lastGreetKey = -1;
+    updateClock(); updateClock(); updateClock();
+    eq('updateGreeting runs once per minute', calls, 1);
+    lastGreetKey = -1; updateClock();
+    eq('and again when the minute changes', calls, 2);
+    updateGreeting = origGreeting; lastGreetKey = keepKey;
+    done();
+  });
+  steps.push(function (done) { // Settings > Look: one set of names, and the live phase beside Follows the sun
+    var keepTheme = state.theme, keepSun = state.isSunset, keepNight = state.isNight, def = findSetting('theme');
+    eq('Look labels', def.options.map(function (o) { return o[1]; }).join('|'), 'Follows the sun|Midnight|Pure black|Daylight Blue');
+    eq('Look stored values unchanged', def.options.map(function (o) { return o[0]; }).join('|'), 'auto|night|oled|day');
+    state.theme = 'auto'; state.isSunset = false; state.isNight = true;
+    eq('auto at night', settingValueText(def), t('Follows the sun') + ' · ' + t('now %s', t('Night')));
+    state.isNight = false;
+    eq('auto by day', settingValueText(def), t('Follows the sun') + ' · ' + t('now %s', t('Daylight')));
+    state.isSunset = true;
+    eq('auto at sunset', settingValueText(def), t('Follows the sun') + ' · ' + t('now %s', t('Sunset')));
+    if (currentLang() === 'en') eq('English auto value', settingValueText(def), 'Follows the sun · now Sunset');
+    state.theme = 'night'; eq('Midnight has no phase', settingValueText(def), t('Midnight'));
+    state.theme = 'oled'; eq('Pure black has no phase', settingValueText(def), t('Pure black'));
+    state.theme = 'day'; eq('Daylight Blue has no phase', settingValueText(def), t('Daylight Blue'));
+    eq('performance row unchanged', settingValueText(findSetting('perfMode')), t(findSetting('perfMode').options[0][1]));
+    state.theme = keepTheme; state.isSunset = keepSun; state.isNight = keepNight;
+    done();
+  });
+  steps.push(function (done) { // the focused Trending card shows its synopsis under the row
+    var syn = document.getElementById('picksSynopsis');
+    function vis(el) { return el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden'; }
+    eq('synopsis hidden at first', vis(syn), false);
+    renderPicks(FALLBACK_MOVIES);
+    var card = document.querySelector('.pick-card');
+    setMainFocus(card);
+    eq('synopsis shows the card text', syn.textContent, t(card.dataset.desc));
+    eq('synopsis is visible', vis(syn), true);
+    eq('synopsis is 20px', getComputedStyle(syn).fontSize, '20px');
+    eq('synopsis is one ellipsis line', getComputedStyle(syn).whiteSpace + ' ' + getComputedStyle(syn).textOverflow, 'nowrap ellipsis');
+    eq('synopsis is muted', getComputedStyle(syn).color !== getComputedStyle(document.getElementById('greetingTitle')).color, true);
+    eq('synopsis sits under the cards', syn.getBoundingClientRect().top >= document.getElementById('picksGrid').getBoundingClientRect().bottom - 1, true);
+    eq('synopsis stays on screen', syn.getBoundingClientRect().bottom <= window.innerHeight, true);
+    setMainFocus(document.getElementById('tabMovies'));
+    eq('synopsis hidden on a tab', vis(syn), false);
+    eq('and empty', syn.textContent, '');
+    setMainFocus(card); setMainFocus(document.querySelector('#appsGrid .app-tile'));
+    eq('synopsis hidden on an app tile', vis(syn), false);
+    done();
+  });
   steps.push(function (done) { // calm home: one headline, logo-only tiles, one caption, quiet corners
     function gearBtn0() { return document.getElementById('customizeBtn'); }
     function vis(el) { return el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden'; }
@@ -1772,13 +1821,43 @@ setTimeout(function () {
     eq('tiles keep 24px apart', Math.round(t1.left - t0.right), 24);
     eq('greeting title 78px', getComputedStyle(document.getElementById('greetingTitle')).fontSize, '78px');
     eq('clock 39px', getComputedStyle(document.getElementById('clockText')).fontSize, '39px');
-    eq('greeting eyebrow is the weekday', document.getElementById('greetingEyebrow').textContent, new Date().toLocaleDateString(LANG_LOCALES[currentLang()], { weekday: 'long' }));
+    eq('greeting eyebrow is the weekday and date', document.getElementById('greetingEyebrow').textContent, new Date().toLocaleDateString(LANG_LOCALES[currentLang()], { weekday: 'long', month: 'long', day: 'numeric' }));
+    if (currentLang() === 'en') eq('English eyebrow reads like Saturday, October 31', /^[A-Z][a-z]+, [A-Z][a-z]+ \d{1,2}$/.test(document.getElementById('greetingEyebrow').textContent), true);
     // the corner text beside the clock
     if (currentLang() === 'en') {
+      var keepKind = weatherKind, keepWText = document.getElementById('weatherText').textContent, keepWSub = document.getElementById('weatherSub').textContent, keepSunset = state.sunset;
+      weatherKind = 'live';
       document.getElementById('weatherText').textContent = '17°C • Clear';
       document.getElementById('weatherSub').textContent = 'Tel Aviv • Sunset 18:18';
       state.sunset = '18:18'; updateGreeting();
       eq('weather corner text', /^\d+° .+ · Sunset \d\d:\d\d$/.test(document.getElementById('weatherCorner').textContent), true);
+      eq('live weather widget is reachable', mainNavItems.indexOf(wx) !== -1 && vis(wx), true);
+      // offline fallback: the city only, no made-up degrees
+      weatherKind = 'fallback';
+      document.getElementById('weatherText').textContent = '22°C • Clear';
+      document.getElementById('weatherSub').textContent = 'Tel Aviv';
+      updateGreeting();
+      eq('fallback corner is the city only', document.getElementById('weatherCorner').textContent, 'Tel Aviv');
+      eq('fallback widget is reachable', mainNavItems.indexOf(wx) !== -1, true);
+      // loading: nothing to show, so nothing to focus
+      weatherKind = '';
+      document.getElementById('weatherText').textContent = 'Loading...';
+      setMainFocus(gearBtn0());
+      updateGreeting();
+      eq('loading corner is empty', document.getElementById('weatherCorner').textContent, '');
+      eq('loading widget is not shown', vis(wx), false);
+      eq('loading widget is not in the focus list', mainNavItems.indexOf(wx), -1);
+      eq('hiding the widget keeps the focus where it was', document.querySelector('.nav-item.focused'), gearBtn0());
+      // it comes back when the text does
+      weatherKind = 'live';
+      document.getElementById('weatherText').textContent = '17°C • Clear';
+      document.getElementById('weatherSub').textContent = 'Tel Aviv • Sunset 18:18';
+      updateGreeting();
+      eq('widget returns with its text', mainNavItems.indexOf(wx) !== -1 && vis(wx), true);
+      eq('and the focus stays on the gear', document.querySelector('.nav-item.focused'), gearBtn0());
+      setMainFocus(document.querySelector('#appsGrid .app-tile'));
+      weatherKind = keepKind; document.getElementById('weatherText').textContent = keepWText; document.getElementById('weatherSub').textContent = keepWSub; state.sunset = keepSunset;
+      updateGreeting();
     }
     // one caption, on the focused tile
     var labels = toArray(document.querySelectorAll('.app-tile .app-label')).filter(vis);
@@ -1806,7 +1885,19 @@ setTimeout(function () {
     localStorage.setItem('fmtv_launch_hist', JSON.stringify(hist));
     renderAppsShelf();
     eq('earlier caption uses the weekday', document.querySelector('#appsGrid .app-tile[data-id="' + id + '"] .app-label').textContent,
-      t('%s, opened %s', title, new Date(T - 3 * 86400000).toLocaleDateString(LANG_LOCALES[currentLang()], { weekday: 'long' })));
+      (function () {
+        var d = new Date(T - 3 * 86400000), want = t('%s, opened on %s', title, d.toLocaleDateString(LANG_LOCALES[currentLang()], { weekday: 'long' }));
+        if (currentLang() === 'pt' && d.getDay() >= 1 && d.getDay() <= 5) want = want.replace(', aberto no ', ', aberto na ');
+        return want;
+      })());
+    (function () { // Portuguese: na quarta-feira, no sábado
+      var keepLang = state.lang;
+      state.lang = 'pt';
+      eq('pt weekday caption is natural', openedCaption('Netflix', new Date(2026, 9, 28, 12).getTime(), new Date(2026, 9, 31, 12).getTime()).indexOf('aberto na quarta-feira') !== -1, true);
+      eq('pt weekend caption uses no', openedCaption('Netflix', new Date(2026, 9, 25, 12).getTime(), new Date(2026, 9, 31, 12).getTime()).indexOf('aberto no domingo') !== -1, true);
+      eq('pt older date caption', openedCaption('Netflix', new Date(2026, 9, 1, 12).getTime(), new Date(2026, 9, 31, 12).getTime()).indexOf('aberto em ') !== -1, true);
+      state.lang = keepLang;
+    })();
     // pick-up off: the first tile has the focus
     state.pickup = 'off';
     document.querySelectorAll('.nav-item.focused').forEach(function (el) { el.classList.remove('focused'); });
@@ -1936,7 +2027,7 @@ setTimeout(function () {
       eq('arrange sub text', sub.textContent, t('Hold OK on any app on Home to get here.'));
       eq('arrange sub 27px', getComputedStyle(sub).fontSize, '27px');
       eq('greeting hidden while arranging', vis(document.getElementById('greetingTitle')), false);
-      eq('hint bar text', document.getElementById('arrangeHint').textContent, t('Left / Right move · Down remove · OK done'));
+      eq('hint bar text', document.getElementById('arrangeHint').textContent, t('Left / Right move · Down remove · OK done · Back cancel'));
       eq('hint bar visible', vis(document.getElementById('arrangeHint')), true);
       eq('Add app tile after the last app', document.querySelector('#appsGrid .app-tile:last-child').classList.contains('tile-add'), true);
       eq('Add app tile text', document.querySelector('#appsGrid .tile-add').textContent.indexOf(t('Add app')) !== -1, true);
@@ -1977,7 +2068,7 @@ setTimeout(function () {
       eq('no Add app tile on Home', document.querySelectorAll('#appsGrid .tile-add').length, 0);
       eq('OK kept the order', stored().join(), state.favorites.join());
       eq('saved toast', document.getElementById('toastMsg').textContent, t('Tile order saved'));
-      // Back also finishes and saves
+      // Back cancels: the order and any removals from when arranging started come back
       setFav(ids);
       setMainFocus(tileOf(ids[3]));
       kd('Enter');
@@ -1985,11 +2076,16 @@ setTimeout(function () {
         eq('second long press arranges', movingTileId, ids[3]);
         ku('Enter');
         kd('ArrowLeft');
+        eq('the move is live while arranging', stored().join(), [ids[0], ids[1], ids[3], ids[2], ids[4]].join());
+        kd('ArrowDown');
+        eq('and so is a removal', stored().length, 4);
         kd('Escape');
-        eq('Back finishes', !shelfEdit && !document.body.classList.contains('arranging'), true);
-        eq('Back saved the move', stored().join(), [ids[0], ids[1], ids[3], ids[2], ids[4]].join());
-        eq('Home again after Back', order().join(), stored().join());
-        eq('focus stays on the moved tile', document.querySelector('.nav-item.focused').dataset.id, ids[3]);
+        eq('Back leaves arranging', !shelfEdit && !document.body.classList.contains('arranging'), true);
+        eq('Back restored the saved order', stored().join(), ids.join());
+        eq('and the state', state.favorites.join(), ids.join());
+        eq('Home shows the original order and the removed app', order().join(), ids.join());
+        eq('focus returns to the held tile', document.querySelector('.nav-item.focused').dataset.id, ids[3]);
+        eq('hint is gone with arranging', document.body.classList.contains('arranging'), false);
         // recent tiles and the divider are not part of arranging
         state.pickup = 'on';
         var hist = {}; hist[off[0].id] = { t: Date.now() - 1000, n: 1 }; hist[off[1].id] = { t: Date.now() - 2000, n: 1 };
@@ -2054,7 +2150,16 @@ setTimeout(function () {
             startArranging(ids[0]);
             document.querySelector('#appsGrid .tile-add').click();
             eq('clicking Add app opens the picker', modalOpen && settingsUi.zone === 'apps', true);
+            // pointer edge: choosing a Settings group instead cancels the pending arranging resume
+            eq('arranging resume is pending', arrangeResume.on, true);
+            document.querySelector('#settingsCats .settings-cat[data-i="1"]').click();
+            eq('clicking a Settings group cancels the resume', arrangeResume.on, false);
             closeSettingsModal();
+            eq('and Home is not arranging afterwards', !shelfEdit && !document.body.classList.contains('arranging'), true);
+            startArranging(ids[0]);
+            document.querySelector('#appsGrid .tile-add').click();
+            closeSettingsModal();
+            eq('without a click on a group the resume still happens', !!shelfEdit, true);
             finishShelfEdit();
             eq('left clean', !shelfEdit && !document.body.classList.contains('arranging'), true);
             function rawDown() { document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })); }
@@ -2076,7 +2181,7 @@ setTimeout(function () {
               eq('locked: the lifted app is the held one', movingTileId, ids[1]);
               ku('Enter');
               eq('locked: no Add app tile while arranging', document.querySelectorAll('#appsGrid .tile-add').length, 0);
-              eq('locked: arrange hint has no Down remove', document.getElementById('arrangeHint').textContent, t('Left / Right move · OK done'));
+              eq('locked: arrange hint has no Down remove', document.getElementById('arrangeHint').textContent, t('Left / Right move · OK done · Back cancel'));
               kd('ArrowRight');
               eq('locked: Right moves and persists', stored().join(), [ids[0], ids[2], ids[1], ids[3], ids[4]].join());
               kd('ArrowLeft'); kd('ArrowLeft');
@@ -2121,10 +2226,32 @@ setTimeout(function () {
             ku('Enter'); rawDown();
             eq('OK after the keyup finishes', !shelfEdit, true);
             ku('Enter');
-            // a press whose tile left the DOM does not launch
+            // a press whose tile was re-rendered meanwhile still launches the current tile with that id
             launched.length = 0; setMainFocus(tileOf(ids[1]));
             rawDown(); renderAppsShelf(); ku('Enter');
-            eq('keyup on a removed tile launches nothing', launched.length, 0);
+            eq('keyup after a re-render launches the current tile', launched.join(), ids[1]);
+            settle();
+            // ...but not when the app left the shelf
+            launched.length = 0; setMainFocus(tileOf(ids[1]));
+            rawDown(); setFav(ids.filter(function (x) { return x !== ids[1]; })); ku('Enter');
+            eq('keyup for an app no longer on the shelf launches nothing', launched.length, 0);
+            setFav(ids);
+            // only an OK keyup proves long press works: arrow keyups do not
+            keyupSeen = false;
+            ku('ArrowRight'); ku('ArrowLeft'); ku('Escape');
+            eq('arrow keyups do not set keyupSeen', keyupSeen, false);
+            launched.length = 0; setMainFocus(tileOf(ids[2]));
+            rawDown();
+            eq('without an OK keyup a press still launches on keydown', launched.join(), ids[2]);
+            settle();
+            ku('Enter');
+            eq('an OK keyup sets keyupSeen', keyupSeen, true);
+            // the guard keeps extending while rejected repeats arrive
+            guardUntil = Date.now() + 50;
+            var before = guardUntil;
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true, repeat: true }));
+            eq('a rejected press refreshes the guard', guardUntil - before >= 300, true);
+            guardUntil = 0;
             window.webOS = oldWeb; settle();
             state.favorites = keepFav; state.pickup = keepPickup;
             if (keepStore === null) localStorage.removeItem('fmtv_favorites'); else localStorage.setItem('fmtv_favorites', keepStore);
