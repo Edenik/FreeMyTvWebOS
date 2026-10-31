@@ -56,6 +56,12 @@ flowchart LR
 - [x] **Night dim:** the home screen softens after sunset.
 - [x] **Customize reorganised:** seven categories, with Reset settings and Erase everything on this TV.
 
+### v1.6 — The Calm Redesign (Released)
+- [x] **Quieter Home:** one headline, logo tiles, the weather in the top-right corner, and "pick up where you left off" folded into the app row (focus on the last app plus up to two recent tiles).
+- [x] **Settings in four groups:** Home, Look, Screensaver and You and this TV, with switches, a More options page, and People and HDMI names sub-pages. Replaces the seven-category Customize screen; no setting removed.
+- [x] **Arrange apps by holding OK:** long press on a Home tile (or Settings > Home > Apps on Home > Arrange on Home) to move, remove or add apps; Kids profiles can move but not remove.
+- [x] **Three-step setup, round people picker, calm screensaver without photos.** No new network calls.
+
 ### v1.4 — Official Homebrew Channel Repo & Home Button Hook
 - [ ] **Publish to `webosbrew.org` Repository:** Manifest generation and the package entry are ready in [`homebrew/`](homebrew/README.md); what remains is the PR to `webosbrew/apps-repo`.
 - [ ] **Optional Physical Home Button Hijack (Root / Autostart):** For rooted TVs, optionally bind the physical `Home` button on the Magic Remote directly to **Free My TV** instead of `com.webos.app.home`.
