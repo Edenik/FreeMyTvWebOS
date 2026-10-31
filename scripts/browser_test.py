@@ -1181,6 +1181,7 @@ setTimeout(function () {
 
   steps.push(function (done) { // opening: category list focused, one visible focus mark, old controls gone
     window.fetch = fakeFetch(200, '49', []);
+    window.realFetchWeather = window.fetchWeather;
     ['fetchWeather', 'fetchTrendingPicks', 'ambientRefresh'].forEach(function (n) { window[n] = function () {}; }); // no network from these steps
     openSettingsModal();
     eq('modal open', modalOpen, true);
@@ -1742,6 +1743,29 @@ setTimeout(function () {
     lastGreetKey = -1; updateClock();
     eq('and again when the minute changes', calls, 2);
     updateGreeting = origGreeting; lastGreetKey = keepKey;
+    done();
+  });
+  steps.push(function (done) { // a language switch and a reset repaint the greeting at once; no fetch still shows the city
+    var keepLang = state.lang, keepName = state.userName, keepFetch = window.fetch, keepKind = weatherKind, keepCity = state.city;
+    state.userName = ''; state.lang = 'en'; lastGreetKey = -1; updateClock();
+    var hour = new Date().getHours();
+    var lang = findSetting('lang');
+    state.lang = 'pt'; lang.apply();
+    eq('language switch updates the greeting without a tick', document.getElementById('greetingTitle').textContent, I18N.pt[greetingKey(hour)] || t(greetingKey(hour)));
+    eq('and the date line', document.getElementById('greetingEyebrow').textContent, new Date().toLocaleDateString(LANG_LOCALES.pt, { weekday: 'long', month: 'long', day: 'numeric' }));
+    state.lang = 'en'; lang.apply();
+    eq('back to English at once', document.getElementById('greetingTitle').textContent, t(greetingKey(hour)));
+    // reset: a stale key must not hide the repaint
+    document.getElementById('greetingTitle').textContent = 'stale';
+    resetAllSettings();
+    eq('reset repaints the greeting', document.getElementById('greetingTitle').textContent, t(greetingKey(hour)));
+    // no fetch(): the corner shows the city immediately
+    window.fetch = undefined; weatherKind = ''; state.city = 'Haifa';
+    document.getElementById('weatherCorner').textContent = '';
+    realFetchWeather();
+    eq('fetch-less fallback shows the city at once', document.getElementById('weatherCorner').textContent, 'Haifa');
+    window.fetch = keepFetch; weatherKind = keepKind; state.city = keepCity; state.lang = keepLang; state.userName = keepName;
+    updateGreeting();
     done();
   });
   steps.push(function (done) { // Settings > Look: one set of names, and the live phase beside Follows the sun

@@ -2162,6 +2162,7 @@
                 weatherKind = 'fallback';
                 document.getElementById('weatherText').textContent = '22°C • ' + t('Clear');
                 document.getElementById('weatherSub').textContent = state.city || t('Offline Mode');
+                updateGreeting();
                 return;
             }
 
@@ -3347,7 +3348,7 @@
               apply: function() { scheduleSettingsNetwork(true, false); } },
             { id: 'lang', group: 3, type: 'choice', field: 'lang', store: 'fmtv_lang', def: 'auto', label: 'Language',
               options: [['auto', 'Auto (TV language)'], ['en', 'English'], ['pt', 'Português (Brasil)'], ['es', 'Español'], ['de', 'Deutsch'], ['fr', 'Français']],
-              apply: function() { applyStaticTranslations(); renderAppsShelf(); updateClock(); applyTheme(); scheduleSettingsNetwork(true, true); } },
+              apply: function() { applyStaticTranslations(); renderAppsShelf(); lastGreetKey = -1; updateClock(); applyTheme(); scheduleSettingsNetwork(true, true); } },
             { id: 'people', group: 3, type: 'sub', opens: 'people', label: 'People' },
             { id: 'askWho', group: 3, page: 'people', type: 'choice', field: 'askWho', store: 'fmtv_ask_who', def: 'on', label: 'Ask who is watching',
               hint: 'Shows the person picker when the app opens, if there is more than one person',
@@ -3532,6 +3533,7 @@
             applyTextSize();
             renderAppsShelf();
             applyTheme();
+            lastGreetKey = -1; // repaint the greeting right away
             updateClock();
             fetchWeather();
             fetchTrendingPicks();
